@@ -263,8 +263,10 @@ def draw_chiplet_diagram(
 if __name__ == "__main__":
     # 简单测试：随机生成连接并画默认布局
     nodes, edges = build_random_chiplet_graph(edge_prob=0.3)
-    out_path = "/root/placement/thermal-placement/chiplet_diagram_from_tool.png"
-    draw_chiplet_diagram(nodes, edges, save_path=out_path)
+    # 使用相对路径，输出到项目根目录
+    from pathlib import Path
+    out_path = Path(__file__).parent.parent / "chiplet_diagram_from_tool.png"
+    draw_chiplet_diagram(nodes, edges, save_path=str(out_path))
     print(f"Diagram saved to: {out_path}")
 
 

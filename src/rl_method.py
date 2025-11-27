@@ -344,7 +344,9 @@ if __name__ == "__main__":
 
     # 3. 用当前 env.state 的布局生成可视化
     layout = env.current_layout()
-    out_path = "/root/placement/thermal-placement/chiplet_dqn_placement.png"
-    draw_chiplet_diagram(nodes, edges, save_path=out_path, layout=layout)
+    # 使用相对路径，输出到项目根目录
+    from pathlib import Path
+    out_path = Path(__file__).parent.parent / "chiplet_dqn_placement.png"
+    draw_chiplet_diagram(nodes, edges, save_path=str(out_path), layout=layout)
     print(f"DQN placement diagram saved to: {out_path}")
 
