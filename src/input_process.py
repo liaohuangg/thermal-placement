@@ -1,10 +1,10 @@
 import json
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 
 def load_chiplets_json(
-    json_path: str | None = None,
+    json_path: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Load the raw chiplet description JSON.
@@ -20,9 +20,9 @@ def load_chiplets_json(
         The parsed JSON object. Top-level keys are chiplet names.
     """
     if json_path is None:
-        # 从 src 目录的相对路径: ../../dummy-chiplet-input/chiplet_input/chiplets.json
+        # 从 src 目录的相对路径: ../../benchmark/dummy-chiplet-input/chiplet_input/chiplets.json
         current_file = Path(__file__)
-        json_path = current_file.parent.parent.parent / "dummy-chiplet-input" / "chiplet_input" / "chiplets.json"
+        json_path = current_file.parent.parent.parent / "benchmark" / "dummy-chiplet-input" / "chiplet_input" / "chiplets.json"
     
     path = Path(json_path)
     with path.open("r", encoding="utf-8") as f:

@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch, Rectangle
@@ -34,16 +34,22 @@ class ChipletNode:
     power: float
 
 
-def load_chiplet_nodes() -> List[ChipletNode]:
+def load_chiplet_nodes(max_nodes: Optional[int] = None) -> List[ChipletNode]:
     """
     Load chiplets from JSON and convert them into :class:`ChipletNode` objects.
+    
+    Parameters
+    ----------
+    max_nodes:
+        如果指定，只返回前 max_nodes 个 chiplet。默认返回前4个。
     """
 
     raw = load_chiplets_json()
     table = build_chiplet_table(raw)
 
     nodes: List[ChipletNode] = []
-    for row in table:
+    limit = max_nodes if max_nodes is not None else 4  # 默认只取前4个
+    for row in table[:limit]:
         nodes.append(
             ChipletNode(
                 name=row["name"],
@@ -60,41 +66,83 @@ def generate_random_links(
     edge_prob: float = 0.2,
     allow_self_loop: bool = False,
     undirected: bool = True,
+    fixed_num_edges: int = 10,
 ) -> List[Tuple[str, str]]:
     """
-    Randomly generate link information between chiplets.
+    生成固定数量的链接信息（每次调用都返回相同的链接）。
+    
+    使用固定的随机种子，确保对于相同的节点列表，每次生成的链接都是相同的。
     """
 
     import random
 
-    edges: List[Tuple[str, str]] = []
-
+    # 设置固定的随机种子，确保每次生成相同的链接
+    random.seed(42)
+    
+    # 生成所有可能的边对（排除自环）
+    all_possible_edges: List[Tuple[str, str]] = []
     n = len(node_names)
     for i in range(n):
         for j in range(n):
-            if not allow_self_loop and i == j:
+            # 明确排除自环（自己链接自己）
+            if i == j:
                 continue
             if undirected and j <= i:
+                # 对于无向图，只保留 i < j 的边
                 continue
 
-            if random.random() < edge_prob:
-                src = node_names[i]
-                dst = node_names[j]
-                edges.append((src, dst))
+            all_possible_edges.append((node_names[i], node_names[j]))
+
+    # 如果可能的边数少于固定数量，返回所有边
+    if len(all_possible_edges) <= fixed_num_edges:
+        # 再次确保没有自环（双重保险）
+        edges = [(a, b) for a, b in all_possible_edges if a != b]
+        random.seed()
+        return edges
+
+    # 随机选择固定数量的边
+    edges = random.sample(all_possible_edges, fixed_num_edges)
+    
+    # 最终过滤：确保没有任何自环（双重保险）
+    edges = [(a, b) for a, b in edges if a != b]
+    
+    # 如果过滤后边数不足，重新选择
+    while len(edges) < fixed_num_edges and len(all_possible_edges) > len(edges):
+        remaining = [e for e in all_possible_edges if e not in edges]
+        if not remaining:
+            break
+        needed = fixed_num_edges - len(edges)
+        additional = random.sample(remaining, min(needed, len(remaining)))
+        edges.extend(additional)
+        edges = [(a, b) for a, b in edges if a != b]  # 再次过滤
+    
+    # 重置随机种子，避免影响其他使用随机数的代码
+    random.seed()
 
     return edges
 
 
 def build_random_chiplet_graph(
     edge_prob: float = 0.2,
+    max_nodes: Optional[int] = None,
+    fixed_num_edges: int = 4,
 ) -> Tuple[List[ChipletNode], List[Tuple[str, str]]]:
     """
     Convenience helper: load chiplets and generate a random connectivity graph.
+    
+    Parameters
+    ----------
+    edge_prob:
+        边的概率（已废弃，现在使用 fixed_num_edges）
+    max_nodes:
+        如果指定，只加载前 max_nodes 个 chiplet。默认只取前4个。
+    fixed_num_edges:
+        生成的固定边数。默认4条。
     """
 
-    nodes = load_chiplet_nodes()
+    nodes = load_chiplet_nodes(max_nodes=max_nodes)
     names = [n.name for n in nodes]
-    edges = generate_random_links(names, edge_prob=edge_prob)
+    edges = generate_random_links(names, edge_prob=edge_prob, fixed_num_edges=fixed_num_edges)
     return nodes, edges
 
 
@@ -136,8 +184,8 @@ def default_grid_layout(nodes: List[ChipletNode]) -> Dict[str, Tuple[float, floa
 def draw_chiplet_diagram(
     nodes: List[ChipletNode],
     edges: List[Tuple[str, str]],
-    save_path: str | None = None,
-    layout: Dict[str, Tuple[float, float]] | None = None,
+    save_path: Optional[str] = None,
+    layout: Optional[Dict[str, Tuple[float, float]]] = None,
 ):
     """
     画出 chiplet 方框图。
@@ -163,7 +211,7 @@ def draw_chiplet_diagram(
 
     fig, ax = plt.subplots(figsize=(10, 8))
 
-    # 记录每个 chiplet 用于连边的锚点坐标（取第一个 phys，如果没有则用中心点）
+    # 记录每个 chiplet 用于连边的锚点坐标（统一使用中心点，与接口无关）
     anchor: Dict[str, Tuple[float, float]] = {}
 
     # 1) 画 chiplet 方框和 phys 锚点
@@ -196,9 +244,9 @@ def draw_chiplet_diagram(
             va="bottom",
         )
 
-        # phys 点：红色小方块
+        # phys 点：红色小方块（仅用于显示，不用于连接）
         if node.phys:
-            for idx, p in enumerate(node.phys):
+            for p in node.phys:
                 px = origin_x + float(p.get("x", 0.0))
                 py = origin_y + float(p.get("y", 0.0))
 
@@ -213,10 +261,8 @@ def draw_chiplet_diagram(
                     )
                 )
 
-                if idx == 0:
-                    anchor[node.name] = (px, py)
-        else:
-            anchor[node.name] = (origin_x + w / 2.0, origin_y + h / 2.0)
+        # 所有连接都从chiplet的中心位置出发（与接口无关）
+        anchor[node.name] = (origin_x + w / 2.0, origin_y + h / 2.0)
 
     # 2) 画有向边（箭头）
     for src, dst in edges:
@@ -239,18 +285,39 @@ def draw_chiplet_diagram(
     ax.set_aspect("equal", adjustable="datalim")
     ax.axis("off")
 
-    # 调整视图范围
-    all_x = []
-    all_y = []
-    for name, (ox, oy) in layout.items():
-        all_x.append(ox)
-        all_y.append(oy)
-    if all_x and all_y:
-        max_w = max(n.dimensions.get("x", 0) for n in nodes)
-        max_h = max(n.dimensions.get("y", 0) for n in nodes)
-        margin = max(max_w, max_h)
-        ax.set_xlim(min(all_x) - margin * 0.3, max(all_x) + max_w + margin * 0.3)
-        ax.set_ylim(min(all_y) - margin * 0.3, max(all_y) + max_h + margin * 0.3)
+    # 调整视图范围（考虑所有模块的完整范围，包括宽度和高度）
+    all_x_min = []
+    all_x_max = []
+    all_y_min = []
+    all_y_max = []
+    
+    for node in nodes:
+        if node.name not in layout:
+            continue
+        ox, oy = layout[node.name]
+        w = float(node.dimensions.get("x", 0.0))
+        h = float(node.dimensions.get("y", 0.0))
+        # 记录左下角和右上角坐标
+        all_x_min.append(ox)
+        all_x_max.append(ox + w)
+        all_y_min.append(oy)
+        all_y_max.append(oy + h)
+    
+    if all_x_min and all_y_min:
+        # 计算所有模块的最小和最大坐标
+        x_min = min(all_x_min)
+        x_max = max(all_x_max)
+        y_min = min(all_y_min)
+        y_max = max(all_y_max)
+        
+        # 添加边距（10%的额外空间）
+        x_range = x_max - x_min
+        y_range = y_max - y_min
+        margin_x = max(x_range * 0.1, 1.0)  # 至少1.0的边距
+        margin_y = max(y_range * 0.1, 1.0)
+        
+        ax.set_xlim(x_min - margin_x, x_max + margin_x)
+        ax.set_ylim(y_min - margin_y, y_max + margin_y)
 
     if save_path is not None:
         fig.savefig(save_path, bbox_inches="tight")
