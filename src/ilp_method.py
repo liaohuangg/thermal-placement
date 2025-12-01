@@ -36,6 +36,7 @@ except ImportError:
 @dataclass
 class ILPPlacementResult:
     """ILP求解结果"""
+
     layout: Dict[str, Tuple[float, float]]  # name -> (x, y)
     rotations: Dict[str, bool]  # name -> 是否旋转
     objective_value: float
@@ -44,7 +45,44 @@ class ILPPlacementResult:
     bounding_box: Tuple[float, float]  # (W, H) 边界框尺寸
 
 
-def solve_placement_ilp(
+@dataclass
+class ILPModelContext:
+    """
+    ILP 模型上下文。
+
+    - `prob`  : 已经构建好的 PuLP 模型（包含变量、约束和目标函数，但可以继续加约束）
+    - `x, y`  : 每个 chiplet 左下角坐标变量（用于排除解等约束）
+    - `r`     : 每个 chiplet 的旋转变量
+    - `z1, z2`: 每对有连边的 chiplet 的“相邻方式”变量（水平/垂直）
+    - `z1L, z1R, z2D, z2U`: 每对有连边的 chiplet 的相对方向变量（左、右、下、上）
+    - `connected_pairs` : 有连边的 (i, j) 索引列表（i < j）
+    - `bbox_w, bbox_h` : 外接方框宽和高对应的变量
+    - `W, H`  : 外接边界框的上界尺寸（建模阶段确定）
+    """
+
+    prob: pulp.LpProblem
+    nodes: List[ChipletNode]
+    edges: List[Tuple[str, str]]
+
+    x: Dict[int, pulp.LpVariable]
+    y: Dict[int, pulp.LpVariable]
+    r: Dict[int, pulp.LpVariable]
+    z1: Dict[Tuple[int, int], pulp.LpVariable]
+    z2: Dict[Tuple[int, int], pulp.LpVariable]
+    z1L: Dict[Tuple[int, int], pulp.LpVariable]
+    z1R: Dict[Tuple[int, int], pulp.LpVariable]
+    z2D: Dict[Tuple[int, int], pulp.LpVariable]
+    z2U: Dict[Tuple[int, int], pulp.LpVariable]
+    connected_pairs: List[Tuple[int, int]]
+
+    bbox_w: pulp.LpVariable
+    bbox_h: pulp.LpVariable
+
+    W: float
+    H: float
+
+
+def build_placement_ilp_model(
     nodes: List[ChipletNode],
     edges: List[Tuple[str, str]],
     W: Optional[float] = None,
@@ -55,7 +93,7 @@ def solve_placement_ilp(
     minimize_bbox_area: bool = True,
     distance_weight: float = 1.0,
     area_weight: float = 0.1,
-) -> ILPPlacementResult:
+) -> ILPModelContext:
     """
     使用 ILP 求解 chiplet 布局（相邻 + 非重叠 + 外接方框 + 多目标）。
 
@@ -99,12 +137,10 @@ def solve_placement_ilp(
 
     返回
     ----
-    ILPPlacementResult
-        包含布局坐标、旋转状态、目标值、求解状态以及边界框大小等信息。
+    ILPModelContext
+        已经构建好的 ILP 模型上下文（尚未求解），
+        可在外部继续添加约束（例如排除解）后再调用求解函数。
     """
-    import time
-    start_time = time.time()
-    
     n = len(nodes)
     name_to_idx = {node.name: i for i, node in enumerate(nodes)}
     
@@ -148,7 +184,7 @@ def solve_placement_ilp(
             H = max(estimated_side, max_h * 3)
     
     # 大 M 常数：一个足够大的数（通常取 2 倍芯片最大尺寸）
-    M = max(W, H) * 2
+    M = max(W, H) * 3
     
     if verbose:
         print(f"芯片边界框尺寸: ChipW = {W:.2f}, ChipH = {H:.2f}")
@@ -216,12 +252,12 @@ def solve_placement_ilp(
     shared_x = {}
     
     for i, j in connected_pairs:
-        z1[(i, j)] = pulp.LpVariable(f"z1_{i}_{j}", cat='Binary')
-        z2[(i, j)] = pulp.LpVariable(f"z2_{i}_{j}", cat='Binary')
-        z1L[(i, j)] = pulp.LpVariable(f"z1L_{i}_{j}", cat='Binary')
-        z1R[(i, j)] = pulp.LpVariable(f"z1R_{i}_{j}", cat='Binary')
-        z2D[(i, j)] = pulp.LpVariable(f"z2D_{i}_{j}", cat='Binary')
-        z2U[(i, j)] = pulp.LpVariable(f"z2U_{i}_{j}", cat='Binary')
+        z1[(i, j)] = pulp.LpVariable(f"z1_{i}_{j}", cat="Binary")
+        z2[(i, j)] = pulp.LpVariable(f"z2_{i}_{j}", cat="Binary")
+        z1L[(i, j)] = pulp.LpVariable(f"z1L_{i}_{j}", cat="Binary")
+        z1R[(i, j)] = pulp.LpVariable(f"z1R_{i}_{j}", cat="Binary")
+        z2D[(i, j)] = pulp.LpVariable(f"z2D_{i}_{j}", cat="Binary")
+        z2U[(i, j)] = pulp.LpVariable(f"z2U_{i}_{j}", cat="Binary")
         
         # 共享边长度变量（非负）
         max_shared_y = min(h_orig[i], h_orig[j], max(h_orig.values()))  # 最大可能的垂直共享长度
@@ -459,181 +495,204 @@ def solve_placement_ilp(
     
     # 目标2: 最小化外接方框面积（使用凸近似的面积代理 t）
     # 最终目标形式：β1 * 线长 + β2 * t
-    
-    # 组合目标函数：最小化总线长 + 外接方框“面积代理”（使用权重平衡）
     if minimize_bbox_area:
-        # 目标函数：最小化加权总线长和面积代理 t
-        prob += distance_weight * pulp.lpSum(distance_terms) + area_weight * t, \
-               "total_objective"
+        prob += (
+            distance_weight * pulp.lpSum(distance_terms) + area_weight * t,
+            "total_objective",
+        )
         if verbose:
-            print(f"目标函数: β1*线长 + β2*t（面积凸近似），其中 β1={distance_weight:.2f}, β2={area_weight:.2f}")
+            print(
+                f"目标函数: β1*线长 + β2*t（面积凸近似），其中 "
+                f"β1={distance_weight:.2f}, β2={area_weight:.2f}"
+            )
     else:
-        # 只最小化距离
         prob += pulp.lpSum(distance_terms), "total_connection_distance"
         if verbose:
             print("目标函数: 只最小化线长（不考虑外接方框大小）")
-    
-    # ============ 步骤6: 求解ILP问题 ============
+
+    # 返回尚未求解的模型上下文
+    return ILPModelContext(
+        prob=prob,
+        nodes=nodes,
+        edges=edges,
+        x=x,
+        y=y,
+        r=r,
+        z1=z1,
+        z2=z2,
+        z1L=z1L,
+        z1R=z1R,
+        z2D=z2D,
+        z2U=z2U,
+        connected_pairs=connected_pairs,
+        bbox_w=bbox_w,
+        bbox_h=bbox_h,
+        W=W,
+        H=H,
+    )
+
+
+def solve_placement_ilp_from_model(
+    ctx: ILPModelContext,
+    time_limit: int = 300,
+    verbose: bool = True,
+) -> ILPPlacementResult:
+    """
+    在已有 ILPModelContext 上调用求解器并抽取解。
+
+    可以在多轮求解之间往 ctx.prob 上继续添加约束（例如排除解约束）。
+    """
+    import time
+
+    prob = ctx.prob
+    nodes = ctx.nodes
+    x, y, r = ctx.x, ctx.y, ctx.r
+    W, H = ctx.W, ctx.H
+
+    start_time = time.time()
+
     if verbose:
         print("\n开始求解ILP问题...")
         print(f"变量数量: {prob.numVariables()}")
         print(f"约束数量: {prob.numConstraints()}")
-    
+
     # 尝试使用可用的求解器
     solver = None
     solver_name = "默认求解器"
-    
+
     # 首先尝试 GLPK
     try:
         import subprocess
-        result = subprocess.run(['glpsol', '--version'], 
-                              capture_output=True, 
-                              timeout=2)
+
+        result = subprocess.run(
+            ["glpsol", "--version"],
+            capture_output=True,
+            timeout=2,
+        )
         if result.returncode == 0:
-            solver = pulp.getSolver('GLPK_CMD', timeLimit=time_limit, msg=verbose)
+            solver = pulp.getSolver("GLPK_CMD", timeLimit=time_limit, msg=verbose)
             solver_name = "GLPK"
             if verbose:
                 print(f"使用求解器: {solver_name}")
     except (FileNotFoundError, subprocess.TimeoutExpired, Exception):
         # GLPK 不可用，尝试 CBC
         try:
-            solver = pulp.getSolver('PULP_CBC_CMD', timeLimit=time_limit, msg=verbose)
+            solver = pulp.getSolver("PULP_CBC_CMD", timeLimit=time_limit, msg=verbose)
             solver_name = "CBC"
             if verbose:
                 print(f"使用求解器: {solver_name}")
-        except:
+        except Exception:
             # 如果 CBC 也不可用，使用默认求解器
             if verbose:
                 print("警告: GLPK 和 CBC 都不可用，使用默认求解器")
             solver = None
             solver_name = "默认求解器"
-    
+
     try:
         status = prob.solve(solver)
         solve_time = time.time() - start_time
-        
+
         if verbose:
             print(f"\n求解状态: {pulp.LpStatus[status]}")
             print(f"求解时间: {solve_time:.2f} 秒")
             if status == pulp.LpStatusOptimal:
-                print(f"目标函数值（总距离）: {pulp.value(prob.objective):.2f}")
-        
-        # ============ 步骤7: 提取解 ============
-        layout = {}
-        rotations = {}
+                print(f"目标函数值: {pulp.value(prob.objective):.2f}")
+
+        # 提取解
+        layout: Dict[str, Tuple[float, float]] = {}
+        rotations: Dict[str, bool] = {}
         for k, node in enumerate(nodes):
             if status == pulp.LpStatusOptimal:
                 x_val = pulp.value(x[k])
                 y_val = pulp.value(y[k])
                 r_val = pulp.value(r[k])
-                layout[node.name] = (x_val if x_val is not None else 0.0,
-                                     y_val if y_val is not None else 0.0)
+                layout[node.name] = (
+                    x_val if x_val is not None else 0.0,
+                    y_val if y_val is not None else 0.0,
+                )
                 rotations[node.name] = bool(r_val > 0.5) if r_val is not None else False
             else:
                 layout[node.name] = (0.0, 0.0)
                 rotations[node.name] = False
-        
-        obj_value = pulp.value(prob.objective) if status == pulp.LpStatusOptimal else float('inf')
-        
+
+        obj_value = (
+            pulp.value(prob.objective) if status == pulp.LpStatusOptimal else float("inf")
+        )
+
+        # 使用求解得到的 bbox_w / bbox_h 作为返回的边界框尺寸
+        try:
+            bw_val = pulp.value(ctx.bbox_w)
+            bh_val = pulp.value(ctx.bbox_h)
+        except Exception:
+            bw_val, bh_val = None, None
+
+        bbox_tuple = (
+            float(bw_val) if bw_val is not None else 0.0,
+            float(bh_val) if bh_val is not None else 0.0,
+        )
+
         return ILPPlacementResult(
             layout=layout,
             rotations=rotations,
             objective_value=obj_value,
             status=pulp.LpStatus[status],
             solve_time=solve_time,
-            bounding_box=(W, H),
+            bounding_box=bbox_tuple,
         )
-    
+
     except Exception as e:
         solve_time = time.time() - start_time
         if verbose:
             print(f"\n求解出错: {e}")
             import traceback
+
             traceback.print_exc()
-        
+
         # 返回空解
         layout = {node.name: (0.0, 0.0) for node in nodes}
         rotations = {node.name: False for node in nodes}
         return ILPPlacementResult(
             layout=layout,
             rotations=rotations,
-            objective_value=float('inf'),
+            objective_value=float("inf"),
             status="Error",
             solve_time=solve_time,
             bounding_box=(W if W else 100.0, H if H else 100.0),
         )
 
 
-if __name__ == "__main__":
-    # 测试：使用ILP求解布局问题
-    print("=" * 80)
-    print("ILP芯片布局求解器测试（相邻约束模型）")
-    print("=" * 80)
-    
-    # 构建测试图（只取前4个模块，生成4条边）
-    nodes, edges = build_random_chiplet_graph(edge_prob=0.2, max_nodes=5, fixed_num_edges=5)
-    
-    print(f"\n问题规模: {len(nodes)} 个模块, {len(edges)} 条边")
-    
-    # 求解
-    # min_shared_length: 相邻chiplet之间共享边的最小长度
-    # - 0.0: 只需要有接触即可（共享边长度 >= 0）
-    # - 1.0: 共享边长度必须 >= 1.0
-    # - 2.0: 共享边长度必须 >= 2.0
-    result = solve_placement_ilp(
+def solve_placement_ilp(
+    nodes: List[ChipletNode],
+    edges: List[Tuple[str, str]],
+    W: Optional[float] = None,
+    H: Optional[float] = None,
+    time_limit: int = 300,
+    verbose: bool = True,
+    min_shared_length: float = 0.0,
+    minimize_bbox_area: bool = True,
+    distance_weight: float = 1.0,
+    area_weight: float = 0.1,
+) -> ILPPlacementResult:
+    """
+    兼容旧接口的一站式求解函数：
+    内部先调用 :func:`build_placement_ilp_model` 构建模型，
+    然后用 :func:`solve_placement_ilp_from_model` 进行一次求解。
+    """
+
+    ctx = build_placement_ilp_model(
         nodes=nodes,
         edges=edges,
-        W=None,  # 自动计算
-        H=None,  # 自动计算
-        time_limit=300,
-        verbose=True,
-        min_shared_length=0.5,  # 可以修改这个值来控制相邻chiplet共享边的最小长度
+        W=W,
+        H=H,
+        verbose=verbose,
+        min_shared_length=min_shared_length,
+        minimize_bbox_area=minimize_bbox_area,
+        distance_weight=distance_weight,
+        area_weight=area_weight,
     )
-    
-    print(f"\n求解结果:")
-    print(f"  状态: {result.status}")
-    if result.status == 'Optimal':
-        print(f"  目标值（总距离）: {result.objective_value:.2f}")
-        print(f"  边界框尺寸: {result.bounding_box[0]:.2f} × {result.bounding_box[1]:.2f}")
-        # 显示旋转信息
-        rotated_nodes = [name for name, rotated in result.rotations.items() if rotated]
-        if rotated_nodes:
-            print(f"  旋转的节点: {', '.join(rotated_nodes)}")
-        else:
-            print(f"  旋转的节点: 无")
-    print(f"  求解时间: {result.solve_time:.2f} 秒")
-    
-    # 可视化结果
-    if result.status == 'Optimal':
-        from pathlib import Path
-        out_path = Path(__file__).parent.parent / "chiplet_ilp_placement.png"
-        
-        # 创建旋转后的节点副本用于绘图
-        from copy import deepcopy
-        nodes_for_draw = []
-        for i, node in enumerate(nodes):
-            node_copy = deepcopy(node)
-            if result.rotations.get(node.name, False):
-                # 旋转90度：交换宽度和高度
-                orig_w = node.dimensions.get("x", 0.0)
-                orig_h = node.dimensions.get("y", 0.0)
-                node_copy.dimensions["x"] = orig_h
-                node_copy.dimensions["y"] = orig_w
-                
-                # 旋转接口位置：原来的 (px, py) 变成 (h - py, px)
-                if node_copy.phys:
-                    rotated_phys = []
-                    for p in node.phys:
-                        px = float(p.get("x", 0.0))
-                        py = float(p.get("y", 0.0))
-                        # 旋转90度：相对于新左下角的坐标
-                        new_px = orig_h - py
-                        new_py = px
-                        rotated_phys.append({"x": new_px, "y": new_py})
-                    node_copy.phys = rotated_phys
-            nodes_for_draw.append(node_copy)
-        
-        draw_chiplet_diagram(nodes_for_draw, edges, save_path=str(out_path), layout=result.layout)
-        print(f"\n布局结果已保存到: {out_path}")
-    else:
-        print(f"\n求解未成功，状态: {result.status}")
+
+    return solve_placement_ilp_from_model(
+        ctx,
+        time_limit=time_limit,
+        verbose=verbose,
+    )

@@ -332,7 +332,7 @@ if __name__ == "__main__":
     nodes, edges = build_random_chiplet_graph(edge_prob=0.3)
     # 使用相对路径，输出到项目根目录
     from pathlib import Path
-    out_path = Path(__file__).parent.parent / "chiplet_diagram_from_tool.png"
+    out_path = Path(__file__).parent.parent / "output" / "chiplet_diagram_from_tool.png"
     draw_chiplet_diagram(nodes, edges, save_path=str(out_path))
     print(f"Diagram saved to: {out_path}")
 
