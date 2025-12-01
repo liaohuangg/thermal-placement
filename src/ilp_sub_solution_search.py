@@ -94,7 +94,7 @@ def search_multiple_solutions(
     演示：在同一个 problem 上反复添加排除解约束，搜索多个不同的可行解（子调度）。
     """
     # 1. 构建初始 graph
-    nodes, edges = build_random_chiplet_graph(edge_prob=0.2, max_nodes=5, fixed_num_edges=2)
+    nodes, edges = build_random_chiplet_graph(edge_prob=0.2, max_nodes=8, fixed_num_edges=4)
 
     # 2. 首次建模（不求解）
     ctx = build_placement_ilp_model(
