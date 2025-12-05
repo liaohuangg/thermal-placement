@@ -1,0 +1,15 @@
+{
+  "chiplets": [
+    {"name": "A", "width": 16.0, "height": 16.0},
+    {"name": "B", "width": 10.0, "height": 20.0},
+    {"name": "C", "width": 20.0, "height": 20.0},
+    {"name": "D", "width": 16.0, "height": 14.0},
+    {"name": "E", "width": 4.0, "height": 4.0}
+  ],
+  "connections": [
+    ["A", "B"],
+    ["B", "D"],
+    ["B", "C"],
+    ["E", "C"]
+  ]
+}
