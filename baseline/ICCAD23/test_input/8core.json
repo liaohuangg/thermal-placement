@@ -5,9 +5,9 @@
     {"name": "C", "width": 20.0, "height": 20.0},
     {"name": "D", "width": 16.0, "height": 16.0},
     {"name": "E", "width": 10.0, "height": 10.0},
-    {"name": "F", "width": 8.0, "height": 7.0},
-    {"name": "G", "width": 5.0, "height": 6.0},
-    {"name": "H", "width": 4.0, "height": 5.0}
+    {"name": "F", "width": 8.0, "height": 6.0},
+    {"name": "G", "width": 6.0, "height": 6.0},
+    {"name": "H", "width": 5.0, "height": 5.0}
   ],
   "connections": [
     ["A", "B"],

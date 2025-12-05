@@ -71,7 +71,7 @@ print("\n\n" + "="*70)
 print("测试案例: 8芯片系统")
 print("="*70)
 
-problem_8 = load_problem_from_json("../test_input/10core.json")
+problem_8 = load_problem_from_json("../test_input/8core.json")
 
 tcg_8 = generate_initial_TCG(problem_8)
 layout_8 = generate_layout_from_tcg(tcg_8, problem_8)
@@ -98,7 +98,7 @@ legal_tcgs_8, legal_layouts_8, final_cost_8 = SA_1(
     initial_temp=100.0,
     cooling_rate=0.95,
     alpha_c=10,
-    beta_l=1,
+    beta_l=3,
     verbose=True
 )
 print("\n" + "="*70)

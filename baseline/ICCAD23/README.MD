@@ -12,6 +12,7 @@ Legality_optimized_SA.py ：核心方法SA
 
 ## test/ :（调试，调参，主要用这里）
 ## 目前来说，对于10以内的芯粒求解，效果不错，若是数量再增加，找解困难
+## 如果找不到解，请多次尝试，或者修改简单的connection输入
 test_SA_1.py :单次运行SA
 test_multi.py :多次运行SA
 
@@ -29,7 +30,6 @@ test_multi.py :多次运行SA
 
   ]
 }
-
 
 包含一个chiplet集合和一个连接集合，注意：连接集合要合法，否则无法求解出布局
 

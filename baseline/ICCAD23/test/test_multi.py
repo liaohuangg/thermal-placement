@@ -146,8 +146,8 @@ def print_summary(run_stats, all_legal_tcgs):
 
 
 if __name__ == "__main__":
-    # 加载12core问题
-    print("\n加载12core问题...")
+    
+    print("\n加载问题...")
     problem = load_problem_from_json("../test_input/10core.json")
     
     # 12core问题非常困难，需要更激进的参数
@@ -164,12 +164,12 @@ if __name__ == "__main__":
     all_legal_tcgs, all_legal_layouts, run_stats = run_multiple_SA_1(
         problem,
         num_runs=num_runs,
-        max_iterations=50000,   # 10万次迭代
+        max_iterations=50000,   # 5万次迭代
         initial_temp=200.0,      # 高初始温度
-        cooling_rate=0.95,      # 慢冷却
-        alpha_c=18.0,             # 提高闭包边惩罚
+        cooling_rate=0.98,      # 慢冷却
+        alpha_c=18.0,            # 提高闭包边惩罚
         beta_l=2.0,             # 加大非法边惩罚
-        use_legalize=True,      # 不使用legalize，提高性能
+        use_legalize=True,      # 使用legalize，提高合法率
         verbose=False           # 显示详细信息
     )
     
@@ -206,7 +206,7 @@ if __name__ == "__main__":
         print(f"  利用率: {chip_area/layout_area*100:.2f}%")
         
         # 可视化最优解
-        output_file = "../output/12core_best_solution.png"
+        output_file = "../output/best_solution.png"
         visualize_layout_with_bridges(best_layout, problem, output_file)
         print(f"\n✓ 最优布局已保存到: {output_file}")
         
