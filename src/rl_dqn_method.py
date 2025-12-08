@@ -138,7 +138,7 @@ def train_dqn(
                     q_values = policy_net(state_tensor)
                     # 只考虑有效动作
                     valid_q_values = q_values[0][valid_actions]
-                    best_valid_idx = torch.argmax(valid_q_values).item()
+                        best_valid_idx = torch.argmax(valid_q_values).item()
                     action_idx = valid_actions[best_valid_idx]
             
             # 执行动作
@@ -154,37 +154,37 @@ def train_dqn(
             
             if done:
                 break
-        
-        # 训练网络
-        if len(replay_buffer) >= batch_size:
-            states, actions, rewards, next_states, dones = replay_buffer.sample(batch_size)
             
+            # 训练网络
+            if len(replay_buffer) >= batch_size:
+                states, actions, rewards, next_states, dones = replay_buffer.sample(batch_size)
+                
             # 将数据移到GPU
             states_t = torch.FloatTensor(states).to(device)
             actions_t = torch.LongTensor(actions).to(device)
             rewards_t = torch.FloatTensor(rewards).to(device)
             next_states_t = torch.FloatTensor(next_states).to(device)
             dones_t = torch.FloatTensor(dones).to(device)
-            
-            # 计算当前Q值
+                
+                # 计算当前Q值
             q_values = policy_net(states_t)
             q_value = q_values.gather(1, actions_t.unsqueeze(1)).squeeze(1)
-            
-            # 计算目标Q值
-            with torch.no_grad():
+                
+                # 计算目标Q值
+                with torch.no_grad():
                 next_q_values = target_net(next_states_t)
                 # 对于每个next_state，需要找到有效动作的最大Q值
                 # 简化处理：使用全局最大值（实际应该只考虑有效动作）
                 max_next_q = next_q_values.max(1)[0]
                 target_q = rewards_t + gamma * max_next_q * (1 - dones_t)
-            
+                
             # 计算损失
             loss = F.mse_loss(q_value, target_q)
             
             # 优化
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
         
         # 更新目标网络
         if episode % target_update == 0:
@@ -204,7 +204,7 @@ def train_dqn(
             if is_complete and not best_is_complete:
                 should_update = True
             elif is_complete == best_is_complete:
-                if episode_reward > best_reward:
+        if episode_reward > best_reward:
                     should_update = True
         
         if should_update:
