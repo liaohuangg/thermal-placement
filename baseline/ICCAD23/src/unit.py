@@ -1,4 +1,4 @@
-"""
+﻿"""
 实用工具函数
 提供JSON文件读写、problem和layout的转换等接口
 """
@@ -9,6 +9,92 @@ from chiplet_model import LayoutProblem, Chiplet
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.patches import Rectangle, FancyBboxPatch
+
+
+def calculate_wirelength(layout: Dict[str, Chiplet], problem: LayoutProblem) -> float:
+    """
+    计算布局的总线长
+    
+    对于每一对有连接关系的芯片，计算它们中心点之间的欧几里得距离（曼哈顿距离）
+    总线长 = 所有连接的距离之和
+    
+    Args:
+        layout: 布局字典 {chip_id: Chiplet}
+        problem: 布局问题，包含连接关系
+        
+    Returns:
+        总线长（所有连接的中心点距离之和）
+    """
+    if not layout or not problem.connection_graph.edges():
+        return 0.0
+    
+    total_wirelength = 0.0
+    
+    # 遍历所有连接
+    for chip1_id, chip2_id in problem.connection_graph.edges():
+        # 获取两个芯片
+        chip1 = layout.get(chip1_id)
+        chip2 = layout.get(chip2_id)
+        
+        if chip1 is None or chip2 is None:
+            continue
+        
+        # 计算中心点坐标
+        center1_x = chip1.x + chip1.width / 2
+        center1_y = chip1.y + chip1.height / 2
+        center2_x = chip2.x + chip2.width / 2
+        center2_y = chip2.y + chip2.height / 2
+        
+        # 计算欧几里得距离（也可以使用曼哈顿距离）
+        distance = ((center2_x - center1_x) ** 2 + (center2_y - center1_y) ** 2) ** 0.5
+        
+        # 累加到总线长
+        total_wirelength += distance
+    
+    return total_wirelength
+
+
+def calculate_manhattan_wirelength(layout: Dict[str, Chiplet], problem: LayoutProblem) -> float:
+    """
+    计算布局的总线长（使用曼哈顿距离）
+    
+    对于每一对有连接关系的芯片，计算它们中心点之间的曼哈顿距离
+    曼哈顿距离 = |x1 - x2| + |y1 - y2|
+    
+    Args:
+        layout: 布局字典 {chip_id: Chiplet}
+        problem: 布局问题，包含连接关系
+        
+    Returns:
+        总线长（所有连接的曼哈顿距离之和）
+    """
+    if not layout or not problem.connection_graph.edges():
+        return 0.0
+    
+    total_wirelength = 0.0
+    
+    # 遍历所有连接
+    for chip1_id, chip2_id in problem.connection_graph.edges():
+        # 获取两个芯片
+        chip1 = layout.get(chip1_id)
+        chip2 = layout.get(chip2_id)
+        
+        if chip1 is None or chip2 is None:
+            continue
+        
+        # 计算中心点坐标
+        center1_x = chip1.x + chip1.width / 2
+        center1_y = chip1.y + chip1.height / 2
+        center2_x = chip2.x + chip2.width / 2
+        center2_y = chip2.y + chip2.height / 2
+        
+        # 计算曼哈顿距离
+        distance = abs(center2_x - center1_x) + abs(center2_y - center1_y)
+        
+        # 累加到总线长
+        total_wirelength += distance
+    
+    return total_wirelength
 
 
 def calculate_layout_utilization(layout: Dict[str, Chiplet]) -> Tuple[float, float, float, float]:
@@ -123,7 +209,7 @@ def load_problem_from_json(json_path: str) -> LayoutProblem:
     for conn in data["connections"]:
         problem.add_connection(conn[0], conn[1])
     
-    print(f"✓ 从 {json_path} 加载: {len(data['chiplets'])}个芯片, {len(data['connections'])}个连接")
+    print(f"✓ Loaded from {json_path}: {len(data['chiplets'])}chiplets, {len(data['connections'])}connections")
     
     return problem
 
@@ -156,7 +242,7 @@ def save_problem_to_json(problem: LayoutProblem, json_path: str):
     with open(json_path, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2)
     
-    print(f"✓ 保存到 {json_path}: {len(data['chiplets'])}个芯片, {len(data['connections'])}个连接")
+    print(f"✓ Saved to {json_path}: {len(data['chiplets'])}chiplets, {len(data['connections'])}connections")
 
 
 def save_layout_to_json(layout: Dict[str, Chiplet], json_path: str):
@@ -183,7 +269,7 @@ def save_layout_to_json(layout: Dict[str, Chiplet], json_path: str):
     with open(json_path, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2)
     
-    print(f"✓ 保存布局到 {json_path}: {len(layout)}个芯片")
+    print(f"✓ Saved layout to {json_path}: {len(layout)}chiplets")
 
 
 def load_layout_from_json(json_path: str) -> Dict[str, Chiplet]:
@@ -219,19 +305,20 @@ def load_layout_from_json(json_path: str) -> Dict[str, Chiplet]:
         chip.y = chip_data["y"]
         layout[chip_data["id"]] = chip
     
-    print(f"✓ 从 {json_path} 加载布局: {len(layout)}个芯片")
+    print(f"✓ Loaded from {json_path} 加载布局: {len(layout)}chiplets")
     
     return layout
 
 
-def print_layout_summary(layout: Dict[str, Chiplet]):
+def print_layout_summary(layout: Dict[str, Chiplet], problem: LayoutProblem = None):
     """
     打印布局摘要信息
     
     Args:
         layout: 布局字典
+        problem: 布局问题（可选），如果提供则显示线长信息
     """
-    print("\n布局摘要:")
+    print("\nLayout Summary:")
     print("=" * 60)
     
     # 计算边界框
@@ -243,11 +330,11 @@ def print_layout_summary(layout: Dict[str, Chiplet]):
     bbox_width = x_max - min(x_coords)
     bbox_height = y_max - min(y_coords)
     
-    print(f"芯片数量: {len(layout)}")
-    print(f"边界框: ({min(x_coords):.1f}, {min(y_coords):.1f}) → ({x_max:.1f}, {y_max:.1f})")
-    print(f"总宽度: {bbox_width:.1f}")
-    print(f"总高度: {bbox_height:.1f}")
-    print(f"边界框面积: {bbox_width * bbox_height:.1f}")
+    print(f"Number of chiplets: {len(layout)}")
+    print(f"Bounding box: ({min(x_coords):.1f}, {min(y_coords):.1f}) → ({x_max:.1f}, {y_max:.1f})")
+    print(f"Total width: {bbox_width:.1f}")
+    print(f"Total height: {bbox_height:.1f}")
+    print(f"Bounding box area: {bbox_width * bbox_height:.1f}")
     
     # 计算芯片总面积
     total_chip_area = sum(chip.width * chip.height for chip in layout.values())
@@ -255,6 +342,20 @@ def print_layout_summary(layout: Dict[str, Chiplet]):
     
     print(f"芯片总面积: {total_chip_area:.1f}")
     print(f"面积利用率: {utilization:.1f}%")
+    
+    # 如果提供了problem，计算并显示线长
+    if problem is not None:
+        euclidean_wl = calculate_wirelength(layout, problem)
+        manhattan_wl = calculate_manhattan_wirelength(layout, problem)
+        num_connections = problem.connection_graph.number_of_edges()
+        
+        print(f"\nWirelength Information:")
+        print(f"Number of connections: {num_connections}")
+        print(f"Total wirelength (Euclidean): {euclidean_wl:.2f}")
+        print(f"Total wirelength (Manhattan): {manhattan_wl:.2f}")
+        if num_connections > 0:
+            print(f"Average wirelength (Euclidean): {euclidean_wl / num_connections:.2f}")
+            print(f"Average wirelength (Manhattan): {manhattan_wl / num_connections:.2f}")
     
     print("\n各芯片位置:")
     print("-" * 60)
@@ -273,7 +374,7 @@ def create_example_problem() -> LayoutProblem:
     """
     problem = LayoutProblem()
     
-    # 创建5个芯片
+    # 创建5chiplets
     chips = [
         Chiplet(chip_id="A", width=8, height=8),
         Chiplet(chip_id="B", width=10, height=10),
@@ -303,7 +404,7 @@ def create_example_problem() -> LayoutProblem:
 
 def generate_color(chip_id: str):
     """
-    为每个芯片生成一个固定的颜色
+    为每chiplets生成一个固定的颜色
     
     使用芯片ID的哈希值来生成确定性的颜色
     
@@ -342,8 +443,8 @@ def visualize_layout_with_bridges(layout: Dict[str, Chiplet],
     """
     from Bridge_Overlap_Adjustment import generate_silicon_bridges
     
-    # 配置中文字体
-    plt.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei', 'SimSun', 'KaiTi', 'Arial Unicode MS']
+    # 配置字体
+    plt.rcParams['font.sans-serif'] = ['Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', 'sans-serif']
     plt.rcParams['axes.unicode_minus'] = False
     
     if not layout:
@@ -363,7 +464,7 @@ def visualize_layout_with_bridges(layout: Dict[str, Chiplet],
     # 创建图形
     fig, ax = plt.subplots(1, 1, figsize=(12, 10))
     
-    # 绘制每个芯片
+    # 绘制每chiplets
     for chip_id, chip in layout.items():
         x, y = chip.x, chip.y
         width, height = chip.width, chip.height
@@ -456,23 +557,23 @@ def visualize_layout_with_bridges(layout: Dict[str, Chiplet],
     ax.set_ylim(y_min - margin, y_max + margin)
     ax.set_aspect('equal')
     ax.grid(True, alpha=0.3, linestyle='--')
-    ax.set_xlabel('X坐标', fontsize=12)
-    ax.set_ylabel('Y坐标', fontsize=12)
+    ax.set_xlabel('X Coordinate', fontsize=12)
+    ax.set_ylabel('Y Coordinate', fontsize=12)
     
     # 标题
-    title = f'芯片布局可视化 ({len(layout)} 个芯片'
+    title = f'Chiplet Layout Visualization ({len(layout)} chiplets'
     if show_bridges:
-        title += f', {problem.connection_graph.number_of_edges()} 个连接'
+        title += f', {problem.connection_graph.number_of_edges()} connections'
     title += ')'
     ax.set_title(title, fontsize=14, fontweight='bold')
     
     # 添加图例说明
-    legend_text = '图例:\n'
-    legend_text += '• 黑色边框 = 芯片边界\n'
-    legend_text += '• 半透明填充 = 芯片区域'
+    legend_text = 'Legend:\n'
+    legend_text += '• Black border = Chiplet boundary\n'
+    legend_text += '• Semi-transparent fill = Chiplet area'
     if show_bridges:
-        legend_text += '\n• 红色虚线框 = 硅桥区域\n'
-        legend_text += '• 黄色半透明 = 硅桥占用'
+        legend_text += '\n• Red dashed box = Silicon bridge area\n'
+        legend_text += '• Yellow semi-transparent = Bridge occupancy'
     
     ax.text(
         0.02, 0.98, legend_text,
@@ -485,11 +586,11 @@ def visualize_layout_with_bridges(layout: Dict[str, Chiplet],
     # 保存图片
     plt.tight_layout()
     plt.savefig(output_file, dpi=300, bbox_inches='tight')
-    print(f"\n✓ 布局可视化已保存到: {output_file}")
-    print(f"  - 芯片数量: {len(layout)}")
-    print(f"  - 连接数量: {problem.connection_graph.number_of_edges()}")
-    print(f"  - 布局尺寸: {x_max - x_min:.1f} x {y_max - y_min:.1f}")
-    print(f"  - 布局面积: {(x_max - x_min) * (y_max - y_min):.1f}")
+    print(f"\n✓ Layout visualization saved to: {output_file}")
+    print(f"  - Number of chiplets: {len(layout)}")
+    print(f"  - Number of connections: {problem.connection_graph.number_of_edges()}")
+    print(f"  - Layout dimensions: {x_max - x_min:.1f} x {y_max - y_min:.1f}")
+    print(f"  - Layout area: {(x_max - x_min) * (y_max - y_min):.1f}")
     
     plt.close()
 
@@ -511,11 +612,22 @@ if __name__ == "__main__":
     print("-" * 70)
     save_problem_to_json(problem, "test_output_problem.json")
     
-    # 测试3: 加载layout
+    # 测试3: 加载layout从JSON
     print("\n测试3: 加载layout从JSON")
     print("-" * 70)
-    layout = load_layout_from_json("../layout.json")
-    print_layout_summary(layout)
+    from TCG import generate_layout_from_tcg  
+    from Generate_initial_TCG import generate_initial_TCG
+
+    layout = generate_layout_from_tcg(generate_initial_TCG(problem), problem)
+    print_layout_summary(layout, problem)
+    
+    # 测试3.1: 计算线长
+    print("\n测试3.1: 计算线长")
+    print("-" * 70)
+    euclidean_wl = calculate_wirelength(layout, problem)
+    manhattan_wl = calculate_manhattan_wirelength(layout, problem)
+    print(f"Euclidean wirelength: {euclidean_wl:.2f}")
+    print(f"Manhattan wirelength: {manhattan_wl:.2f}")
     
     # 测试4: 保存layout
     print("\n测试4: 保存layout到JSON")
@@ -534,5 +646,6 @@ if __name__ == "__main__":
     )
     
     print("\n✓ 所有测试完成")
-    
-    print("\n✓ 所有测试完成")
+
+
+

@@ -147,73 +147,158 @@ def print_summary(run_stats, all_legal_tcgs):
 
 if __name__ == "__main__":
     
-    print("\n加载问题...")
-    problem = load_problem_from_json("../test_input/10core.json")
+    # print("\n加载问题...")
+    # problem = load_problem_from_json("../test_input/8core.json")
     
-    # 12core问题非常困难，需要更激进的参数
-    # 问题分析: 从前7次运行看，成本只能降到6.5-7.0
-    # 这意味着还有约45-50%的EMIB边不合法
-    # 建议策略: 先不用legalize (避免deepcopy性能问题)，纯SA搜索
+    # # 12core问题非常困难，需要更激进的参数
+    # # 问题分析: 从前7次运行看，成本只能降到6.5-7.0
+    # # 这意味着还有约45-50%的EMIB边不合法
+    # # 建议策略: 先不用legalize (避免deepcopy性能问题)，纯SA搜索
     
-    print("\n建议: 12core问题非常困难，可以尝试:")
-    print("1. 不使用legalize (use_legalize=False) 提高速度")
-    print("2. 增加运行次数，用多样性弥补单次的困难")
-    print("3. 调整参数后多次尝试\n")
+    # print("\n建议: 12core问题非常困难，可以尝试:")
+    # print("1. 不使用legalize (use_legalize=False) 提高速度")
+    # print("2. 增加运行次数，用多样性弥补单次的困难")
+    # print("3. 调整参数后多次尝试\n")
     
-    num_runs = 10 # 先运行10次看效果
-    all_legal_tcgs, all_legal_layouts, run_stats = run_multiple_SA_1(
-        problem,
-        num_runs=num_runs,
-        max_iterations=50000,   # 5万次迭代
-        initial_temp=200.0,      # 高初始温度
-        cooling_rate=0.98,      # 慢冷却
-        alpha_c=18.0,            # 提高闭包边惩罚
-        beta_l=2.0,             # 加大非法边惩罚
-        use_legalize=True,      # 使用legalize，提高合法率
-        verbose=False           # 显示详细信息
-    )
+    # num_runs = 10 # 先运行10次看效果
+    # all_legal_tcgs, all_legal_layouts, run_stats = run_multiple_SA_1(
+    #     problem,
+    #     num_runs=num_runs,
+    #     max_iterations=70000,   # 7万次迭代
+    #     initial_temp=200.0,      # 高初始温度
+    #     cooling_rate=0.98,      # 慢冷却
+    #     alpha_c=10.0,            # 提高闭包边惩罚
+    #     beta_l=3.0,             # 加大非法边惩罚
+    #     use_legalize=True,      # 使用legalize，提高合法率
+    #     verbose=False           # 显示详细信息
+    # )
     
-    # 打印总结
-    print_summary(run_stats, all_legal_tcgs)
+    # # 打印总结
+    # print_summary(run_stats, all_legal_tcgs)
     
-    # 如果找到合法解，选择最优的
-    if len(all_legal_tcgs) > 0:
-        print(f"\n{'='*70}")
-        print(f"选择最优解")
-        print(f"{'='*70}")
+    # # 如果找到合法解，选择最优的
+    # if len(all_legal_tcgs) > 0:
+    #     print(f"\n{'='*70}")
+    #     print(f"选择最优解")
+    #     print(f"{'='*70}")
         
-        # 找到利用率最优的解
-        best_idx, best_layout, best_util = best_utilization(all_legal_tcgs, all_legal_layouts)
-        best_tcg = all_legal_tcgs[best_idx]
+    #     # 找到利用率最优的解
+    #     best_idx, best_layout, best_util = best_utilization(all_legal_tcgs, all_legal_layouts)
+    #     best_tcg = all_legal_tcgs[best_idx]
         
-        print(f"最优解索引: {best_idx + 1}/{len(all_legal_tcgs)}")
-        print(f"最优利用率: {best_util:.2f}%")
+    #     print(f"最优解索引: {best_idx + 1}/{len(all_legal_tcgs)}")
+    #     print(f"最优利用率: {best_util:.2f}%")
         
-        # 验证成本
-        verify_cost = cost_legal(best_tcg, problem, best_layout, alpha_c=1.0, beta_l=10.0)
-        print(f"验证成本: {verify_cost:.6f}")
+    #     # 验证成本
+    #     verify_cost = cost_legal(best_tcg, problem, best_layout, alpha_c=1.0, beta_l=10.0)
+    #     print(f"验证成本: {verify_cost:.6f}")
         
-        # 计算布局信息
-        chip_area = sum(chip.width * chip.height for chip in problem.chiplets.values())
-        max_x = max(chip.x + chip.width for chip in best_layout.values())
-        max_y = max(chip.y + chip.height for chip in best_layout.values())
-        layout_area = max_x * max_y
+    #     # 计算布局信息
+    #     chip_area = sum(chip.width * chip.height for chip in problem.chiplets.values())
+    #     max_x = max(chip.x + chip.width for chip in best_layout.values())
+    #     max_y = max(chip.y + chip.height for chip in best_layout.values())
+    #     layout_area = max_x * max_y
         
-        print(f"\n布局详情:")
-        print(f"  芯片总面积: {chip_area:.2f}")
-        print(f"  布局尺寸: {max_x:.2f} x {max_y:.2f}")
-        print(f"  布局面积: {layout_area:.2f}")
-        print(f"  利用率: {chip_area/layout_area*100:.2f}%")
+    #     print(f"\n布局详情:")
+    #     print(f"  芯片总面积: {chip_area:.2f}")
+    #     print(f"  布局尺寸: {max_x:.2f} x {max_y:.2f}")
+    #     print(f"  布局面积: {layout_area:.2f}")
+    #     print(f"  利用率: {chip_area/layout_area*100:.2f}%")
         
-        # 可视化最优解
-        output_file = "../output/best_solution.png"
-        visualize_layout_with_bridges(best_layout, problem, output_file)
-        print(f"\n✓ 最优布局已保存到: {output_file}")
+    #     # 可视化最优解
+    #     output_file = "../output/best_solution.png"
+    #     visualize_layout_with_bridges(best_layout, problem, output_file)
+    #     print(f"\n✓ 最优布局已保存到: {output_file}")
         
-    else:
-        print(f"\n⚠ 所有运行均未找到合法解")
-        print(f"建议:")
-        print(f"  1. 增加运行次数 (num_runs)")
-        print(f"  2. 增加每次迭代次数 (max_iterations)")
-        print(f"  3. 调高初始温度 (initial_temp)")
-        print(f"  4. 调慢冷却速率 (cooling_rate更接近1.0)")
+    # else:
+    #     print(f"\n⚠ 所有运行均未找到合法解")
+    #     print(f"建议:")
+    #     print(f"  1. 增加运行次数 (num_runs)")
+    #     print(f"  2. 增加每次迭代次数 (max_iterations)")
+    #     print(f"  3. 调高初始温度 (initial_temp)")
+    #     print(f"  4. 调慢冷却速率 (cooling_rate更接近1.0)")
+ 
+
+#测试维度：最短线长
+          print("\n\n" + "="*70)
+print("测试维度: 最短线长优化")
+print("="*70)
+
+print("\n加载问题...")
+problem_wl = load_problem_from_json("../test_input/10core.json")
+
+print("\n建议: 12core问题非常困难，可以尝试:")
+print("1. 不使用legalize (use_legalize=False) 提高速度")
+print("2. 增加运行次数，用多样性弥补单次的困难")
+print("3. 调整参数后多次尝试\n")
+
+num_runs_wl = 100  # 先运行10次看效果
+all_legal_tcgs_wl, all_legal_layouts_wl, run_stats_wl = run_multiple_SA_1(
+    problem_wl,
+    num_runs=num_runs_wl,
+    max_iterations=80000,   # 5万次迭代
+    initial_temp=300.0,      # 高初始温度
+    cooling_rate=0.99,      # 慢冷却
+    alpha_c=10.0,            # 提高闭包边惩罚
+    beta_l=3.0,             # 加大非法边惩罚
+    use_legalize=True,      # 使用legalize，提高合法率
+    verbose=False           # 显示详细信息
+)
+
+# 打印总结
+print_summary(run_stats_wl, all_legal_tcgs_wl)
+
+# 如果找到合法解，选择线长最短的
+if len(all_legal_tcgs_wl) > 0:
+    print(f"\n{'='*70}")
+    print(f"选择最短线长解")
+    print(f"{'='*70}")
+    
+    # 找到线长最短的解
+    from unit import calculate_wirelength
+    
+    best_wl_idx = -1
+    best_wl_layout = None
+    best_wl_value = float('inf')
+    
+    for i, layout in enumerate(all_legal_layouts_wl):
+        wirelength = calculate_wirelength(layout, problem_wl)
+        if wirelength < best_wl_value:
+            best_wl_value = wirelength
+            best_wl_idx = i
+            best_wl_layout = layout
+    
+    best_wl_tcg = all_legal_tcgs_wl[best_wl_idx]
+    
+    print(f"最短线长解索引: {best_wl_idx + 1}/{len(all_legal_tcgs_wl)}")
+    print(f"最短线长: {best_wl_value:.2f}")
+    
+    # 验证成本
+    verify_cost_wl = cost_legal(best_wl_tcg, problem_wl, best_wl_layout, alpha_c=1.0, beta_l=10.0)
+    print(f"验证成本: {verify_cost_wl:.6f}")
+    
+    # 计算布局信息
+    chip_area_wl = sum(chip.width * chip.height for chip in problem_wl.chiplets.values())
+    max_x_wl = max(chip.x + chip.width for chip in best_wl_layout.values())
+    max_y_wl = max(chip.y + chip.height for chip in best_wl_layout.values())
+    layout_area_wl = max_x_wl * max_y_wl
+    
+    print(f"\n布局详情:")
+    print(f"  芯片总面积: {chip_area_wl:.2f}")
+    print(f"  布局尺寸: {max_x_wl:.2f} x {max_y_wl:.2f}")
+    print(f"  布局面积: {layout_area_wl:.2f}")
+    print(f"  利用率: {chip_area_wl/layout_area_wl*100:.2f}%")
+    print(f"  线长: {best_wl_value:.2f}")
+    
+    # 可视化最短线长解
+    output_file_wl = "../output/best_solution_wirelength.png"
+    visualize_layout_with_bridges(best_wl_layout, problem_wl, output_file_wl)
+    print(f"\n✓ 最短线长布局已保存到: {output_file_wl}")
+    
+else:
+    print(f"\n⚠ 所有运行均未找到合法解")
+    print(f"建议:")
+    print(f"  1. 增加运行次数 (num_runs)")
+    print(f"  2. 增加每次迭代次数 (max_iterations)")
+    print(f"  3. 调高初始温度 (initial_temp)")
+    print(f"  4. 调慢冷却速率 (cooling_rate更接近1.0)")

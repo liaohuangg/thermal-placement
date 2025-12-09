@@ -12,8 +12,8 @@ from matplotlib.patches import Rectangle
 import random
 from typing import List, Dict, Tuple
 
-# 配置中文字体
-plt.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei', 'SimSun', 'KaiTi', 'Arial Unicode MS']
+# 配置字体
+plt.rcParams['font.sans-serif'] = ['Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', 'sans-serif']
 plt.rcParams['axes.unicode_minus'] = False  # 解决负号显示问题
 
 
@@ -140,17 +140,17 @@ def visualize_layout(chiplets: List[Dict], output_file: str = 'layout_visualizat
     ax.set_ylim(y_min - margin, y_max + margin)
     ax.set_aspect('equal')
     ax.grid(True, alpha=0.3, linestyle='--')
-    ax.set_xlabel('X坐标', fontsize=12)
-    ax.set_ylabel('Y坐标', fontsize=12)
+    ax.set_xlabel('X Coordinate', fontsize=12)
+    ax.set_ylabel('Y Coordinate', fontsize=12)
     
     # 标题
-    title = f'芯片布局可视化 ({len(chiplets)} 个芯片)'
+    title = f'Chiplet Layout Visualization ({len(chiplets)} chiplets)'
     ax.set_title(title, fontsize=14, fontweight='bold')
     
     # 添加图例说明
-    legend_text = '图例:\n'
-    legend_text += '• 黑色边框 = 芯片边界\n'
-    legend_text += '• 半透明填充显示芯片区域'
+    legend_text = 'Legend:\n'
+    legend_text += '• Black border = Chiplet boundary\n'
+    legend_text += '• Semi-transparent fill = Chiplet area'
     
     ax.text(
         0.02, 0.98, legend_text,
