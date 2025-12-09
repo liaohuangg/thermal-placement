@@ -361,34 +361,23 @@ def train_ppo(
         is_complete = len(env.state.remaining) == 0
         
         should_update = False
-        update_reason = ""
         if best_state is None:
             should_update = True
-            update_reason = "首次episode"
         else:
             best_is_complete = len(best_state.remaining) == 0
             if is_complete and not best_is_complete:
                 should_update = True
-                update_reason = "完成所有chiplet放置"
             elif is_complete == best_is_complete:
                 if episode_reward > best_reward:
                     should_update = True
-                    update_reason = f"reward提升 ({best_reward:.2f} -> {episode_reward:.2f})"
-                else:
-                    update_reason = f"reward未提升 (当前: {episode_reward:.2f}, 最佳: {best_reward:.2f})"
-            else:
-                update_reason = f"未完成状态，不更新 (当前完成: {is_complete}, 最佳完成: {best_is_complete})"
         
         if should_update:
-            old_best_reward = best_reward
             best_reward = episode_reward
             best_state = PlacementState(
                 placed=list(env.state.placed),
                 remaining=list(env.state.remaining),
                 grid_mask=env.state.grid_mask.copy()
             )
-            if (episode + 1) % 10 == 0:  # 每次更新都打印
-                print(f"  [更新Best] Episode {episode+1}: {old_best_reward:.2f} -> {best_reward:.2f} ({update_reason})")
         
         if (episode + 1) % 50 == 0:
             completion_status = "✓" if is_complete else "✗"
@@ -396,8 +385,7 @@ def train_ppo(
             print(f"Episode {episode+1}/{num_episodes}, "
                   f"Reward: {episode_reward:.2f} ({completion_status}), "
                   f"Best Reward: {best_reward:.2f} ({best_completion_status}), "
-                  f"Placed: {len(env.state.placed)}/{len(env.nodes)}, "
-                  f"更新原因: {update_reason}")
+                  f"Placed: {len(env.state.placed)}/{len(env.nodes)}")
     
     # 恢复最佳状态
     if best_state:
