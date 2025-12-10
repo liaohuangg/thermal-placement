@@ -22,7 +22,7 @@ def load_chiplets_json(
     if json_path is None:
         # 从 src 目录的相对路径: ../../benchmark/dummy-chiplet-input/chiplet_input/chiplets.json
         current_file = Path(__file__)
-        json_path = current_file.parent.parent.parent / "benchmark" / "dummy-chiplet-input" / "chiplet_input" / "chiplets.json"
+        json_path = "Z:\\work\\chaoyue\\dummy-chiplet-input\\chiplet_input\\chiplets.json"
     
     path = Path(json_path)
     with path.open("r", encoding="utf-8") as f:

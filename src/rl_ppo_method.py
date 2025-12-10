@@ -396,7 +396,7 @@ def train_ppo(
 
 if __name__ == "__main__":
     # 1. 构建初始图
-    nodes, edges = build_random_chiplet_graph(max_nodes=4, fixed_num_edges=4)
+    nodes, edges = build_random_chiplet_graph(max_nodes=6, fixed_num_edges=6)
     print(f"加载了 {len(nodes)} 个chiplet，{len(edges)} 条边")
     
     # 2. 创建环境
@@ -416,7 +416,7 @@ if __name__ == "__main__":
     print("开始训练...")
     ac_net, best_state = train_ppo(
         env,
-        num_episodes=5000,
+        num_episodes=500,
         max_steps_per_episode=50,
         gamma=0.99,
         lr=3e-4,

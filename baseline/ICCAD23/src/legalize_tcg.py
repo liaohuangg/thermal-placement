@@ -273,7 +273,7 @@ def legalize_tcg(tcg: TCG, problem: LayoutProblem, max_iterations: int = 100,
                 
                 if x_overlap < MIN_OVERLAP:
                     # 需要增加x方向重叠 - 采用随机目标重叠策略(40%-100%芯片宽度)
-                    overlap_ratio = random.uniform(0.4, 1)
+                    overlap_ratio = random.uniform(0, 1)
                     target_overlap = max(MIN_OVERLAP, min(chip1.width, chip2.width) * overlap_ratio)
                     if has_ch_12:
                         # Ch中chip1→chip2: chip2在chip1右边,只能右移chip1
@@ -320,7 +320,7 @@ def legalize_tcg(tcg: TCG, problem: LayoutProblem, max_iterations: int = 100,
                 
                 if y_overlap < MIN_OVERLAP:
                     # 需要增加y方向重叠 - 采用随机目标重叠策略(40%-100%芯片高度)
-                    overlap_ratio = random.uniform(0.4, 1)
+                    overlap_ratio = random.uniform(0, 1)
                     target_overlap = max(MIN_OVERLAP, min(chip1.height, chip2.height) * overlap_ratio)
                     if has_cv_12:
                         # Cv中chip1→chip2: chip2在chip1上方,只能上移chip1
