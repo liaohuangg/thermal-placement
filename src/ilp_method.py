@@ -53,11 +53,13 @@ class ILPModelContext:
     - `prob`  : 已经构建好的 PuLP 模型（包含变量、约束和目标函数，但可以继续加约束）
     - `x, y`  : 每个 chiplet 左下角坐标变量（用于排除解等约束）
     - `r`     : 每个 chiplet 的旋转变量
-    - `z1, z2`: 每对有连边的 chiplet 的“相邻方式”变量（水平/垂直）
+    - `z1, z2`: 每对有连边的 chiplet 的"相邻方式"变量（水平/垂直）
     - `z1L, z1R, z2D, z2U`: 每对有连边的 chiplet 的相对方向变量（左、右、下、上）
     - `connected_pairs` : 有连边的 (i, j) 索引列表（i < j）
     - `bbox_w, bbox_h` : 外接方框宽和高对应的变量
     - `W, H`  : 外接边界框的上界尺寸（建模阶段确定）
+    - `grid_size` : 网格大小（如果使用网格化，否则为None）
+    - `fixed_chiplet_idx` : 固定位置的chiplet索引（如果使用固定中心约束，否则为None）
     """
 
     prob: pulp.LpProblem
@@ -80,6 +82,8 @@ class ILPModelContext:
 
     W: float
     H: float
+    grid_size: Optional[float] = None
+    fixed_chiplet_idx: Optional[int] = None
 
 
 def build_placement_ilp_model(
@@ -179,12 +183,12 @@ def build_placement_ilp_model(
         # 估算：假设紧凑排列，总面积 * 2 作为边界框面积
         estimated_side = math.ceil(math.sqrt(total_area * 2))
         if W is None:
-            W = max(estimated_side, max_w * 3)
+            W = max(estimated_side, max_w * 10)
         if H is None:
-            H = max(estimated_side, max_h * 3)
+            H = max(estimated_side, max_h * 10)
     
     # 大 M 常数：一个足够大的数（通常取 2 倍芯片最大尺寸）
-    M = max(W, H) * 5
+    M = max(W, H) * 10
     
     if verbose:
         print(f"芯片边界框尺寸: ChipW = {W:.2f}, ChipH = {H:.2f}")
@@ -695,4 +699,332 @@ def solve_placement_ilp(
         ctx,
         time_limit=time_limit,
         verbose=verbose,
+    )
+
+
+def build_placement_ilp_model_grid(
+    nodes: List[ChipletNode],
+    edges: List[Tuple[str, str]],
+    grid_size: float,
+    W: Optional[float] = None,
+    H: Optional[float] = None,
+    time_limit: int = 300,
+    verbose: bool = True,
+    min_shared_length: float = 0.0,
+    minimize_bbox_area: bool = True,
+    distance_weight: float = 1.0,
+    area_weight: float = 0.1,
+    fixed_chiplet_idx: Optional[int] = None,  # 固定位置的chiplet索引（中心固定在方框中心）
+) -> ILPModelContext:
+    """
+    使用网格化ILP求解chiplet布局。
+    
+    与build_placement_ilp_model的主要区别：
+    1. 坐标变量为整数（grid索引）
+    2. 有链接关系的chiplet之间距离不能超过一个grid
+    3. 共享边长不超过一个grid的共享范围，且不能小于min_shared_length
+    4. 可以固定一个chiplet的中心位置在方框的中心点
+    
+    参数
+    ----
+    grid_size: float
+        网格大小（实际单位）
+    fixed_chiplet_idx: Optional[int]
+        固定位置的chiplet索引，如果提供，则该chiplet的中心固定在方框中心
+    其他参数同build_placement_ilp_model
+    """
+    import math
+    
+    n = len(nodes)
+    name_to_idx = {node.name: i for i, node in enumerate(nodes)}
+    
+    # ============ 步骤1: 读取已知条件 ============
+    w_orig = {}
+    h_orig = {}
+    for i, node in enumerate(nodes):
+        w_orig[i] = float(node.dimensions.get("x", 0.0))
+        h_orig[i] = float(node.dimensions.get("y", 0.0))
+    
+    # 找到所有有边连接的模块对
+    connected_pairs = []
+    for src_name, dst_name in edges:
+        if src_name in name_to_idx and dst_name in name_to_idx:
+            i = name_to_idx[src_name]
+            j = name_to_idx[dst_name]
+            if i != j:
+                if i > j:
+                    i, j = j, i
+                connected_pairs.append((i, j))
+    connected_pairs = list(set(connected_pairs))
+    
+    # 估算芯片边界框尺寸
+    if W is None or H is None:
+        max_w = max(w_orig.values())
+        max_h = max(h_orig.values())
+        total_area = sum(w_orig[i] * h_orig[i] for i in range(n))
+        estimated_side = math.ceil(math.sqrt(total_area * 2))
+        if W is None:
+            W = max(estimated_side, max_w * 3)
+        if H is None:
+            H = max(estimated_side, max_h * 3)
+    
+    # 计算grid数量
+    grid_w = int(math.ceil(W / grid_size))
+    grid_h = int(math.ceil(H / grid_size))
+    
+    if verbose:
+        print(f"网格化布局: grid_size={grid_size}, grid_w={grid_w}, grid_h={grid_h}")
+        print(f"问题规模: {n} 个模块, {len(connected_pairs)} 对有连接的模块对")
+    
+    # ============ 步骤2: 创建ILP问题 ============
+    prob = pulp.LpProblem("ChipletPlacementGrid", pulp.LpMinimize)
+    
+    # 大M常数
+    M = max(grid_w, grid_h) * 2
+    
+    # ============ 步骤3: 定义变量 ============
+    # 3.1 整数变量：每个chiplet在grid中的左下角坐标（grid索引）
+    x_grid = {}
+    y_grid = {}
+    for k in range(n):
+        max_dim_k_grid = max(int(math.ceil(w_orig[k] / grid_size)), int(math.ceil(h_orig[k] / grid_size)))
+        x_grid[k] = pulp.LpVariable(f"x_grid_{k}", lowBound=0, upBound=grid_w - 1, cat='Integer')
+        y_grid[k] = pulp.LpVariable(f"y_grid_{k}", lowBound=0, upBound=grid_h - 1, cat='Integer')
+    
+    # 3.2 连续变量：实际坐标（用于计算距离和共享边长）
+    x = {}
+    y = {}
+    for k in range(n):
+        x[k] = pulp.LpVariable(f"x_{k}", lowBound=0, upBound=W)
+        y[k] = pulp.LpVariable(f"y_{k}", lowBound=0, upBound=H)
+        # 约束：实际坐标 = grid坐标 * grid_size
+        prob += x[k] == x_grid[k] * grid_size, f"x_grid_to_real_{k}"
+        prob += y[k] == y_grid[k] * grid_size, f"y_grid_to_real_{k}"
+    
+    # 3.3 二进制变量：旋转变量
+    r = {}
+    for k in range(n):
+        r[k] = pulp.LpVariable(f"r_{k}", cat='Binary')
+    
+    # 3.4 连续变量：实际宽度和高度
+    w = {}
+    h = {}
+    for k in range(n):
+        w_min = min(w_orig[k], h_orig[k])
+        w_max = max(w_orig[k], h_orig[k])
+        w[k] = pulp.LpVariable(f"w_{k}", lowBound=w_min, upBound=w_max)
+        h[k] = pulp.LpVariable(f"h_{k}", lowBound=w_min, upBound=w_max)
+    
+    # 3.5 辅助变量：中心坐标
+    cx = {}
+    cy = {}
+    for k in range(n):
+        cx[k] = pulp.LpVariable(f"cx_{k}", lowBound=0, upBound=W)
+        cy[k] = pulp.LpVariable(f"cy_{k}", lowBound=0, upBound=H)
+    
+    # 3.6 二进制变量：控制相邻方式
+    z1 = {}
+    z2 = {}
+    z1L = {}
+    z1R = {}
+    z2D = {}
+    z2U = {}
+    
+    # 3.7 二进制变量：控制相邻方式
+    for i, j in connected_pairs:
+        z1[(i, j)] = pulp.LpVariable(f"z1_{i}_{j}", cat="Binary")
+        z2[(i, j)] = pulp.LpVariable(f"z2_{i}_{j}", cat="Binary")
+        z1L[(i, j)] = pulp.LpVariable(f"z1L_{i}_{j}", cat="Binary")
+        z1R[(i, j)] = pulp.LpVariable(f"z1R_{i}_{j}", cat="Binary")
+        z2D[(i, j)] = pulp.LpVariable(f"z2D_{i}_{j}", cat="Binary")
+        z2U[(i, j)] = pulp.LpVariable(f"z2U_{i}_{j}", cat="Binary")
+    
+    # ============ 步骤4: 定义约束 ============
+    
+    # 4.1 旋转约束
+    for k in range(n):
+        prob += w[k] == w_orig[k] + r[k] * (h_orig[k] - w_orig[k]), f"width_rotation_{k}"
+        prob += h[k] == h_orig[k] + r[k] * (w_orig[k] - h_orig[k]), f"height_rotation_{k}"
+    
+    # 4.2 中心坐标定义
+    for k in range(n):
+        prob += cx[k] == x[k] + w[k] / 2.0, f"cx_def_{k}"
+        prob += cy[k] == y[k] + h[k] / 2.0, f"cy_def_{k}"
+    
+    # 4.3 固定chiplet中心在方框中心
+    if fixed_chiplet_idx is not None and 0 <= fixed_chiplet_idx < n:
+        prob += cx[fixed_chiplet_idx] == W / 2.0, f"fix_center_x_{fixed_chiplet_idx}"
+        prob += cy[fixed_chiplet_idx] == H / 2.0, f"fix_center_y_{fixed_chiplet_idx}"
+        if verbose:
+            print(f"固定chiplet {fixed_chiplet_idx} 的中心在方框中心 ({W/2:.2f}, {H/2:.2f})")
+    
+    # 4.4 相邻约束：对于每对有连接的模块对 (i, j)
+    for i, j in connected_pairs:
+        # 规则1: 必须相邻，且只能选一种方式
+        prob += z1[(i, j)] + z2[(i, j)] == 1, f"must_adjacent_{i}_{j}"
+        
+        # 规则2: 如果水平相邻，要么 i 在左，要么 i 在右
+        prob += z1L[(i, j)] + z1R[(i, j)] == z1[(i, j)], f"horizontal_direction_{i}_{j}"
+        
+        # 规则3: 如果垂直相邻，要么 i 在下，要么 i 在上
+        prob += z2D[(i, j)] + z2U[(i, j)] == z2[(i, j)], f"vertical_direction_{i}_{j}"
+        
+        # 规则4: 距离约束 - 有链接关系的chiplet之间距离不能超过一个grid
+        # 简化：直接使用grid坐标约束距离
+        # 如果水平相邻：|y_grid_i - y_grid_j| <= 1（在垂直方向上最多相差1个grid）
+        # 如果垂直相邻：|x_grid_i - x_grid_j| <= 1（在水平方向上最多相差1个grid）
+        
+        # 水平相邻时，垂直方向grid距离 <= 1
+        diff_y_grid = pulp.LpVariable(f"diff_y_grid_{i}_{j}", lowBound=0, upBound=grid_h, cat='Integer')
+        prob += diff_y_grid >= y_grid[i] - y_grid[j], f"diff_y_grid_abs1_{i}_{j}"
+        prob += diff_y_grid >= y_grid[j] - y_grid[i], f"diff_y_grid_abs2_{i}_{j}"
+        prob += diff_y_grid <= 1 + M * (1 - z1[(i, j)]), f"diff_y_grid_limit_{i}_{j}"
+        
+        # 垂直相邻时，水平方向grid距离 <= 1
+        diff_x_grid = pulp.LpVariable(f"diff_x_grid_{i}_{j}", lowBound=0, upBound=grid_w, cat='Integer')
+        prob += diff_x_grid >= x_grid[i] - x_grid[j], f"diff_x_grid_abs1_{i}_{j}"
+        prob += diff_x_grid >= x_grid[j] - x_grid[i], f"diff_x_grid_abs2_{i}_{j}"
+        prob += diff_x_grid <= 1 + M * (1 - z2[(i, j)]), f"diff_x_grid_limit_{i}_{j}"
+        
+        # 规则5: 水平相邻的具体约束
+        # 约束1：相邻方向的边界距离 ≤ grid_size
+        # 如果 i 在左（z1L[i,j] = 1）：x_j - (x_i + w_i) <= grid_size（距离不超过1个grid）
+        prob += x[j] - (x[i] + w[i]) <= grid_size + M * (1 - z1L[(i, j)]), f"horizontal_left_dist_{i}_{j}"
+        prob += x[j] - (x[i] + w[i]) >= 0 - M * (1 - z1L[(i, j)]), f"horizontal_left_dist_lb_{i}_{j}"
+        # 如果 i 在右（z1R[i,j] = 1）：x_i - (x_j + w_j) <= grid_size（距离不超过1个grid）
+        prob += x[i] - (x[j] + w[j]) <= grid_size + M * (1 - z1R[(i, j)]), f"horizontal_right_dist_{i}_{j}"
+        prob += x[i] - (x[j] + w[j]) >= 0 - M * (1 - z1R[(i, j)]), f"horizontal_right_dist_lb_{i}_{j}"
+        
+        # 约束2：垂直方向（与相邻方向垂直）的重叠长度 >= min_shared_length
+        # 重叠长度 = min(y[i] + h[i], y[j] + h[j]) - max(y[i], y[j])
+        # 首先确保有重叠：y[i] < y[j] + h[j] 且 y[j] < y[i] + h[i]
+        prob += y[i] - (y[j] + h[j]) <= M * (1 - z1[(i, j)]), f"horizontal_overlap_y1_{i}_{j}"
+        prob += y[j] - (y[i] + h[i]) <= M * (1 - z1[(i, j)]), f"horizontal_overlap_y2_{i}_{j}"
+        
+        # 共享边长度（垂直方向的重叠长度）
+        max_shared_y = max(h_orig[i], h_orig[j])
+        shared_y = pulp.LpVariable(f"shared_y_{i}_{j}", lowBound=0, upBound=max_shared_y)
+        prob += shared_y <= (y[i] + h[i]) - y[j] + M * (1 - z1[(i, j)]), f"shared_y_ub1_{i}_{j}"
+        prob += shared_y <= (y[j] + h[j]) - y[i] + M * (1 - z1[(i, j)]), f"shared_y_ub2_{i}_{j}"
+        prob += shared_y >= min_shared_length - M * (1 - z1[(i, j)]), f"shared_y_min_{i}_{j}"
+        prob += shared_y <= M * z1[(i, j)], f"shared_y_zero_{i}_{j}"
+        
+        # 规则6: 垂直相邻的具体约束
+        # 约束1：相邻方向的边界距离 ≤ grid_size
+        # 如果 i 在下（z2D[i,j] = 1）：y_j - (y_i + h_i) <= grid_size（距离不超过1个grid）
+        prob += y[j] - (y[i] + h[i]) <= grid_size + M * (1 - z2D[(i, j)]), f"vertical_down_dist_{i}_{j}"
+        prob += y[j] - (y[i] + h[i]) >= 0 - M * (1 - z2D[(i, j)]), f"vertical_down_dist_lb_{i}_{j}"
+        # 如果 i 在上（z2U[i,j] = 1）：y_i - (y_j + h_j) <= grid_size（距离不超过1个grid）
+        prob += y[i] - (y[j] + h[j]) <= grid_size + M * (1 - z2U[(i, j)]), f"vertical_up_dist_{i}_{j}"
+        prob += y[i] - (y[j] + h[j]) >= 0 - M * (1 - z2U[(i, j)]), f"vertical_up_dist_lb_{i}_{j}"
+        
+        # 约束2：水平方向（与相邻方向垂直）的重叠长度 >= min_shared_length
+        # 重叠长度 = min(x[i] + w[i], x[j] + w[j]) - max(x[i], x[j])
+        # 首先确保有重叠：x[i] < x[j] + w[j] 且 x[j] < x[i] + w[i]
+        prob += x[i] - (x[j] + w[j]) <= M * (1 - z2[(i, j)]), f"vertical_overlap_x1_{i}_{j}"
+        prob += x[j] - (x[i] + w[i]) <= M * (1 - z2[(i, j)]), f"vertical_overlap_x2_{i}_{j}"
+        
+        # 共享边长度（水平方向的重叠长度）
+        max_shared_x = max(w_orig[i], w_orig[j])
+        shared_x = pulp.LpVariable(f"shared_x_{i}_{j}", lowBound=0, upBound=max_shared_x)
+        prob += shared_x <= (x[i] + w[i]) - x[j] + M * (1 - z2[(i, j)]), f"shared_x_ub1_{i}_{j}"
+        prob += shared_x <= (x[j] + w[j]) - x[i] + M * (1 - z2[(i, j)]), f"shared_x_ub2_{i}_{j}"
+        prob += shared_x >= min_shared_length - M * (1 - z2[(i, j)]), f"shared_x_min_{i}_{j}"
+        prob += shared_x <= M * z2[(i, j)], f"shared_x_zero_{i}_{j}"
+    
+    # 4.5 边界约束
+    for k in range(n):
+        prob += x[k] + w[k] <= W, f"boundary_x_{k}"
+        prob += y[k] + h[k] <= H, f"boundary_y_{k}"
+    
+    # 4.6 非重叠约束
+    p_left = {}
+    p_right = {}
+    p_down = {}
+    p_up = {}
+    
+    all_pairs = []
+    for i in range(n):
+        for j in range(i + 1, n):
+            all_pairs.append((i, j))
+            p_left[(i, j)] = pulp.LpVariable(f"p_left_{i}_{j}", cat='Binary')
+            p_right[(i, j)] = pulp.LpVariable(f"p_right_{i}_{j}", cat='Binary')
+            p_down[(i, j)] = pulp.LpVariable(f"p_down_{i}_{j}", cat='Binary')
+            p_up[(i, j)] = pulp.LpVariable(f"p_up_{i}_{j}", cat='Binary')
+    
+    for i, j in all_pairs:
+        prob += p_left[(i, j)] + p_right[(i, j)] + p_down[(i, j)] + p_up[(i, j)] == 1, \
+               f"non_overlap_choice_{i}_{j}"
+        prob += x[i] + w[i] <= x[j] + M * (1 - p_left[(i, j)]), f"non_overlap_left_{i}_{j}"
+        prob += x[j] + w[j] <= x[i] + M * (1 - p_right[(i, j)]), f"non_overlap_right_{i}_{j}"
+        prob += y[i] + h[i] <= y[j] + M * (1 - p_down[(i, j)]), f"non_overlap_down_{i}_{j}"
+        prob += y[j] + h[j] <= y[i] + M * (1 - p_up[(i, j)]), f"non_overlap_up_{i}_{j}"
+    
+    # 4.7 外接方框约束
+    bbox_min_x = pulp.LpVariable("bbox_min_x", lowBound=0, upBound=W)
+    bbox_max_x = pulp.LpVariable("bbox_max_x", lowBound=0, upBound=W)
+    bbox_min_y = pulp.LpVariable("bbox_min_y", lowBound=0, upBound=H)
+    bbox_max_y = pulp.LpVariable("bbox_max_y", lowBound=0, upBound=H)
+    bbox_w = pulp.LpVariable("bbox_w", lowBound=0, upBound=W)
+    bbox_h = pulp.LpVariable("bbox_h", lowBound=0, upBound=H)
+    
+    for k in range(n):
+        prob += bbox_min_x <= x[k], f"bbox_min_x_{k}"
+        prob += bbox_max_x >= x[k] + w[k], f"bbox_max_x_{k}"
+        prob += bbox_min_y <= y[k], f"bbox_min_y_{k}"
+        prob += bbox_max_y >= y[k] + h[k], f"bbox_max_y_{k}"
+    
+    prob += bbox_w == bbox_max_x - bbox_min_x, "bbox_w_def"
+    prob += bbox_h == bbox_max_y - bbox_min_y, "bbox_h_def"
+    
+    # ============ 步骤5: 定义目标函数 ============
+    # 5.1 线长（曼哈顿距离）
+    wirelength = 0
+    for i, j in connected_pairs:
+        dx_abs = pulp.LpVariable(f"dx_abs_{i}_{j}", lowBound=0)
+        dy_abs = pulp.LpVariable(f"dy_abs_{i}_{j}", lowBound=0)
+        
+        prob += dx_abs >= cx[i] - cx[j], f"dx_abs1_{i}_{j}"
+        prob += dx_abs >= cx[j] - cx[i], f"dx_abs2_{i}_{j}"
+        prob += dy_abs >= cy[i] - cy[j], f"dy_abs1_{i}_{j}"
+        prob += dy_abs >= cy[j] - cy[i], f"dy_abs2_{i}_{j}"
+        
+        wirelength += dx_abs + dy_abs
+    
+    # 5.2 面积代理
+    t = pulp.LpVariable("bbox_area_proxy_t", lowBound=0)
+    prob += t <= (bbox_w + bbox_h) / 2.0, "area_proxy_am_gm1"
+    K = max(W, H)
+    prob += bbox_w <= K * t, "area_proxy_am_gm2"
+    prob += bbox_h <= K * t, "area_proxy_am_gm3"
+    
+    # 5.3 目标函数
+    if minimize_bbox_area:
+        prob += distance_weight * wirelength + area_weight * t, "Objective"
+    else:
+        prob += distance_weight * wirelength, "Objective"
+    
+    if verbose:
+        print(f"目标函数: {distance_weight} * wirelength + {area_weight} * area_proxy")
+    
+    return ILPModelContext(
+        prob=prob,
+        nodes=nodes,
+        edges=edges,
+        x=x,
+        y=y,
+        r=r,
+        z1=z1,
+        z2=z2,
+        z1L=z1L,
+        z1R=z1R,
+        z2D=z2D,
+        z2U=z2U,
+        connected_pairs=connected_pairs,
+        bbox_w=bbox_w,
+        bbox_h=bbox_h,
+        W=W,
+        H=H,
+        grid_size=grid_size,
+        fixed_chiplet_idx=fixed_chiplet_idx,
     )

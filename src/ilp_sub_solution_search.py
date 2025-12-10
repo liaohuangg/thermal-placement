@@ -11,6 +11,7 @@ from ilp_method import (
     ILPModelContext,
     ILPPlacementResult,
     build_placement_ilp_model,
+    build_placement_ilp_model_grid,
     solve_placement_ilp_from_model,
 )
 
@@ -20,119 +21,72 @@ def add_exclude_layout_constraint(
     *,
     require_change_pairs: int = 1,  # 目前没有用到这个参数，先保留接口
     solution_index: int = 0,  # 解的索引，用于生成唯一的约束名称
-    excluded_pairs: Optional[set] = None,  # 已经排除过的 (i, j) 对集合
-) -> Optional[Tuple[int, int]]:
+) -> None:
     """
-    在已有 ILP 模型上添加"排除特定相对位置"的约束。
-
-    对每一对有连边的 (i, j)，读取当前解中的相邻方式和方向：
-      - z1 = 1: 水平相邻
-        z1L = 1: i 在 j 左边
-        z1R = 1: i 在 j 右边
-      - z2 = 1: 垂直相邻
-        z2D = 1: i 在 j 下边
-        z2U = 1: i 在 j 上边
-
-    然后禁止"上一解使用过的 (方式 + 方向) 组合"，例如：
-      - 若上一解为"水平 & i 在 j 左边"，则加入约束：z1 + z1L <= 1
-      - 若上一解为"垂直 & i 在 j 上边"，则加入约束：z2 + z2U <= 1
+    在已有 ILP 模型上添加排除解的约束。
     
-    重要：避免对同一对 (i, j) 重复添加排除约束，否则可能导致所有方向都被排除，产生矛盾。
-    
-    返回：被排除的对 (i, j)，如果未找到则返回 None
+    排除整个解，只要下一个解的chiplet集合中有chiplet的位置和上一个解不同即可。
     """
 
     prob = ctx.prob
-    z1 = ctx.z1
-    z1L = ctx.z1L
-    z1R = ctx.z1R
-    z2 = ctx.z2
-    z2D = ctx.z2D
-    z2U = ctx.z2U
-    pair_list = ctx.connected_pairs
+    x = ctx.x
+    y = ctx.y
+    n = len(ctx.nodes)
+    W = ctx.W
+    H = ctx.H
     
-    if excluded_pairs is None:
-        excluded_pairs = set()
-
-    print(f"[DEBUG] add_exclude_layout_constraint: 共有 {len(pair_list)} 对连接的 chiplet")
-    print(f"[DEBUG] 已排除的对: {excluded_pairs}")
+    print(f"[DEBUG] add_exclude_layout_constraint: 共有 {n} 个 chiplet")
     
-    if not pair_list:
-        print("[DEBUG] 警告：没有连接的 chiplet 对，无法添加排除约束")
-        return None
-
-    # 排除相对位置约束：只排除一对相对位置组合，而不是所有对
-    # 找到第一对有效的、未被排除过的相对位置组合并排除它
-    constraint_added = False
-    excluded_pair = None
+    # 读取上一解中每个chiplet的位置
+    x_prev = {}
+    y_prev = {}
+    valid_count = 0
     
-    for (i, j) in pair_list:
-        # 跳过已经排除过的对，避免重复排除导致矛盾
-        if (i, j) in excluded_pairs:
-            print(f"  [跳过] pair ({i}, {j}) 已经被排除过，避免重复排除")
-            continue
-            
-        z1_val = pulp.value(z1[(i, j)])
-        z2_val = pulp.value(z2[(i, j)])
-        z1L_val = pulp.value(z1L[(i, j)])
-        z1R_val = pulp.value(z1R[(i, j)])
-        z2D_val = pulp.value(z2D[(i, j)])
-        z2U_val = pulp.value(z2U[(i, j)])
+    for k in range(n):
+        x_val = pulp.value(x[k])
+        y_val = pulp.value(y[k])
         
-        print(f"pair ({i}, {j}): z1={z1_val}, z2={z2_val}, z1L={z1L_val}, z1R={z1R_val}, z2D={z2D_val}, z2U={z2U_val}")
-        
-        # 还没解出来 / 上一次求解失败时，直接跳过
-        if z1_val is None or z2_val is None:
-            print(f"  [跳过] pair ({i}, {j}) 的变量值未求解")
+        if x_val is None or y_val is None:
+            print(f"  [警告] chiplet {k} 的位置未求解，跳过")
             continue
-
-        # ---- 排除"水平 + 左/右"的组合 ----
-        if z1_val >= 0.5:
-            if z1L_val is not None and z1L_val >= 0.5:
-                # 上一解：水平相邻 & i 在 j 左边
-                # 禁止：z1 = 1 且 z1L = 1
-                prob += z1[(i, j)] + z1L[(i, j)] <= 1, f"exclude_h_left_{solution_index}_{i}_{j}"
-                print(f"  [添加约束] 排除水平相邻且 i 在 j 左边（只排除这一对）")
-                constraint_added = True
-                excluded_pair = (i, j)
-                break  # 只排除一对，找到后立即退出
-            elif z1R_val is not None and z1R_val >= 0.5:
-                # 上一解：水平相邻 & i 在 j 右边
-                prob += z1[(i, j)] + z1R[(i, j)] <= 1, f"exclude_h_right_{solution_index}_{i}_{j}"
-                print(f"  [添加约束] 排除水平相邻且 i 在 j 右边（只排除这一对）")
-                constraint_added = True
-                excluded_pair = (i, j)
-                break  # 只排除一对，找到后立即退出
-
-        # ---- 排除"垂直 + 上/下"的组合 ----
-        if z2_val >= 0.5:
-            if z2D_val is not None and z2D_val >= 0.5:
-                # 上一解：垂直相邻 & i 在 j 下边
-                prob += z2[(i, j)] + z2D[(i, j)] <= 1, f"exclude_v_down_{solution_index}_{i}_{j}"
-                print(f"  [添加约束] 排除垂直相邻且 i 在 j 下边（只排除这一对）")
-                constraint_added = True
-                excluded_pair = (i, j)
-                break  # 只排除一对，找到后立即退出
-            elif z2U_val is not None and z2U_val >= 0.5:
-                # 上一解：垂直相邻 & i 在 j 上边
-                prob += z2[(i, j)] + z2U[(i, j)] <= 1, f"exclude_v_up_{solution_index}_{i}_{j}"
-                print(f"  [添加约束] 排除垂直相邻且 i 在 j 上边（只排除这一对）")
-                constraint_added = True
-                excluded_pair = (i, j)
-                break  # 只排除一对，找到后立即退出
+        
+        x_prev[k] = float(x_val)
+        y_prev[k] = float(y_val)
+        valid_count += 1
     
-    if constraint_added:
-        print(f"[DEBUG] 已添加一对相对位置排除约束，排除的对: {excluded_pair}")
-        return excluded_pair
-    else:
-        print(f"[DEBUG] 警告：未找到有效的相对位置组合来排除")
-        return None
+    if valid_count < n:
+        print(f"[DEBUG] 警告：只有 {valid_count}/{n} 个chiplet的位置可用，无法添加排除约束")
+        return
+    
+    # 为每个chiplet创建二进制变量，表示该chiplet的位置是否与上一解不同
+    diff_pos = {}
+    for k in range(n):
+        diff_pos[k] = pulp.LpVariable(f"diff_pos_{solution_index}_{k}", cat='Binary')
+    
+    # 小常数，用于判断"不同"（避免浮点数精度问题）
+    epsilon = 0.01
+    M = max(W, H) * 2
+    
+    # 对于每个chiplet k，如果 diff_pos[k] = 0，则位置与上一解相同（在epsilon范围内）
+    for k in range(n):
+        prob += x[k] - x_prev[k] <= epsilon + M * diff_pos[k], f"exclude_x_upper_{solution_index}_{k}"
+        prob += x[k] - x_prev[k] >= -epsilon - M * diff_pos[k], f"exclude_x_lower_{solution_index}_{k}"
+        prob += y[k] - y_prev[k] <= epsilon + M * diff_pos[k], f"exclude_y_upper_{solution_index}_{k}"
+        prob += y[k] - y_prev[k] >= -epsilon - M * diff_pos[k], f"exclude_y_lower_{solution_index}_{k}"
+    
+    # 排除整个解：至少有一个chiplet的位置不同
+    prob += pulp.lpSum([diff_pos[k] for k in range(n)]) >= 1, f"exclude_solution_{solution_index}"
+    
+    print(f"[DEBUG] 已添加排除整个解的约束（排除解 {solution_index}）")
+    print(f"  上一解的位置: {[(x_prev[k], y_prev[k]) for k in range(n)]}")
 
 
 def search_multiple_solutions(
     num_solutions: int = 3,
     min_shared_length: float = 0.5,
     input_json_path: Optional[str] = None,  # 可选：从JSON文件加载输入
+    grid_size: Optional[float] = None,  # 网格大小，如果提供则使用网格化布局
+    fixed_chiplet_idx: Optional[int] = None,  # 固定位置的chiplet索引
 ) -> List[ILPPlacementResult]:
     """
     演示：在同一个 problem 上反复添加排除解约束，搜索多个不同的可行解（子调度）。
@@ -155,22 +109,38 @@ def search_multiple_solutions(
         print("使用随机生成的图")
 
     # 2. 首次建模（不求解）
-    ctx = build_placement_ilp_model(
-        nodes=nodes,
-        edges=edges,
-        W=None,
-        H=None,
-        verbose=False,
-        min_shared_length=min_shared_length,
-        minimize_bbox_area=True,
-        distance_weight=1.0,
-        area_weight=0.1,
-    )
+    if grid_size is not None:
+        # 使用网格化布局
+        ctx = build_placement_ilp_model_grid(
+            nodes=nodes,
+            edges=edges,
+            grid_size=grid_size,
+            W=None,
+            H=None,
+            verbose=False,
+            min_shared_length=min_shared_length,
+            minimize_bbox_area=True,
+            distance_weight=1.0,
+            area_weight=0.1,
+            fixed_chiplet_idx=fixed_chiplet_idx,
+        )
+        print(f"使用网格化布局，grid_size={grid_size}")
+    else:
+        # 使用连续布局
+        ctx = build_placement_ilp_model(
+            nodes=nodes,
+            edges=edges,
+            W=None,
+            H=None,
+            verbose=False,
+            min_shared_length=min_shared_length,
+            minimize_bbox_area=True,
+            distance_weight=1.0,
+            area_weight=0.1,
+        )
+        print("使用连续布局（非网格化）")
 
     results: List[ILPPlacementResult] = []
-    
-    # 跟踪已经排除过的 (i, j) 对，避免重复排除导致矛盾
-    excluded_pairs: set = set()
 
     # 输出目录：placement/thermal-placement/output
     output_dir = Path(__file__).parent.parent / "output"
@@ -219,19 +189,12 @@ def search_multiple_solutions(
         print(f"  解 {i+1} 的布局图已保存到: {img_path}")
 
         # 5. 基于本次解添加"排除该解"的约束，然后继续下一轮搜索
-        #    这里只要求：至少 1 对有连边的 chiplet 改变相邻方式
-        #    避免对同一对重复排除，防止所有方向都被排除导致矛盾
-        excluded_pair = add_exclude_layout_constraint(
+        #    只要下一个解的chiplet集合中有chiplet的位置和上一个解不同即可
+        add_exclude_layout_constraint(
             ctx, 
             require_change_pairs=1, 
-            solution_index=i,
-            excluded_pairs=excluded_pairs
+            solution_index=i
         )
-        if excluded_pair:
-            excluded_pairs.add(excluded_pair)
-            print(f"[DEBUG] 已排除的对集合: {excluded_pairs}")
-        else:
-            print(f"[DEBUG] 警告：无法找到新的相对位置组合来排除，可能所有对都已被排除")
 
     return results
 
@@ -243,14 +206,22 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         json_path = sys.argv[1]
         print(f"使用输入文件: {json_path}")
+        # 使用网格化布局，grid_size=1.0（chiplet位置只能是整数坐标点）
         sols = search_multiple_solutions(
             num_solutions=10, 
             min_shared_length=0.5,
-            input_json_path=json_path
+            input_json_path=json_path,
+            grid_size=1.0,  # 网格大小为1.0，chiplet位置只能是整数坐标点
+            fixed_chiplet_idx=0,  # 固定第一个chiplet的中心位置
         )
     else:
         # 默认使用随机生成的图
         print("使用随机生成的图")
-        sols = search_multiple_solutions(num_solutions=10, min_shared_length=0.5)
+        sols = search_multiple_solutions(
+            num_solutions=10, 
+            min_shared_length=0.5,
+            grid_size=1.0,  # 网格大小为1.0
+            fixed_chiplet_idx=0,
+        )
     
     print(f"共找到 {len(sols)} 个不同的 ILP 可行解。")
