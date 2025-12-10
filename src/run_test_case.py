@@ -44,8 +44,8 @@ def main():
     # 运行求解搜索
     try:
         sols = search_multiple_solutions(
-            num_solutions=10, 
-            min_shared_length=0.5,
+            num_solutions=100, 
+            min_shared_length=0.1,
             input_json_path=str(json_file.absolute())
         )
         

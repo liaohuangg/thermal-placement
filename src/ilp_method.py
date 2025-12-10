@@ -184,7 +184,7 @@ def build_placement_ilp_model(
             H = max(estimated_side, max_h * 3)
     
     # 大 M 常数：一个足够大的数（通常取 2 倍芯片最大尺寸）
-    M = max(W, H) * 3
+    M = max(W, H) * 5
     
     if verbose:
         print(f"芯片边界框尺寸: ChipW = {W:.2f}, ChipH = {H:.2f}")
