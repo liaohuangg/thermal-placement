@@ -291,6 +291,7 @@ def draw_chiplet_diagram(
     save_path: Optional[str] = None,
     layout: Optional[Dict[str, Tuple[float, float]]] = None,
     edge_types: Optional[Dict[Tuple[str, str], str]] = None,
+    fixed_chiplet_names: Optional[set] = None,  # 固定的chiplet名称集合，这些chiplet将用粉红色绘制
 ):
     """
     画出 chiplet 方框图。
@@ -313,6 +314,8 @@ def draw_chiplet_diagram(
         如果 edges 是新格式或提供了此参数，将根据类型使用不同颜色：
         - 硅桥互联边：绿色
         - 普通链接边：灰色
+    fixed_chiplet_names:
+        固定的chiplet名称集合。如果提供，这些chiplet将用粉红色绘制，其他chiplet用淡蓝色。
     """
 
     if not nodes:
@@ -345,12 +348,17 @@ def draw_chiplet_diagram(
         w = float(node.dimensions.get("x", 0.0))
         h = float(node.dimensions.get("y", 0.0))
 
-        # 淡蓝色方框
+        # 判断是否为固定chiplet，固定chiplet使用粉红色，其他使用淡蓝色
+        if fixed_chiplet_names is not None and node.name in fixed_chiplet_names:
+            facecolor = "pink"  # 粉红色
+        else:
+            facecolor = "#cce6ff"  # 淡蓝色
+        
         rect = Rectangle(
             (origin_x, origin_y),
             w,
             h,
-            facecolor="#cce6ff",
+            facecolor=facecolor,
             edgecolor="black",
             linewidth=1.0,
         )
