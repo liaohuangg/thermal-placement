@@ -1,31 +1,30 @@
 {
   "chiplets": [
-    {"name": "A", "width": 20.0, "height": 20.0},
-    {"name": "B", "width": 20.0, "height": 20.0},
-    {"name": "C", "width": 20.0, "height": 20.0},
-    {"name": "D", "width": 20.0, "height": 20.0},
-    {"name": "E", "width": 20.0, "height": 20.0},
-    {"name": "F", "width": 20.0, "height": 20.0},
-    {"name": "G", "width": 20.0, "height": 20.0},
-    {"name": "H", "width": 20.0, "height": 20.0},
-    {"name": "I", "width": 20.0, "height": 20.0},
-    {"name": "J", "width": 20.0, "height": 20.0},
-    {"name": "K", "width": 20.0, "height": 20.0},
-    {"name": "L", "width": 20.0, "height": 20.0}
+    {"name": "A", "width": 50.0, "height": 30.0},
+    {"name": "B", "width": 30.0, "height": 50.0},
+    {"name": "C", "width": 30.0, "height": 50.0},
+    {"name": "D", "width": 30.0, "height": 50.0},
+    {"name": "E", "width": 10.0, "height": 15},
+    {"name": "F", "width": 10.0, "height": 15},
+    {"name": "G", "width": 10.0, "height": 15},
+    {"name": "H", "width": 10.0, "height": 15},
+    {"name": "I", "width": 10.0, "height": 15},
+    {"name": "J", "width": 10.0, "height": 15},
+    {"name": "K", "width": 10.0, "height": 15},
+    {"name": "L", "width": 10.0, "height": 15}
   ],
   "connections": [
     ["A", "B"],
     ["A", "E"],
-    ["B", "F", {"weight": 5}],
-    ["B", "C", {"weight": 3}],
-    ["C", "D", {"weight": 4}],
-    ["D", "H"],
-    ["H", "G"],
-    ["F", "G"],
-    ["F", "E"],
-    ["E", "I", {"weight": 6}],
-    ["I", "J"],
-    ["J", "K"],
-    ["H", "L"]
+    ["A", "F"],
+    ["A", "C"],
+    ["B", "D"],
+    ["B", "K"],
+    ["B", "L"],
+    ["C", "D"],
+    ["C", "G"],
+    ["C", "H"],
+    ["D", "I"],
+    ["D", "J"]
   ]
 }
