@@ -40,7 +40,7 @@ def main():
     # 运行求解搜索
     try:
         sols = search_multiple_solutions(
-            num_solutions=100, 
+            num_solutions=3, 
             min_shared_length=0.1,
             input_json_path=str(json_file.absolute()),
             grid_size=0.5,  # 使用网格化布局，grid_size=1.0（chiplet位置只能是整数坐标点）

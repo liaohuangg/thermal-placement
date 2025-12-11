@@ -297,7 +297,7 @@ def build_placement_ilp_model_grid(
     for i, node in enumerate(nodes):
         w_orig[i] = float(node.dimensions.get("x", 0.0))
         h_orig[i] = float(node.dimensions.get("y", 0.0))
-    
+    #print("w_orig, h_orig",w_orig, h_orig)
     # 找到所有有边连接的模块对
     connected_pairs = []
     for src_name, dst_name in edges:
@@ -309,7 +309,7 @@ def build_placement_ilp_model_grid(
                     i, j = j, i
                 connected_pairs.append((i, j))
     connected_pairs = list(set(connected_pairs))
-    
+    #print("connected_pairs",connected_pairs)
     # 估算芯片边界框尺寸
     if W is None or H is None:
         max_w = max(w_orig.values())
@@ -320,11 +320,11 @@ def build_placement_ilp_model_grid(
             W = max(estimated_side, max_w * 3)
         if H is None:
             H = max(estimated_side, max_h * 3)
-    
+    #print("W, H",W, H)
     # 计算grid数量
     grid_w = int(math.ceil(W / grid_size))
     grid_h = int(math.ceil(H / grid_size))
-    
+    # print("grid_w, grid_h",grid_w, grid_h)
     if verbose:
         print(f"网格化布局: grid_size={grid_size}, grid_w={grid_w}, grid_h={grid_h}")
         print(f"问题规模: {n} 个模块, {len(connected_pairs)} 对有连接的模块对")
@@ -411,6 +411,20 @@ def build_placement_ilp_model_grid(
         if verbose:
             print(f"固定chiplet {fixed_chiplet_idx} 的中心在方框中心 ({W/2:.2f}, {H/2:.2f})")
     
+    # 约束Chiplet宽高为grid_size的整数倍（对齐网格）
+    for k in range(n):
+        # 1. 计算固定的网格数（向上取整，不是变量）
+        w_grid_k = int(math.ceil(w_orig[k] / grid_size))
+        h_grid_k = int(math.ceil(h_orig[k] / grid_size))
+        
+        # 2. 约束芯片宽度=网格数×grid_size（对齐网格）
+        prob += w[k] == w_grid_k * grid_size, f"w_align_grid_{k}"
+        prob += h[k] == h_grid_k * grid_size, f"h_align_grid_{k}"
+        
+        # 3. 额外约束：对齐后的尺寸不超过全局范围（可选，确保合理性）
+        prob += w[k] <= W, f"w_max_{k}"
+        prob += h[k] <= H, f"h_max_{k}"
+    
     # 4.4 相邻约束：对于每对有连接的模块对 (i, j)
     for i, j in connected_pairs:
         # 规则1: 必须相邻，且只能选一种方式
@@ -488,7 +502,7 @@ def build_placement_ilp_model_grid(
             p_right[(i, j)] = pulp.LpVariable(f"p_right_{i}_{j}", cat='Binary')
             p_down[(i, j)] = pulp.LpVariable(f"p_down_{i}_{j}", cat='Binary')
             p_up[(i, j)] = pulp.LpVariable(f"p_up_{i}_{j}", cat='Binary')
-    eps = 1e-3  # 浮点精度容错
+
     # 对于每对模块 (i, j)
     for i, j in all_pairs:
         # 修复漏洞1：恢复互斥约束（必须且仅需满足一个非重叠条件）
@@ -497,43 +511,29 @@ def build_placement_ilp_model_grid(
         
         # 情况1: i 在 j 的左边（x_i + w_i <= x_j）
         # 正向约束：p_left=1 → x_i + w_i <= x_j
-        prob += x[i] + w[i] - x[j] <= M * (1 - p_left[(i, j)]) + eps, \
+        prob += x[i] + w[i] - x[j] <= M * (1 - p_left[(i, j)]) , \
             f"non_overlap_left_{i}_{j}"
         # 修复漏洞2：正确的反向约束（x_i + w_i <= x_j → p_left=1）
-        prob += x[j] - (x[i] + w[i]) <= M * p_left[(i, j)] + eps, \
+        prob += x[j] - (x[i] + w[i]) <= M * p_left[(i, j)] , \
             f"non_overlap_left_rev_{i}_{j}"
         
         # 情况2: i 在 j 的右边（x_j + w_j <= x_i）
-        prob += x[j] + w[j] - x[i] <= M * (1 - p_right[(i, j)]) + eps, \
+        prob += x[j] + w[j] - x[i] <= M * (1 - p_right[(i, j)]) , \
             f"non_overlap_right_{i}_{j}"
-        prob += x[i] - (x[j] + w[j]) <= M * p_right[(i, j)] + eps, \
+        prob += x[i] - (x[j] + w[j]) <= M * p_right[(i, j)] , \
             f"non_overlap_right_rev_{i}_{j}"
         
         # 情况3: i 在 j 的下边（y_i + h_i <= y_j）
-        prob += y[i] + h[i] - y[j] <= M * (1 - p_down[(i, j)]) + eps, \
+        prob += y[i] + h[i] - y[j] <= M * (1 - p_down[(i, j)]) , \
             f"non_overlap_down_{i}_{j}"
-        prob += y[j] - (y[i] + h[i]) <= M * p_down[(i, j)] + eps, \
+        prob += y[j] - (y[i] + h[i]) <= M * p_down[(i, j)] , \
             f"non_overlap_down_rev_{i}_{j}"
         
         # 情况4: i 在 j 的上边（y_j + h_j <= y_i）
-        prob += y[j] + h[j] - y[i] <= M * (1 - p_up[(i, j)]) + eps, \
+        prob += y[j] + h[j] - y[i] <= M * (1 - p_up[(i, j)]) , \
             f"non_overlap_up_{i}_{j}"
-        prob += y[i] - (y[j] + h[j]) <= M * p_up[(i, j)] + eps, \
+        prob += y[i] - (y[j] + h[j]) <= M * p_up[(i, j)] , \
             f"non_overlap_up_rev_{i}_{j}"
-
-    # 修复漏洞3：约束Chiplet宽高为grid_size的整数倍（对齐网格）
-    for k in range(n):
-        # 计算Chiplet宽高对应的网格数（向上取整）
-        w_grid_k = pulp.LpVariable(f"w_grid_{k}", lowBound=1, upBound=int(W/grid_size), cat='Integer')
-        h_grid_k = pulp.LpVariable(f"h_grid_{k}", lowBound=1, upBound=int(H/grid_size), cat='Integer')
-        
-        # 宽高 = 网格数 * grid_size
-        prob += w[k] == w_grid_k * grid_size, f"w_align_grid_{k}"
-        prob += h[k] == h_grid_k * grid_size, f"h_align_grid_{k}"
-        
-        # 强制宽高向上取整（匹配原始尺寸）
-        prob += w_grid_k >= math.ceil(w_orig[k] / grid_size) - eps, f"w_grid_lb_{k}"
-        prob += h_grid_k >= math.ceil(h_orig[k] / grid_size) - eps, f"h_grid_lb_{k}"
 
     if verbose:
         print(f"非重叠约束: {len(all_pairs)} 对模块对（所有模块对），M={M}（基板尺寸最大值）")
@@ -570,11 +570,16 @@ def build_placement_ilp_model_grid(
         wirelength += dx_abs + dy_abs
     
     # 5.2 面积代理
-    t = pulp.LpVariable("bbox_area_proxy_t", lowBound=0)
-    prob += t <= (bbox_w + bbox_h) / 2.0, "area_proxy_am_gm1"
-    K = max(W, H)
-    prob += bbox_w <= K * t, "area_proxy_am_gm2"
-    prob += bbox_h <= K * t, "area_proxy_am_gm3"
+    t = pulp.LpVariable("bbox_area_proxy_t", lowBound=0, upBound=W+H, cat=pulp.LpContinuous)
+    # 4. 核心约束：让 t 合理代理面积（无冲突、紧凑）
+    ## 约束1：t 至少 ≥ 宽/高（保证 t 不小于单个维度）
+    prob += t >= bbox_w, "t_ge_width"
+    prob += t >= bbox_h, "t_ge_height"
+    
+    ## 约束2：t 至少 ≥ 宽×高的“线性近似”（关键：用均值放大系数逼近面积）
+    # 系数 alpha 取 0.5~1（平衡近似精度和约束紧凑性）
+    alpha = 0.8
+    prob += t >= alpha * (bbox_w + bbox_h), "t_ge_scaled_mean"
     
     # 5.3 目标函数
     if minimize_bbox_area:
@@ -608,3 +613,358 @@ def build_placement_ilp_model_grid(
         cx=cx,
         cy=cy,
     )
+
+
+def main():
+    """
+    主函数：使用网格化ILP模型进行单次求解并可视化结果。
+    """
+    from pathlib import Path
+    import json
+    
+    # 设置参数
+    grid_size = 1.0
+    time_limit = 300
+    min_shared_length = 0.1
+    fixed_chiplet_idx = 0  # 固定第一个chiplet在中心
+    
+    # 输出目录
+    output_dir = Path(__file__).parent.parent / "output"
+    output_dir.mkdir(exist_ok=True)
+    
+    # JSON文件路径
+    json_path = Path(__file__).parent.parent / "baseline" / "ICCAD23" / "test_input" / "2core.json"
+    
+    print("=" * 80)
+    print("ILP单次求解测试")
+    print("=" * 80)
+    
+    # 从JSON文件加载测试数据
+    print(f"\n从JSON文件加载测试数据: {json_path}")
+    if not json_path.exists():
+        raise FileNotFoundError(f"JSON文件不存在: {json_path}")
+    
+    with json_path.open("r", encoding="utf-8") as f:
+        data = json.load(f)
+    
+    # 处理JSON数据：格式 {"chiplets": [...], "connections": [...]}
+    nodes = []
+    edges = []
+    
+    if "chiplets" in data and isinstance(data["chiplets"], list):
+        # 构建ChipletNode对象
+        for chiplet_info in data["chiplets"]:
+            name = chiplet_info.get("name", "")
+            width = chiplet_info.get("width", 0.0)
+            height = chiplet_info.get("height", 0.0)
+            
+            nodes.append(
+                ChipletNode(
+                    name=name,
+                    dimensions={"x": width, "y": height},
+                    phys=[],  # 测试输入中没有phys信息
+                    power=chiplet_info.get("power", 0.0),
+                )
+            )
+        
+        # 提取连接关系
+        if "connections" in data and isinstance(data["connections"], list):
+            for conn in data["connections"]:
+                if isinstance(conn, list) and len(conn) >= 2:
+                    src, dst = conn[0], conn[1]
+                    edges.append((src, dst))
+    
+    if len(nodes) == 0:
+        raise ValueError("未能从JSON文件中加载任何chiplet节点")
+    
+    print(f"节点数量: {len(nodes)}")
+    print(f"边数量: {len(edges)}")
+    print(f"节点列表: {[n.name for n in nodes]}")
+    print(f"边列表: {edges}")
+    
+    # 构建ILP模型
+    print("\n构建ILP模型...")
+    ctx = build_placement_ilp_model_grid(
+        nodes=nodes,
+        edges=edges,
+        grid_size=grid_size,
+        W=None,  # 自动估算
+        H=None,  # 自动估算
+        verbose=True,
+        min_shared_length=min_shared_length,
+        minimize_bbox_area=True,
+        distance_weight=1.0,
+        area_weight=0.1,
+        fixed_chiplet_idx=fixed_chiplet_idx,
+    )
+    
+    # 导出LP文件
+    lp_file = output_dir / "ilp_model.lp"
+    ctx.prob.writeLP(str(lp_file))
+    print(f"LP模型文件已导出至: {lp_file}")
+    
+    # 求解
+    print("\n开始求解...")
+    result = solve_placement_ilp_from_model(
+        ctx,
+        time_limit=time_limit,
+        verbose=True,
+    )
+    
+    # 输出结果
+    print("\n" + "=" * 80)
+    print("求解结果")
+    print("=" * 80)
+    print(f"状态: {result.status}")
+    print(f"求解时间: {result.solve_time:.2f} 秒")
+    print(f"目标函数值: {result.objective_value:.2f}")
+    print(f"边界框尺寸: {result.bounding_box[0]:.2f} x {result.bounding_box[1]:.2f}")
+    
+    print("\n布局结果:")
+    for name, (x, y) in result.layout.items():
+        rotated = result.rotations.get(name, False)
+        rot_str = " (已旋转)" if rotated else ""
+        print(f"  {name}: ({x:.2f}, {y:.2f}){rot_str}")
+    
+    # 打印所有变量的值
+    if result.status == "Optimal":
+        print("\n" + "=" * 80)
+        print("变量值详情")
+        print("=" * 80)
+        
+        import pulp
+        
+        # 1. 坐标变量 (x, y)
+        print("\n【坐标变量】")
+        for k in range(len(nodes)):
+            x_val = pulp.value(ctx.x[k]) if ctx.x[k] is not None else None
+            y_val = pulp.value(ctx.y[k]) if ctx.y[k] is not None else None
+            print(f"  x[{k}] ({nodes[k].name}): {x_val}")
+            print(f"  y[{k}] ({nodes[k].name}): {y_val}")
+        
+        # 2. 网格坐标变量 (x_grid, y_grid)
+        print("\n【网格坐标变量】")
+        for k in range(len(nodes)):
+            x_grid_var = ctx.prob.variablesDict().get(f"x_grid_{k}")
+            y_grid_var = ctx.prob.variablesDict().get(f"y_grid_{k}")
+            x_grid_val = pulp.value(x_grid_var) if x_grid_var is not None else None
+            y_grid_val = pulp.value(y_grid_var) if y_grid_var is not None else None
+            print(f"  x_grid[{k}] ({nodes[k].name}): {x_grid_val}")
+            print(f"  y_grid[{k}] ({nodes[k].name}): {y_grid_val}")
+        
+        # 3. 旋转变量 (r)
+        print("\n【旋转变量】")
+        for k in range(len(nodes)):
+            r_val = pulp.value(ctx.r[k]) if ctx.r[k] is not None else None
+            rotated_str = "是" if (r_val is not None and r_val > 0.5) else "否"
+            print(f"  r[{k}] ({nodes[k].name}): {r_val} (旋转: {rotated_str})")
+        
+        # 4. 宽度和高度变量 (w, h) - 需要从prob中获取
+        print("\n【尺寸变量】")
+        for k in range(len(nodes)):
+            w_var = None
+            h_var = None
+            for var_name, var in ctx.prob.variablesDict().items():
+                if var_name == f"w_{k}":
+                    w_var = var
+                elif var_name == f"h_{k}":
+                    h_var = var
+            w_val = pulp.value(w_var) if w_var is not None else None
+            h_val = pulp.value(h_var) if h_var is not None else None
+            print(f"  w[{k}] ({nodes[k].name}): {w_val}")
+            print(f"  h[{k}] ({nodes[k].name}): {h_val}")
+        
+        # 5. 中心坐标变量 (cx, cy)
+        print("\n【中心坐标变量】")
+        for k in range(len(nodes)):
+            cx_val = pulp.value(ctx.cx[k]) if ctx.cx[k] is not None else None
+            cy_val = pulp.value(ctx.cy[k]) if ctx.cy[k] is not None else None
+            print(f"  cx[{k}] ({nodes[k].name}): {cx_val}")
+            print(f"  cy[{k}] ({nodes[k].name}): {cy_val}")
+        
+        # 6. 相邻方式变量 (z1, z2, z1L, z1R, z2D, z2U)
+        if len(ctx.connected_pairs) > 0:
+            print("\n【相邻方式变量】")
+            for i, j in ctx.connected_pairs:
+                name_i = nodes[i].name
+                name_j = nodes[j].name
+                z1_val = pulp.value(ctx.z1[(i, j)]) if (i, j) in ctx.z1 else None
+                z2_val = pulp.value(ctx.z2[(i, j)]) if (i, j) in ctx.z2 else None
+                z1L_val = pulp.value(ctx.z1L[(i, j)]) if (i, j) in ctx.z1L else None
+                z1R_val = pulp.value(ctx.z1R[(i, j)]) if (i, j) in ctx.z1R else None
+                z2D_val = pulp.value(ctx.z2D[(i, j)]) if (i, j) in ctx.z2D else None
+                z2U_val = pulp.value(ctx.z2U[(i, j)]) if (i, j) in ctx.z2U else None
+                print(f"  模块对 ({name_i}, {name_j}):")
+                print(f"    z1[{i},{j}] (水平相邻): {z1_val}")
+                print(f"    z2[{i},{j}] (垂直相邻): {z2_val}")
+                if z1_val is not None and z1_val > 0.5:
+                    print(f"      z1L[{i},{j}] (i在左): {z1L_val}")
+                    print(f"      z1R[{i},{j}] (i在右): {z1R_val}")
+                if z2_val is not None and z2_val > 0.5:
+                    print(f"      z2D[{i},{j}] (i在下): {z2D_val}")
+                    print(f"      z2U[{i},{j}] (i在上): {z2U_val}")
+        
+        # 7. 非重叠约束变量 (p_left, p_right, p_down, p_up)
+        print("\n【非重叠约束变量】")
+        all_pairs = []
+        for i in range(len(nodes)):
+            for j in range(i + 1, len(nodes)):
+                all_pairs.append((i, j))
+        
+        for i, j in all_pairs:
+            name_i = nodes[i].name
+            name_j = nodes[j].name
+            # 从prob中查找这些变量
+            p_left_var = ctx.prob.variablesDict().get(f"p_left_{i}_{j}")
+            p_right_var = ctx.prob.variablesDict().get(f"p_right_{i}_{j}")
+            p_down_var = ctx.prob.variablesDict().get(f"p_down_{i}_{j}")
+            p_up_var = ctx.prob.variablesDict().get(f"p_up_{i}_{j}")
+            
+            p_left_val = pulp.value(p_left_var) if p_left_var is not None else None
+            p_right_val = pulp.value(p_right_var) if p_right_var is not None else None
+            p_down_val = pulp.value(p_down_var) if p_down_var is not None else None
+            p_up_val = pulp.value(p_up_var) if p_up_var is not None else None
+            
+            print(f"  模块对 ({name_i}, {name_j}):")
+            print(f"    p_left[{i},{j}]: {p_left_val}")
+            print(f"    p_right[{i},{j}]: {p_right_val}")
+            print(f"    p_down[{i},{j}]: {p_down_val}")
+            print(f"    p_up[{i},{j}]: {p_up_val}")
+        
+        # 8. 边界框变量
+        print("\n【边界框变量】")
+        bbox_w_val = pulp.value(ctx.bbox_w) if ctx.bbox_w is not None else None
+        bbox_h_val = pulp.value(ctx.bbox_h) if ctx.bbox_h is not None else None
+        print(f"  bbox_w: {bbox_w_val}")
+        print(f"  bbox_h: {bbox_h_val}")
+        
+        # 9. 其他辅助变量（shared_x, shared_y, dx_abs, dy_abs, bbox_min/max等）
+        print("\n【其他辅助变量】")
+        other_vars = []
+        for var_name, var in ctx.prob.variablesDict().items():
+            if var_name.startswith("shared_") or var_name.startswith("dx_abs_") or \
+               var_name.startswith("dy_abs_") or var_name.startswith("bbox_") or \
+               var_name.startswith("bbox_area_proxy"):
+                # 排除排除约束相关的变量（这些会在后面单独打印）
+                if not (var_name.startswith("dx_abs_pair_") or var_name.startswith("dy_abs_pair_")):
+                    val = pulp.value(var) if var is not None else None
+                    if val is not None:
+                        other_vars.append((var_name, val))
+        
+        if other_vars:
+            for var_name, val in sorted(other_vars):
+                print(f"  {var_name}: {val}")
+        else:
+            print("  (无)")
+        
+        # 10. 排除解约束相关变量和约束（仅在第二次及以后的求解中打印）
+        # 检查是否存在排除约束相关的变量
+        exclude_vars = []
+        for var_name, var in ctx.prob.variablesDict().items():
+            if var_name.startswith("dx_abs_pair_") or var_name.startswith("dy_abs_pair_") or \
+               var_name.startswith("dist_diff_pair_") or var_name.startswith("dist_diff_abs_pair_") or \
+               var_name.startswith("diff_dist_pair_"):
+                val = pulp.value(var) if var is not None else None
+                if val is not None:
+                    exclude_vars.append((var_name, val))
+        
+        if exclude_vars:
+            print("\n" + "=" * 80)
+            print("排除解约束相关变量和约束")
+            print("=" * 80)
+            
+            # 10.1 打印排除约束相关的变量
+            print("\n【排除约束变量】")
+            
+            # 按变量类型分组
+            dx_abs_pair_vars = []
+            dy_abs_pair_vars = []
+            dist_diff_pair_vars = []
+            dist_diff_abs_pair_vars = []
+            diff_dist_pair_vars = []
+            
+            for var_name, val in exclude_vars:
+                if var_name.startswith("dx_abs_pair_"):
+                    dx_abs_pair_vars.append((var_name, val))
+                elif var_name.startswith("dy_abs_pair_"):
+                    dy_abs_pair_vars.append((var_name, val))
+                elif var_name.startswith("dist_diff_pair_") and not var_name.startswith("dist_diff_abs_pair_"):
+                    dist_diff_pair_vars.append((var_name, val))
+                elif var_name.startswith("dist_diff_abs_pair_"):
+                    dist_diff_abs_pair_vars.append((var_name, val))
+                elif var_name.startswith("diff_dist_pair_"):
+                    diff_dist_pair_vars.append((var_name, val))
+            
+            if dx_abs_pair_vars:
+                print("\n  dx_abs_pair (chiplet对的x方向距离绝对值):")
+                for var_name, val in sorted(dx_abs_pair_vars):
+                    print(f"    {var_name}: {val}")
+            
+            if dy_abs_pair_vars:
+                print("\n  dy_abs_pair (chiplet对的y方向距离绝对值):")
+                for var_name, val in sorted(dy_abs_pair_vars):
+                    print(f"    {var_name}: {val}")
+            
+            if dist_diff_pair_vars:
+                print("\n  dist_diff_pair (chiplet对的距离差):")
+                for var_name, val in sorted(dist_diff_pair_vars):
+                    print(f"    {var_name}: {val}")
+            
+            if dist_diff_abs_pair_vars:
+                print("\n  dist_diff_abs_pair (chiplet对的距离差绝对值):")
+                for var_name, val in sorted(dist_diff_abs_pair_vars):
+                    print(f"    {var_name}: {val}")
+            
+            if diff_dist_pair_vars:
+                print("\n  diff_dist_pair (chiplet对的距离是否不同，二进制变量):")
+                for var_name, val in sorted(diff_dist_pair_vars):
+                    print(f"    {var_name}: {val}")
+            
+            # 10.2 打印排除约束相关的约束
+            print("\n【排除约束】")
+            exclude_constraints = []
+            for constraint_name, constraint in ctx.prob.constraints.items():
+                if constraint_name.startswith("dx_abs_pair_") or constraint_name.startswith("dy_abs_pair_") or \
+                   constraint_name.startswith("dist_diff_pair_") or constraint_name.startswith("dist_diff_abs_pair_") or \
+                   constraint_name.startswith("exclude_solution_dist_pair_"):
+                    exclude_constraints.append(constraint_name)
+            
+            if exclude_constraints:
+                print(f"  共找到 {len(exclude_constraints)} 个排除约束:")
+                for constraint_name in sorted(exclude_constraints):
+                    constraint = ctx.prob.constraints[constraint_name]
+                    # 打印约束的简化形式
+                    print(f"    {constraint_name}: {constraint}")
+            else:
+                print("  (未找到排除约束)")
+        else:
+            print("\n【排除解约束】")
+            print("  (第一次求解，无排除约束)")
+    
+    # 可视化结果
+    if result.status == "Optimal":
+        print("\n生成可视化图表...")
+        try:
+            save_path = output_dir / "ilp_single_solution.png"
+            
+            draw_chiplet_diagram(
+                nodes=nodes,
+                edges=edges,
+                layout=result.layout,
+                save_path=str(save_path),
+            )
+            print(f"图表已保存至: {save_path}")
+        except Exception as e:
+            print(f"可视化失败: {e}")
+            import traceback
+            traceback.print_exc()
+    else:
+        print("\n求解未达到最优解，跳过可视化")
+    
+    print("\n" + "=" * 80)
+    print("完成")
+    print("=" * 80)
+
+
+if __name__ == "__main__":
+    main()
