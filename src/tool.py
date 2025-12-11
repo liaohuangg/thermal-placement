@@ -17,6 +17,11 @@ from typing import Dict, List, Tuple, Optional
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch, Rectangle
 
+try:
+    import pulp
+except ImportError:
+    pulp = None
+
 from input_process import build_chiplet_table, load_chiplets_json
 
 
@@ -520,4 +525,42 @@ if __name__ == "__main__":
     for src, dst, edge_type in normal_edges:
         print(f"  {src} <-> {dst} (类型: {edge_type})")
 
+
+# ---------------------------------------------------------------------------
+# 约束打印功能（用于调试ILP约束）
+# ---------------------------------------------------------------------------
+
+if pulp is not None:
+    # 约束方向映射表
+    SENSE_MAP = {
+        pulp.LpConstraintLE: "<=",
+        pulp.LpConstraintGE: ">=",
+        pulp.LpConstraintEQ: "=",
+    }
+
+    def print_constraint_formal(constraint: pulp.LpConstraint) -> None:
+        """
+        打印约束的形式化数学表达。
+        
+        参数:
+            constraint: Pulp约束对象
+        """
+        # 处理左侧表达式：移除冗余的 *1.0，美化输出
+        lhs = str(constraint.expr).replace("*1.0", "").replace(" + ", " + ").strip()
+        
+        # 处理右侧常数：Pulp内部存储为 expr + constant <= 0，所以需要取负号
+        rhs = round(-constraint.constant, 4)
+        
+        # 获取约束方向字符串
+        sense_str = SENSE_MAP.get(constraint.sense, "?")
+        
+        # 构建形式化表达式
+        formal_expr = f"[{constraint.name}] {lhs} {sense_str} {rhs}"
+        
+        # 打印约束（可以修改为输出到日志文件）
+        # print(f"[ADD CONSTRAINT] {formal_expr}")
+else:
+    # 如果pulp未安装，提供占位函数
+    def print_constraint_formal(*args, **kwargs):
+        raise ImportError("pulp库未安装，无法使用约束打印功能")
 

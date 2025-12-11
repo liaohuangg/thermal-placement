@@ -22,7 +22,15 @@ def load_chiplets_json(
     if json_path is None:
         # 从 src 目录的相对路径: ../../benchmark/dummy-chiplet-input/chiplet_input/chiplets.json
         current_file = Path(__file__)
-        json_path = "Z:\\work\\chaoyue\\dummy-chiplet-input\\chiplet_input\\chiplets.json"
+        src_dir = current_file.parent
+        project_root = src_dir.parent
+        json_path = project_root / "benchmark" / "dummy-chiplet-input" / "chiplet_input" / "chiplets.json"
+        # 如果默认路径不存在，抛出错误提示用户提供路径
+        if not json_path.exists():
+            raise FileNotFoundError(
+                f"默认的 chiplets.json 文件不存在: {json_path}\n"
+                f"请使用 input_json_path 参数指定正确的 JSON 文件路径。"
+            )
     
     path = Path(json_path)
     with path.open("r", encoding="utf-8") as f:
