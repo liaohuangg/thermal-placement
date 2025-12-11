@@ -869,24 +869,7 @@ def build_placement_ilp_model_grid(
         # 规则3: 如果垂直相邻，要么 i 在下，要么 i 在上
         prob += z2D[(i, j)] + z2U[(i, j)] == z2[(i, j)], f"vertical_direction_{i}_{j}"
         
-        # 规则4: 距离约束 - 有链接关系的chiplet之间距离不能超过一个grid
-        # 简化：直接使用grid坐标约束距离
-        # 如果水平相邻：|y_grid_i - y_grid_j| <= 1（在垂直方向上最多相差1个grid）
-        # 如果垂直相邻：|x_grid_i - x_grid_j| <= 1（在水平方向上最多相差1个grid）
-        
-        # 水平相邻时，垂直方向grid距离 <= 1
-        diff_y_grid = pulp.LpVariable(f"diff_y_grid_{i}_{j}", lowBound=0, upBound=grid_h, cat='Integer')
-        prob += diff_y_grid >= y_grid[i] - y_grid[j], f"diff_y_grid_abs1_{i}_{j}"
-        prob += diff_y_grid >= y_grid[j] - y_grid[i], f"diff_y_grid_abs2_{i}_{j}"
-        prob += diff_y_grid <= 1 + M * (1 - z1[(i, j)]), f"diff_y_grid_limit_{i}_{j}"
-        
-        # 垂直相邻时，水平方向grid距离 <= 1
-        diff_x_grid = pulp.LpVariable(f"diff_x_grid_{i}_{j}", lowBound=0, upBound=grid_w, cat='Integer')
-        prob += diff_x_grid >= x_grid[i] - x_grid[j], f"diff_x_grid_abs1_{i}_{j}"
-        prob += diff_x_grid >= x_grid[j] - x_grid[i], f"diff_x_grid_abs2_{i}_{j}"
-        prob += diff_x_grid <= 1 + M * (1 - z2[(i, j)]), f"diff_x_grid_limit_{i}_{j}"
-        
-        # 规则5: 水平相邻的具体约束
+        # 规则4: 水平相邻的具体约束
         # 约束1：相邻方向的边界距离 ≤ grid_size
         # 如果 i 在左（z1L[i,j] = 1）：x_j - (x_i + w_i) <= grid_size（距离不超过1个grid）
         prob += x[j] - (x[i] + w[i]) <= grid_size + M * (1 - z1L[(i, j)]), f"horizontal_left_dist_{i}_{j}"
@@ -909,7 +892,7 @@ def build_placement_ilp_model_grid(
         prob += shared_y >= min_shared_length - M * (1 - z1[(i, j)]), f"shared_y_min_{i}_{j}"
         prob += shared_y <= M * z1[(i, j)], f"shared_y_zero_{i}_{j}"
         
-        # 规则6: 垂直相邻的具体约束
+        # 规则5: 垂直相邻的具体约束
         # 约束1：相邻方向的边界距离 ≤ grid_size
         # 如果 i 在下（z2D[i,j] = 1）：y_j - (y_i + h_i) <= grid_size（距离不超过1个grid）
         prob += y[j] - (y[i] + h[i]) <= grid_size + M * (1 - z2D[(i, j)]), f"vertical_down_dist_{i}_{j}"
