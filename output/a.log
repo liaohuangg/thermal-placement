@@ -1,0 +1,82 @@
+使用网格化布局，grid_size=0.5
+
+解 1:
+
+Chiplet坐标（左下角坐标）：
+  A  : (   22.00,    22.00)
+  B  : (   25.00,    38.00)
+  C  : (   35.00,    38.00)
+  D  : (   11.00,    40.00)
+  E  : (   43.00,    34.00)
+
+Chiplet对之间的距离：
+  (A, B):    18.00
+  (A, C):    33.00
+  (A, D):    30.00
+  (A, E):    21.00
+  (B, C):    15.00
+  (B, D):    12.00
+  (B, E):    27.00
+  (C, D):    27.00
+  (C, E):    12.00
+  (D, E):    39.00
+
+[DEBUG 绘图] nodes数量: 5, layout中的chiplet数量: 5
+[DEBUG 绘图] 绘制 A: 位置=(22.00, 22.00)
+[DEBUG 绘图] 绘制 B: 位置=(25.00, 38.00)
+[DEBUG 绘图] 绘制 C: 位置=(35.00, 38.00)
+[DEBUG 绘图] 绘制 D: 位置=(11.00, 40.00)
+[DEBUG 绘图] 绘制 E: 位置=(43.00, 34.00)
+[DEBUG 绘图] 实际绘制了 5 个chiplet（共 5 个）
+Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
+
+解 2:
+
+Chiplet坐标（左下角坐标）：
+  A  : (   22.00,    22.00)
+  B  : (   25.00,    38.00)
+  C  : (    5.00,    38.00)
+  D  : (   35.00,    40.00)
+  E  : (   13.00,    34.00)
+
+Chiplet对之间的距离：
+  (A, B):    18.00
+  (A, C):    33.00
+  (A, D):    30.00
+  (A, E):    21.00
+  (B, C):    15.00
+  (B, D):    12.00
+  (B, E):    27.00
+  (C, D):    27.00
+  (C, E):    12.00
+  (D, E):    39.00
+
+与上一解的变化：
+  位置变化的chiplet: C, D, E
+  距离变化的chiplet对: (A, D), (D, E)
+
+[DEBUG 绘图] nodes数量: 5, layout中的chiplet数量: 5
+[DEBUG 绘图] 绘制 A: 位置=(22.00, 22.00)
+[DEBUG 绘图] 绘制 B: 位置=(25.00, 38.00)
+[DEBUG 绘图] 绘制 C: 位置=(5.00, 38.00)
+[DEBUG 绘图] 绘制 D: 位置=(35.00, 40.00)
+[DEBUG 绘图] 绘制 E: 位置=(13.00, 34.00)
+[DEBUG 绘图] 实际绘制了 5 个chiplet（共 5 个）
+Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
+
+错误：求解过程中出现异常: overlapping constraint names: diff_pos_fixed_4_prev0_0
+Traceback (most recent call last):
+  File "/root/placement/thermal-placement/src/run_test_case.py", line 42, in main
+    sols = search_multiple_solutions(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/placement/thermal-placement/src/ilp_sub_solution_search.py", line 475, in search_multiple_solutions
+    add_exclude_layout_constraint(
+  File "/root/placement/thermal-placement/src/ilp_sub_solution_search.py", line 236, in add_exclude_layout_constraint
+    _add_exclude_single_solution_constraint(
+  File "/root/placement/thermal-placement/src/ilp_sub_solution_search.py", line 50, in _add_exclude_single_solution_constraint
+    prob += diff_pos[k] == 0, f"diff_pos_fixed_{solution_index_suffix}_{k}"
+  File "/root/anaconda3/envs/pyside/lib/python3.12/site-packages/pulp/pulp.py", line 1862, in __iadd__
+    self.addConstraint(other, name)
+  File "/root/anaconda3/envs/pyside/lib/python3.12/site-packages/pulp/pulp.py", line 1822, in addConstraint
+    raise const.PulpError("overlapping constraint names: " + name)
+pulp.constants.PulpError: overlapping constraint names: diff_pos_fixed_4_prev0_0
