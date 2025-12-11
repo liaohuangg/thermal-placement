@@ -1,778 +1,2073 @@
-网格化布局: grid_size=0.5, grid_w=120, grid_h=120
-问题规模: 5 个模块, 4 对有连接的模块对
-固定chiplet 0 的中心在方框中心 (30.00, 30.00)
-非重叠约束: 10 对模块对（所有模块对），M=200（基板尺寸最大值）
+网格化布局: grid_size=0.5, grid_w=60, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (15.00, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
 目标函数: 1.0 * wirelength + 0.1 * area_proxy
 
 开始求解ILP问题...
-变量数量: 139
-约束数量: 285
+变量数量: 41
+约束数量: 75
 使用求解器: GLPK
 GLPSOL: GLPK LP/MIP Solver, v4.65
 Parameter(s) specified in the command line:
- --cpxlp /tmp/10f20fa507904e2095e199958416e01d-pulp.lp -o /tmp/10f20fa507904e2095e199958416e01d-pulp.out
- -w /tmp/10f20fa507904e2095e199958416e01d-pulp.sol --tmlim 300
-Reading problem data from '/tmp/10f20fa507904e2095e199958416e01d-pulp.lp'...
-285 rows, 139 columns, 923 non-zeros
-86 integer variables, 66 of which are binary
-444 lines were read
+ --cpxlp /tmp/eb12b57e949d4d7d9bd22728d4197d17-pulp.lp -o /tmp/eb12b57e949d4d7d9bd22728d4197d17-pulp.out
+ -w /tmp/eb12b57e949d4d7d9bd22728d4197d17-pulp.sol --tmlim 300
+Reading problem data from '/tmp/eb12b57e949d4d7d9bd22728d4197d17-pulp.lp'...
+75 rows, 41 columns, 211 non-zeros
+18 integer variables, 10 of which are binary
+129 lines were read
 GLPK Integer Optimizer, v4.65
-285 rows, 139 columns, 923 non-zeros
-86 integer variables, 66 of which are binary
+75 rows, 41 columns, 211 non-zeros
+18 integer variables, 10 of which are binary
 Preprocessing...
-160 constraint coefficient(s) were reduced
-235 rows, 111 columns, 625 non-zeros
-72 integer variables, 64 of which are binary
+16 constraint coefficient(s) were reduced
+37 rows, 27 columns, 85 non-zeros
+12 integer variables, 10 of which are binary
 Scaling...
- A: min|aij| =  1.000e-01  max|aij| =  6.000e+01  ratio =  6.000e+02
-GM: min|aij| =  2.056e-01  max|aij| =  4.865e+00  ratio =  2.366e+01
-EQ: min|aij| =  4.226e-02  max|aij| =  1.000e+00  ratio =  2.366e+01
-2N: min|aij| =  2.500e-02  max|aij| =  1.500e+00  ratio =  6.000e+01
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  3.162e-01  max|aij| =  3.162e+00  ratio =  1.000e+01
+EQ: min|aij| =  1.000e-01  max|aij| =  1.000e+00  ratio =  1.000e+01
+2N: min|aij| =  1.000e-01  max|aij| =  1.250e+00  ratio =  1.250e+01
 Constructing initial basis...
-Size of triangular part is 235
+Size of triangular part is 37
 Solving LP relaxation...
 GLPK Simplex Optimizer, v4.65
-235 rows, 111 columns, 625 non-zeros
-      0: obj =   0.000000000e+00 inf =   1.361e+02 (37)
-     47: obj =   3.333333333e-02 inf =   4.441e-15 (0)
+37 rows, 27 columns, 85 non-zeros
+      0: obj =   3.333333333e-02 inf =   3.010e+01 (5)
+      6: obj =   3.333333333e-02 inf =   8.882e-15 (0)
 OPTIMAL LP SOLUTION FOUND
 Integer optimization begins...
 Long-step dual simplex will be used
-+    47: mip =     not found yet >=              -inf        (1; 0)
-+   164: >>>>>   9.406666667e+01 >=   3.333333333e-02 100.0% (26; 1)
-+   309: >>>>>   9.056666667e+01 >=   1.204000000e+01  86.7% (29; 19)
-+   361: >>>>>   8.206666667e+01 >=   1.204000000e+01  85.3% (33; 20)
-+   537: >>>>>   6.608333333e+01 >=   1.503233333e+01  77.3% (49; 30)
-+  1134: >>>>>   6.107666667e+01 >=   2.507666667e+01  58.9% (117; 71)
-+  3241: mip =   6.107666667e+01 >=     tree is empty   0.0% (0; 891)
++     6: mip =     not found yet >=              -inf        (1; 0)
++    16: >>>>>   1.006666667e+01 >=   1.003233333e+01   0.3% (5; 1)
++    16: mip =   1.006666667e+01 >=     tree is empty   0.0% (0; 11)
 INTEGER OPTIMAL SOLUTION FOUND
-Time used:   0.1 secs
-Memory used: 0.7 Mb (745847 bytes)
-Writing MIP solution to '/tmp/10f20fa507904e2095e199958416e01d-pulp.out'...
-Writing MIP solution to '/tmp/10f20fa507904e2095e199958416e01d-pulp.sol'...
-433 lines were written
+Time used:   0.0 secs
+Memory used: 0.1 Mb (118605 bytes)
+Writing MIP solution to '/tmp/eb12b57e949d4d7d9bd22728d4197d17-pulp.out'...
+Writing MIP solution to '/tmp/eb12b57e949d4d7d9bd22728d4197d17-pulp.sol'...
+125 lines were written
 
 求解状态: Optimal
-求解时间: 0.08 秒
-目标函数值: 61.08
+求解时间: 0.01 秒
+目标函数值: 10.07
 
 === 解 1 ===
-目标函数值: 61.0767
+目标函数值: 10.0667
 
 Chiplet坐标（左下角）:
-  A: (22.00, 22.00)
-  B: (25.00, 38.00)
-  C: (35.00, 38.00)
-  D: (9.00, 38.00)
-  E: (43.00, 34.00)
+  A: (10.00, 10.00)
+  B: (10.00, 20.00)
 
 Chiplet中心坐标:
-  A: (30.00, 30.00)
-  B: (30.00, 48.00)
-  C: (45.00, 48.00)
-  D: (17.00, 45.00)
-  E: (45.00, 36.00)
+  A: (15.00, 15.00)
+  B: (15.00, 25.00)
 
 重叠检查:
   ✓ 无重叠：所有chiplet之间都没有重叠
 
 Chiplet对之间的距离:
-  (A, B): 18.00
-  (A, C): 33.00
-  (A, D): 28.00
-  (A, E): 21.00
-  (B, C): 15.00
-  (B, D): 16.00
-  (B, E): 27.00
-  (C, D): 31.00
-  (C, E): 12.00
-  (D, E): 37.00
-[DEBUG 绘图] nodes数量: 5, layout中的chiplet数量: 5
-[DEBUG 绘图] 绘制 A: 位置=(22.00, 22.00)
-[DEBUG 绘图] 绘制 B: 位置=(25.00, 38.00)
-[DEBUG 绘图] 绘制 C: 位置=(35.00, 38.00)
-[DEBUG 绘图] 绘制 D: 位置=(9.00, 38.00)
-[DEBUG 绘图] 绘制 E: 位置=(43.00, 34.00)
-[DEBUG 绘图] 实际绘制了 5 个chiplet（共 5 个）
+  (A, B): 10.00
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(10.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(10.00, 20.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
 Ignoring fixed x limits to fulfill fixed data aspect with adjustable data limits.
 
 布局图片已保存: /root/placement/thermal-placement/output/solution_1_layout.png
-网格化布局: grid_size=0.5, grid_w=120, grid_h=120
-问题规模: 5 个模块, 4 对有连接的模块对
-固定chiplet 0 的中心在方框中心 (30.00, 30.00)
-非重叠约束: 10 对模块对（所有模块对），M=200（基板尺寸最大值）
+网格化布局: grid_size=0.5, grid_w=60, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (15.00, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
 目标函数: 1.0 * wirelength + 0.1 * area_proxy
 
 开始求解ILP问题...
-变量数量: 218
-约束数量: 446
+变量数量: 54
+约束数量: 104
 使用求解器: GLPK
 GLPSOL: GLPK LP/MIP Solver, v4.65
 Parameter(s) specified in the command line:
- --cpxlp /tmp/88e0c6cdb6c546e597b465a555b342ed-pulp.lp -o /tmp/88e0c6cdb6c546e597b465a555b342ed-pulp.out
- -w /tmp/88e0c6cdb6c546e597b465a555b342ed-pulp.sol --tmlim 300
-Reading problem data from '/tmp/88e0c6cdb6c546e597b465a555b342ed-pulp.lp'...
-446 rows, 218 columns, 1316 non-zeros
-125 integer variables, 105 of which are binary
-752 lines were read
+ --cpxlp /tmp/3d58615b2d734a4695adf4218d2ad175-pulp.lp -o /tmp/3d58615b2d734a4695adf4218d2ad175-pulp.out
+ -w /tmp/3d58615b2d734a4695adf4218d2ad175-pulp.sol --tmlim 300
+Reading problem data from '/tmp/3d58615b2d734a4695adf4218d2ad175-pulp.lp'...
+104 rows, 54 columns, 274 non-zeros
+27 integer variables, 19 of which are binary
+179 lines were read
 GLPK Integer Optimizer, v4.65
-446 rows, 218 columns, 1316 non-zeros
-125 integer variables, 105 of which are binary
+104 rows, 54 columns, 274 non-zeros
+27 integer variables, 19 of which are binary
 Preprocessing...
-22 hidden packing inequaliti(es) were detected
-10 hidden covering inequaliti(es) were detected
-208 constraint coefficient(s) were reduced
-391 rows, 187 columns, 989 non-zeros
-108 integer variables, 100 of which are binary
+3 hidden packing inequaliti(es) were detected
+1 hidden covering inequaliti(es) were detected
+22 constraint coefficient(s) were reduced
+57 rows, 36 columns, 126 non-zeros
+17 integer variables, 15 of which are binary
 Scaling...
- A: min|aij| =  1.000e-01  max|aij| =  1.170e+02  ratio =  1.170e+03
-GM: min|aij| =  2.056e-01  max|aij| =  4.865e+00  ratio =  2.366e+01
-EQ: min|aij| =  4.226e-02  max|aij| =  1.000e+00  ratio =  2.366e+01
-2N: min|aij| =  2.500e-02  max|aij| =  1.500e+00  ratio =  6.000e+01
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  3.162e-01  max|aij| =  3.162e+00  ratio =  1.000e+01
+EQ: min|aij| =  1.000e-01  max|aij| =  1.000e+00  ratio =  1.000e+01
+2N: min|aij| =  1.000e-01  max|aij| =  1.250e+00  ratio =  1.250e+01
 Constructing initial basis...
-Size of triangular part is 391
+Size of triangular part is 57
 Solving LP relaxation...
 GLPK Simplex Optimizer, v4.65
-391 rows, 187 columns, 989 non-zeros
-      0: obj =   0.000000000e+00 inf =   4.598e+02 (76)
-     95: obj =   3.333333333e-02 inf =   1.510e-14 (0)
+57 rows, 36 columns, 126 non-zeros
+      0: obj =   3.333333333e-02 inf =   6.198e+01 (11)
+     13: obj =   3.333333333e-02 inf =   8.882e-15 (0)
 OPTIMAL LP SOLUTION FOUND
 Integer optimization begins...
 Long-step dual simplex will be used
-+    95: mip =     not found yet >=              -inf        (1; 0)
-+   323: >>>>>   6.908333333e+01 >=   3.333333333e-02 100.0% (40; 1)
-+  6379: >>>>>   6.407666667e+01 >=   4.055583333e+01  36.7% (288; 336)
-+  7699: >>>>>   6.107666667e+01 >=   4.505900000e+01  26.2% (254; 514)
-+ 10096: mip =   6.107666667e+01 >=     tree is empty   0.0% (0; 1513)
++    13: mip =     not found yet >=              -inf        (1; 0)
++    31: >>>>>   1.306666667e+01 >=   1.003233333e+01  23.2% (6; 1)
++    35: >>>>>   1.006666667e+01 >=   1.003333333e+01   0.3% (3; 5)
++    35: mip =   1.006666667e+01 >=     tree is empty   0.0% (0; 13)
 INTEGER OPTIMAL SOLUTION FOUND
-Time used:   0.2 secs
-Memory used: 1.3 Mb (1382747 bytes)
-Writing MIP solution to '/tmp/88e0c6cdb6c546e597b465a555b342ed-pulp.out'...
-Writing MIP solution to '/tmp/88e0c6cdb6c546e597b465a555b342ed-pulp.sol'...
-673 lines were written
+Time used:   0.0 secs
+Memory used: 0.1 Mb (149120 bytes)
+Writing MIP solution to '/tmp/3d58615b2d734a4695adf4218d2ad175-pulp.out'...
+Writing MIP solution to '/tmp/3d58615b2d734a4695adf4218d2ad175-pulp.sol'...
+167 lines were written
 
 求解状态: Optimal
-求解时间: 0.25 秒
-目标函数值: 61.08
+求解时间: 0.01 秒
+目标函数值: 10.07
 
 === 解 2 ===
-目标函数值: 61.0767
+目标函数值: 10.0667
 
 Chiplet坐标（左下角）:
-  A: (22.00, 22.00)
-  B: (25.00, 2.00)
-  C: (5.00, 0.00)
-  D: (35.00, 6.00)
-  E: (13.00, 20.00)
+  A: (10.00, 10.00)
+  B: (0.00, 10.00)
 
 Chiplet中心坐标:
-  A: (30.00, 30.00)
-  B: (30.00, 12.00)
-  C: (15.00, 10.00)
-  D: (43.00, 13.00)
-  E: (15.00, 22.00)
+  A: (15.00, 15.00)
+  B: (5.00, 15.00)
 
 重叠检查:
   ✓ 无重叠：所有chiplet之间都没有重叠
 
 Chiplet对之间的距离:
-  (A, B): 18.00
-  (A, C): 35.00
-  (A, D): 30.00
-  (A, E): 23.00
-  (B, C): 17.00
-  (B, D): 14.00
-  (B, E): 25.00
-  (C, D): 31.00
-  (C, E): 12.00
-  (D, E): 37.00
+  (A, B): 10.00
 
 与上一解的变化:
-  位置变化的chiplet: B, C, D, E
-  距离变化的chiplet对: (A,C), (A,D), (A,E), (B,C), (B,D), (B,E)
-[DEBUG 绘图] nodes数量: 5, layout中的chiplet数量: 5
-[DEBUG 绘图] 绘制 A: 位置=(22.00, 22.00)
-[DEBUG 绘图] 绘制 B: 位置=(25.00, 2.00)
-[DEBUG 绘图] 绘制 C: 位置=(5.00, 0.00)
-[DEBUG 绘图] 绘制 D: 位置=(35.00, 6.00)
-[DEBUG 绘图] 绘制 E: 位置=(13.00, 20.00)
-[DEBUG 绘图] 实际绘制了 5 个chiplet（共 5 个）
+  位置变化的chiplet: B
+  距离变化的chiplet对: 无
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(10.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(0.00, 10.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
 Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
 
 布局图片已保存: /root/placement/thermal-placement/output/solution_2_layout.png
-网格化布局: grid_size=0.5, grid_w=120, grid_h=120
-问题规模: 5 个模块, 4 对有连接的模块对
-固定chiplet 0 的中心在方框中心 (30.00, 30.00)
-非重叠约束: 10 对模块对（所有模块对），M=200（基板尺寸最大值）
+网格化布局: grid_size=0.5, grid_w=60, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (15.00, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
 目标函数: 1.0 * wirelength + 0.1 * area_proxy
 
 开始求解ILP问题...
-变量数量: 297
-约束数量: 607
+变量数量: 67
+约束数量: 133
 使用求解器: GLPK
 GLPSOL: GLPK LP/MIP Solver, v4.65
 Parameter(s) specified in the command line:
- --cpxlp /tmp/c56568a2d3204fce893e5e181c02c9f2-pulp.lp -o /tmp/c56568a2d3204fce893e5e181c02c9f2-pulp.out
- -w /tmp/c56568a2d3204fce893e5e181c02c9f2-pulp.sol --tmlim 300
-Reading problem data from '/tmp/c56568a2d3204fce893e5e181c02c9f2-pulp.lp'...
-607 rows, 297 columns, 1709 non-zeros
-164 integer variables, 144 of which are binary
-1060 lines were read
+ --cpxlp /tmp/bd9f014f54ad4c30a68bffceff52e723-pulp.lp -o /tmp/bd9f014f54ad4c30a68bffceff52e723-pulp.out
+ -w /tmp/bd9f014f54ad4c30a68bffceff52e723-pulp.sol --tmlim 300
+Reading problem data from '/tmp/bd9f014f54ad4c30a68bffceff52e723-pulp.lp'...
+133 rows, 67 columns, 337 non-zeros
+36 integer variables, 28 of which are binary
+229 lines were read
 GLPK Integer Optimizer, v4.65
-607 rows, 297 columns, 1709 non-zeros
-164 integer variables, 144 of which are binary
+133 rows, 67 columns, 337 non-zeros
+36 integer variables, 28 of which are binary
 Preprocessing...
-44 hidden packing inequaliti(es) were detected
-20 hidden covering inequaliti(es) were detected
-256 constraint coefficient(s) were reduced
-547 rows, 263 columns, 1353 non-zeros
-144 integer variables, 136 of which are binary
+6 hidden packing inequaliti(es) were detected
+2 hidden covering inequaliti(es) were detected
+28 constraint coefficient(s) were reduced
+77 rows, 45 columns, 167 non-zeros
+22 integer variables, 20 of which are binary
 Scaling...
- A: min|aij| =  1.000e-01  max|aij| =  1.170e+02  ratio =  1.170e+03
-GM: min|aij| =  2.056e-01  max|aij| =  4.865e+00  ratio =  2.366e+01
-EQ: min|aij| =  4.226e-02  max|aij| =  1.000e+00  ratio =  2.366e+01
-2N: min|aij| =  2.500e-02  max|aij| =  1.500e+00  ratio =  6.000e+01
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  3.162e-01  max|aij| =  3.162e+00  ratio =  1.000e+01
+EQ: min|aij| =  1.000e-01  max|aij| =  1.000e+00  ratio =  1.000e+01
+2N: min|aij| =  1.000e-01  max|aij| =  1.250e+00  ratio =  1.250e+01
 Constructing initial basis...
-Size of triangular part is 547
+Size of triangular part is 77
 Solving LP relaxation...
 GLPK Simplex Optimizer, v4.65
-547 rows, 263 columns, 1353 non-zeros
-      0: obj =   0.000000000e+00 inf =   7.781e+02 (113)
-    140: obj =   3.333333333e-02 inf =   2.931e-14 (0)
+77 rows, 45 columns, 167 non-zeros
+      0: obj =   3.333333333e-02 inf =   9.173e+01 (16)
+     20: obj =   3.333333333e-02 inf =   8.882e-15 (0)
 OPTIMAL LP SOLUTION FOUND
 Integer optimization begins...
 Long-step dual simplex will be used
-+   140: mip =     not found yet >=              -inf        (1; 0)
-+   417: >>>>>   7.207666667e+01 >=   3.333333333e-02 100.0% (42; 1)
-+  2094: >>>>>   7.159000000e+01 >=   1.305166667e+01  81.8% (167; 32)
-+  7236: >>>>>   6.709000000e+01 >=   3.005900000e+01  55.2% (332; 288)
-+  8272: >>>>>   6.608333333e+01 >=   3.055983167e+01  53.8% (343; 401)
-+ 12317: >>>>>   6.107666667e+01 >=   4.255900000e+01  30.3% (346; 890)
-+ 17085: mip =   6.107666667e+01 >=     tree is empty   0.0% (0; 2397)
++    20: mip =     not found yet >=              -inf        (1; 0)
++    42: >>>>>   1.306666667e+01 >=   7.034333333e+00  46.2% (7; 1)
++    54: >>>>>   1.006666667e+01 >=   1.006666667e+01   0.0% (3; 5)
++    54: mip =   1.006666667e+01 >=     tree is empty   0.0% (0; 15)
 INTEGER OPTIMAL SOLUTION FOUND
-Time used:   0.6 secs
-Memory used: 1.8 Mb (1896183 bytes)
-Writing MIP solution to '/tmp/c56568a2d3204fce893e5e181c02c9f2-pulp.out'...
-Writing MIP solution to '/tmp/c56568a2d3204fce893e5e181c02c9f2-pulp.sol'...
-913 lines were written
+Time used:   0.0 secs
+Memory used: 0.2 Mb (186185 bytes)
+Writing MIP solution to '/tmp/bd9f014f54ad4c30a68bffceff52e723-pulp.out'...
+Writing MIP solution to '/tmp/bd9f014f54ad4c30a68bffceff52e723-pulp.sol'...
+209 lines were written
 
 求解状态: Optimal
-求解时间: 0.58 秒
-目标函数值: 61.08
+求解时间: 0.01 秒
+目标函数值: 10.07
 
 === 解 3 ===
-目标函数值: 61.0767
+目标函数值: 10.0667
 
 Chiplet坐标（左下角）:
-  A: (22.00, 22.00)
-  B: (25.00, 38.00)
-  C: (5.00, 38.00)
-  D: (35.00, 38.00)
-  E: (13.00, 34.00)
+  A: (10.00, 10.00)
+  B: (10.00, 0.00)
 
 Chiplet中心坐标:
-  A: (30.00, 30.00)
-  B: (30.00, 48.00)
-  C: (15.00, 48.00)
-  D: (43.00, 45.00)
-  E: (15.00, 36.00)
+  A: (15.00, 15.00)
+  B: (15.00, 5.00)
 
 重叠检查:
   ✓ 无重叠：所有chiplet之间都没有重叠
 
 Chiplet对之间的距离:
-  (A, B): 18.00
-  (A, C): 33.00
-  (A, D): 28.00
-  (A, E): 21.00
-  (B, C): 15.00
-  (B, D): 16.00
-  (B, E): 27.00
-  (C, D): 31.00
-  (C, E): 12.00
-  (D, E): 37.00
+  (A, B): 10.00
 
 与上一解的变化:
-  位置变化的chiplet: B, C, D, E
-  距离变化的chiplet对: (A,C), (A,D), (A,E), (B,C), (B,D), (B,E)
-[DEBUG 绘图] nodes数量: 5, layout中的chiplet数量: 5
-[DEBUG 绘图] 绘制 A: 位置=(22.00, 22.00)
-[DEBUG 绘图] 绘制 B: 位置=(25.00, 38.00)
-[DEBUG 绘图] 绘制 C: 位置=(5.00, 38.00)
-[DEBUG 绘图] 绘制 D: 位置=(35.00, 38.00)
-[DEBUG 绘图] 绘制 E: 位置=(13.00, 34.00)
-[DEBUG 绘图] 实际绘制了 5 个chiplet（共 5 个）
+  位置变化的chiplet: B
+  距离变化的chiplet对: 无
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(10.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(10.00, 0.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
 Ignoring fixed x limits to fulfill fixed data aspect with adjustable data limits.
 
 布局图片已保存: /root/placement/thermal-placement/output/solution_3_layout.png
-网格化布局: grid_size=0.5, grid_w=120, grid_h=120
-问题规模: 5 个模块, 4 对有连接的模块对
-固定chiplet 0 的中心在方框中心 (30.00, 30.00)
-非重叠约束: 10 对模块对（所有模块对），M=200（基板尺寸最大值）
+网格化布局: grid_size=0.5, grid_w=60, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (15.00, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
 目标函数: 1.0 * wirelength + 0.1 * area_proxy
 
 开始求解ILP问题...
-变量数量: 376
-约束数量: 768
+变量数量: 80
+约束数量: 162
 使用求解器: GLPK
 GLPSOL: GLPK LP/MIP Solver, v4.65
 Parameter(s) specified in the command line:
- --cpxlp /tmp/de7b8d2913c3498aa6a2f1deac412176-pulp.lp -o /tmp/de7b8d2913c3498aa6a2f1deac412176-pulp.out
- -w /tmp/de7b8d2913c3498aa6a2f1deac412176-pulp.sol --tmlim 300
-Reading problem data from '/tmp/de7b8d2913c3498aa6a2f1deac412176-pulp.lp'...
-768 rows, 376 columns, 2102 non-zeros
-203 integer variables, 183 of which are binary
-1368 lines were read
+ --cpxlp /tmp/282d1b2f4aa748629f8ad82d83270b56-pulp.lp -o /tmp/282d1b2f4aa748629f8ad82d83270b56-pulp.out
+ -w /tmp/282d1b2f4aa748629f8ad82d83270b56-pulp.sol --tmlim 300
+Reading problem data from '/tmp/282d1b2f4aa748629f8ad82d83270b56-pulp.lp'...
+162 rows, 80 columns, 400 non-zeros
+45 integer variables, 37 of which are binary
+279 lines were read
 GLPK Integer Optimizer, v4.65
-768 rows, 376 columns, 2102 non-zeros
-203 integer variables, 183 of which are binary
+162 rows, 80 columns, 400 non-zeros
+45 integer variables, 37 of which are binary
 Preprocessing...
-66 hidden packing inequaliti(es) were detected
-30 hidden covering inequaliti(es) were detected
-304 constraint coefficient(s) were reduced
-703 rows, 339 columns, 1717 non-zeros
-180 integer variables, 172 of which are binary
+9 hidden packing inequaliti(es) were detected
+3 hidden covering inequaliti(es) were detected
+34 constraint coefficient(s) were reduced
+97 rows, 54 columns, 208 non-zeros
+27 integer variables, 25 of which are binary
 Scaling...
- A: min|aij| =  1.000e-01  max|aij| =  1.170e+02  ratio =  1.170e+03
-GM: min|aij| =  2.056e-01  max|aij| =  4.865e+00  ratio =  2.366e+01
-EQ: min|aij| =  4.226e-02  max|aij| =  1.000e+00  ratio =  2.366e+01
-2N: min|aij| =  2.500e-02  max|aij| =  1.500e+00  ratio =  6.000e+01
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  3.162e-01  max|aij| =  3.162e+00  ratio =  1.000e+01
+EQ: min|aij| =  1.000e-01  max|aij| =  1.000e+00  ratio =  1.000e+01
+2N: min|aij| =  1.000e-01  max|aij| =  1.250e+00  ratio =  1.250e+01
 Constructing initial basis...
-Size of triangular part is 703
+Size of triangular part is 97
 Solving LP relaxation...
 GLPK Simplex Optimizer, v4.65
-703 rows, 339 columns, 1717 non-zeros
-      0: obj =   0.000000000e+00 inf =   1.101e+03 (152)
-    188: obj =   3.333333333e-02 inf =   0.000e+00 (0) 1
+97 rows, 54 columns, 208 non-zeros
+      0: obj =   3.333333333e-02 inf =   1.215e+02 (21)
+     26: obj =   3.333333333e-02 inf =   8.882e-15 (0)
 OPTIMAL LP SOLUTION FOUND
 Integer optimization begins...
 Long-step dual simplex will be used
-+   188: mip =     not found yet >=              -inf        (1; 0)
-+   550: >>>>>   7.207666667e+01 >=   3.333333333e-02 100.0% (49; 1)
-+  9720: >>>>>   6.608333333e+01 >=   3.056000000e+01  53.8% (406; 345)
-+ 13786: >>>>>   6.407666667e+01 >=   4.209000000e+01  34.3% (360; 849)
-+ 22888: >>>>>   6.107666667e+01 >=   5.857649833e+01   4.1% (179; 2152)
-+ 23402: mip =   6.107666667e+01 >=     tree is empty   0.0% (0; 2873)
++    26: mip =     not found yet >=              -inf        (1; 0)
++    56: >>>>>   1.306666667e+01 >=   7.034333333e+00  46.2% (8; 1)
++    76: >>>>>   1.006666667e+01 >=   1.006666667e+01   0.0% (1; 9)
++    76: mip =   1.006666667e+01 >=     tree is empty   0.0% (0; 17)
 INTEGER OPTIMAL SOLUTION FOUND
-Time used:   1.0 secs
-Memory used: 2.4 Mb (2481849 bytes)
-Writing MIP solution to '/tmp/de7b8d2913c3498aa6a2f1deac412176-pulp.out'...
-Writing MIP solution to '/tmp/de7b8d2913c3498aa6a2f1deac412176-pulp.sol'...
-1153 lines were written
+Time used:   0.0 secs
+Memory used: 0.2 Mb (215604 bytes)
+Writing MIP solution to '/tmp/282d1b2f4aa748629f8ad82d83270b56-pulp.out'...
+Writing MIP solution to '/tmp/282d1b2f4aa748629f8ad82d83270b56-pulp.sol'...
+251 lines were written
 
 求解状态: Optimal
-求解时间: 0.97 秒
-目标函数值: 61.08
+求解时间: 0.01 秒
+目标函数值: 10.07
 
 === 解 4 ===
-目标函数值: 61.0767
+目标函数值: 10.0667
 
 Chiplet坐标（左下角）:
-  A: (22.00, 22.00)
-  B: (25.00, 2.00)
-  C: (35.00, 0.00)
-  D: (9.00, 6.00)
-  E: (43.00, 20.00)
+  A: (10.00, 10.00)
+  B: (20.00, 10.00)
 
 Chiplet中心坐标:
-  A: (30.00, 30.00)
-  B: (30.00, 12.00)
-  C: (45.00, 10.00)
-  D: (17.00, 13.00)
-  E: (45.00, 22.00)
+  A: (15.00, 15.00)
+  B: (25.00, 15.00)
 
 重叠检查:
   ✓ 无重叠：所有chiplet之间都没有重叠
 
 Chiplet对之间的距离:
-  (A, B): 18.00
-  (A, C): 35.00
-  (A, D): 30.00
-  (A, E): 23.00
-  (B, C): 17.00
-  (B, D): 14.00
-  (B, E): 25.00
-  (C, D): 31.00
-  (C, E): 12.00
-  (D, E): 37.00
+  (A, B): 10.00
 
 与上一解的变化:
-  位置变化的chiplet: B, C, D, E
-  距离变化的chiplet对: (A,C), (A,D), (A,E), (B,C), (B,D), (B,E)
-[DEBUG 绘图] nodes数量: 5, layout中的chiplet数量: 5
-[DEBUG 绘图] 绘制 A: 位置=(22.00, 22.00)
-[DEBUG 绘图] 绘制 B: 位置=(25.00, 2.00)
-[DEBUG 绘图] 绘制 C: 位置=(35.00, 0.00)
-[DEBUG 绘图] 绘制 D: 位置=(9.00, 6.00)
-[DEBUG 绘图] 绘制 E: 位置=(43.00, 20.00)
-[DEBUG 绘图] 实际绘制了 5 个chiplet（共 5 个）
+  位置变化的chiplet: B
+  距离变化的chiplet对: 无
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(10.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(20.00, 10.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
 Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
 
 布局图片已保存: /root/placement/thermal-placement/output/solution_4_layout.png
-网格化布局: grid_size=0.5, grid_w=120, grid_h=120
-问题规模: 5 个模块, 4 对有连接的模块对
-固定chiplet 0 的中心在方框中心 (30.00, 30.00)
-非重叠约束: 10 对模块对（所有模块对），M=200（基板尺寸最大值）
+网格化布局: grid_size=0.5, grid_w=60, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (15.00, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
 目标函数: 1.0 * wirelength + 0.1 * area_proxy
 
 开始求解ILP问题...
-变量数量: 455
-约束数量: 929
+变量数量: 93
+约束数量: 191
 使用求解器: GLPK
 GLPSOL: GLPK LP/MIP Solver, v4.65
 Parameter(s) specified in the command line:
- --cpxlp /tmp/52752bfe8de64d6ebfd823370cd05c62-pulp.lp -o /tmp/52752bfe8de64d6ebfd823370cd05c62-pulp.out
- -w /tmp/52752bfe8de64d6ebfd823370cd05c62-pulp.sol --tmlim 300
-Reading problem data from '/tmp/52752bfe8de64d6ebfd823370cd05c62-pulp.lp'...
-929 rows, 455 columns, 2495 non-zeros
-242 integer variables, 222 of which are binary
-1676 lines were read
+ --cpxlp /tmp/b2f22efd01ba498a9171831b3cab969a-pulp.lp -o /tmp/b2f22efd01ba498a9171831b3cab969a-pulp.out
+ -w /tmp/b2f22efd01ba498a9171831b3cab969a-pulp.sol --tmlim 300
+Reading problem data from '/tmp/b2f22efd01ba498a9171831b3cab969a-pulp.lp'...
+191 rows, 93 columns, 463 non-zeros
+54 integer variables, 46 of which are binary
+329 lines were read
 GLPK Integer Optimizer, v4.65
-929 rows, 455 columns, 2495 non-zeros
-242 integer variables, 222 of which are binary
+191 rows, 93 columns, 463 non-zeros
+54 integer variables, 46 of which are binary
 Preprocessing...
-88 hidden packing inequaliti(es) were detected
-40 hidden covering inequaliti(es) were detected
-352 constraint coefficient(s) were reduced
-859 rows, 415 columns, 2081 non-zeros
-216 integer variables, 208 of which are binary
+12 hidden packing inequaliti(es) were detected
+4 hidden covering inequaliti(es) were detected
+40 constraint coefficient(s) were reduced
+117 rows, 63 columns, 249 non-zeros
+32 integer variables, 30 of which are binary
 Scaling...
- A: min|aij| =  1.000e-01  max|aij| =  1.170e+02  ratio =  1.170e+03
-GM: min|aij| =  2.056e-01  max|aij| =  4.865e+00  ratio =  2.366e+01
-EQ: min|aij| =  4.226e-02  max|aij| =  1.000e+00  ratio =  2.366e+01
-2N: min|aij| =  2.500e-02  max|aij| =  1.500e+00  ratio =  6.000e+01
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  3.162e-01  max|aij| =  3.162e+00  ratio =  1.000e+01
+EQ: min|aij| =  1.000e-01  max|aij| =  1.000e+00  ratio =  1.000e+01
+2N: min|aij| =  1.000e-01  max|aij| =  1.250e+00  ratio =  1.250e+01
 Constructing initial basis...
-Size of triangular part is 859
+Size of triangular part is 117
 Solving LP relaxation...
 GLPK Simplex Optimizer, v4.65
-859 rows, 415 columns, 2081 non-zeros
-      0: obj =   0.000000000e+00 inf =   1.420e+03 (189)
-    231: obj =   3.333333333e-02 inf =   0.000e+00 (0) 1
+117 rows, 63 columns, 249 non-zeros
+      0: obj =   3.333333333e-02 inf =   1.534e+02 (27)
+     32: obj =   3.333333333e-02 inf =   8.882e-15 (0)
 OPTIMAL LP SOLUTION FOUND
 Integer optimization begins...
 Long-step dual simplex will be used
-+   231: mip =     not found yet >=              -inf        (1; 0)
-+  1113: >>>>>   7.508333333e+01 >=   3.333333333e-02 100.0% (84; 2)
-+  2387: >>>>>   7.159000000e+01 >=   1.305166667e+01  81.8% (168; 35)
-+ 10885: >>>>>   6.909000000e+01 >=   3.006000000e+01  56.5% (388; 165)
-+ 16610: >>>>>   6.908333333e+01 >=   3.856000000e+01  44.2% (487; 581)
-+ 17817: >>>>>   6.407666667e+01 >=   4.056000000e+01  36.7% (497; 641)
-+ 41695: mip =   6.407666667e+01 >=     tree is empty   0.0% (0; 4345)
++    32: mip =     not found yet >=              -inf        (1; 0)
++    64: >>>>>   1.756666667e+01 >=   3.333333333e-02  99.8% (9; 0)
++   146: >>>>>   1.306666667e+01 >=   1.006666667e+01  23.0% (10; 7)
++   146: mip =   1.306666667e+01 >=     tree is empty   0.0% (0; 33)
 INTEGER OPTIMAL SOLUTION FOUND
-Time used:   1.8 secs
-Memory used: 3.1 Mb (3302365 bytes)
-Writing MIP solution to '/tmp/52752bfe8de64d6ebfd823370cd05c62-pulp.out'...
-Writing MIP solution to '/tmp/52752bfe8de64d6ebfd823370cd05c62-pulp.sol'...
-1393 lines were written
+Time used:   0.0 secs
+Memory used: 0.2 Mb (254369 bytes)
+Writing MIP solution to '/tmp/b2f22efd01ba498a9171831b3cab969a-pulp.out'...
+Writing MIP solution to '/tmp/b2f22efd01ba498a9171831b3cab969a-pulp.sol'...
+293 lines were written
 
 求解状态: Optimal
-求解时间: 1.83 秒
-目标函数值: 64.08
+求解时间: 0.01 秒
+目标函数值: 13.07
 
 === 解 5 ===
-目标函数值: 64.0767
+目标函数值: 13.0667
 
 Chiplet坐标（左下角）:
-  A: (22.00, 22.00)
-  B: (28.00, 38.00)
-  C: (38.00, 38.00)
-  D: (12.00, 38.00)
-  E: (46.00, 34.00)
+  A: (10.00, 10.00)
+  B: (13.00, 20.00)
 
 Chiplet中心坐标:
-  A: (30.00, 30.00)
-  B: (33.00, 48.00)
-  C: (48.00, 48.00)
-  D: (20.00, 45.00)
-  E: (48.00, 36.00)
+  A: (15.00, 15.00)
+  B: (18.00, 25.00)
 
 重叠检查:
   ✓ 无重叠：所有chiplet之间都没有重叠
 
 Chiplet对之间的距离:
-  (A, B): 21.00
-  (A, C): 36.00
-  (A, D): 25.00
-  (A, E): 24.00
-  (B, C): 15.00
-  (B, D): 16.00
-  (B, E): 27.00
-  (C, D): 31.00
-  (C, E): 12.00
-  (D, E): 37.00
+  (A, B): 13.00
 
 与上一解的变化:
-  位置变化的chiplet: B, C, D, E
-  距离变化的chiplet对: (A,B), (A,C), (A,D), (A,E), (B,C), (B,D), (B,E)
-[DEBUG 绘图] nodes数量: 5, layout中的chiplet数量: 5
-[DEBUG 绘图] 绘制 A: 位置=(22.00, 22.00)
-[DEBUG 绘图] 绘制 B: 位置=(28.00, 38.00)
-[DEBUG 绘图] 绘制 C: 位置=(38.00, 38.00)
-[DEBUG 绘图] 绘制 D: 位置=(12.00, 38.00)
-[DEBUG 绘图] 绘制 E: 位置=(46.00, 34.00)
-[DEBUG 绘图] 实际绘制了 5 个chiplet（共 5 个）
+  位置变化的chiplet: B
+  距离变化的chiplet对: (A,B)
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(10.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(13.00, 20.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
 Ignoring fixed x limits to fulfill fixed data aspect with adjustable data limits.
 
 布局图片已保存: /root/placement/thermal-placement/output/solution_5_layout.png
-网格化布局: grid_size=0.5, grid_w=120, grid_h=120
-问题规模: 5 个模块, 4 对有连接的模块对
-固定chiplet 0 的中心在方框中心 (30.00, 30.00)
-非重叠约束: 10 对模块对（所有模块对），M=200（基板尺寸最大值）
+网格化布局: grid_size=0.5, grid_w=60, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (15.00, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
 目标函数: 1.0 * wirelength + 0.1 * area_proxy
 
 开始求解ILP问题...
-变量数量: 534
-约束数量: 1090
+变量数量: 106
+约束数量: 220
 使用求解器: GLPK
 GLPSOL: GLPK LP/MIP Solver, v4.65
 Parameter(s) specified in the command line:
- --cpxlp /tmp/a55ca380382d4ab2a26cc250e605ac3c-pulp.lp -o /tmp/a55ca380382d4ab2a26cc250e605ac3c-pulp.out
- -w /tmp/a55ca380382d4ab2a26cc250e605ac3c-pulp.sol --tmlim 300
-Reading problem data from '/tmp/a55ca380382d4ab2a26cc250e605ac3c-pulp.lp'...
-1090 rows, 534 columns, 2888 non-zeros
-281 integer variables, 261 of which are binary
-1984 lines were read
+ --cpxlp /tmp/aec59cdde6c44f4891899240ac466d25-pulp.lp -o /tmp/aec59cdde6c44f4891899240ac466d25-pulp.out
+ -w /tmp/aec59cdde6c44f4891899240ac466d25-pulp.sol --tmlim 300
+Reading problem data from '/tmp/aec59cdde6c44f4891899240ac466d25-pulp.lp'...
+220 rows, 106 columns, 526 non-zeros
+63 integer variables, 55 of which are binary
+379 lines were read
 GLPK Integer Optimizer, v4.65
-1090 rows, 534 columns, 2888 non-zeros
-281 integer variables, 261 of which are binary
+220 rows, 106 columns, 526 non-zeros
+63 integer variables, 55 of which are binary
 Preprocessing...
-109 hidden packing inequaliti(es) were detected
-49 hidden covering inequaliti(es) were detected
-398 constraint coefficient(s) were reduced
-1013 rows, 490 columns, 2439 non-zeros
-251 integer variables, 243 of which are binary
+15 hidden packing inequaliti(es) were detected
+5 hidden covering inequaliti(es) were detected
+46 constraint coefficient(s) were reduced
+137 rows, 72 columns, 290 non-zeros
+37 integer variables, 35 of which are binary
 Scaling...
- A: min|aij| =  1.000e-01  max|aij| =  1.170e+02  ratio =  1.170e+03
-GM: min|aij| =  2.056e-01  max|aij| =  4.865e+00  ratio =  2.366e+01
-EQ: min|aij| =  4.226e-02  max|aij| =  1.000e+00  ratio =  2.366e+01
-2N: min|aij| =  2.500e-02  max|aij| =  1.500e+00  ratio =  6.000e+01
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  3.162e-01  max|aij| =  3.162e+00  ratio =  1.000e+01
+EQ: min|aij| =  1.000e-01  max|aij| =  1.000e+00  ratio =  1.000e+01
+2N: min|aij| =  1.000e-01  max|aij| =  1.250e+00  ratio =  1.250e+01
 Constructing initial basis...
-Size of triangular part is 1013
+Size of triangular part is 137
 Solving LP relaxation...
 GLPK Simplex Optimizer, v4.65
-1013 rows, 490 columns, 2439 non-zeros
-      0: obj =   0.000000000e+00 inf =   1.747e+03 (228)
-    281: obj =   3.333333333e-02 inf =   0.000e+00 (0) 1
+137 rows, 72 columns, 290 non-zeros
+      0: obj =   3.333333333e-02 inf =   1.890e+02 (33)
+     40: obj =   3.333333333e-02 inf =   8.882e-15 (0)
 OPTIMAL LP SOLUTION FOUND
 Integer optimization begins...
 Long-step dual simplex will be used
-+   281: mip =     not found yet >=              -inf        (1; 0)
-+  1157: >>>>>   7.508333333e+01 >=   3.433333333e-02 100.0% (96; 2)
-+  3029: >>>>>   6.407666667e+01 >=   1.254566833e+01  80.4% (199; 48)
-+100549: mip =   6.407666667e+01 >=     tree is empty   0.0% (0; 10011)
++    40: mip =     not found yet >=              -inf        (1; 0)
++    77: >>>>>   1.756666667e+01 >=   3.333333333e-02  99.8% (9; 0)
++   180: >>>>>   1.606666667e+01 >=   1.006666667e+01  37.3% (10; 7)
++   192: >>>>>   1.306666667e+01 >=   1.306666667e+01   0.0% (7; 11)
++   192: mip =   1.306666667e+01 >=     tree is empty   0.0% (0; 35)
 INTEGER OPTIMAL SOLUTION FOUND
-Time used:   5.0 secs
-Memory used: 4.4 Mb (4566994 bytes)
-Writing MIP solution to '/tmp/a55ca380382d4ab2a26cc250e605ac3c-pulp.out'...
-Writing MIP solution to '/tmp/a55ca380382d4ab2a26cc250e605ac3c-pulp.sol'...
-1633 lines were written
+Time used:   0.0 secs
+Memory used: 0.3 Mb (300076 bytes)
+Writing MIP solution to '/tmp/aec59cdde6c44f4891899240ac466d25-pulp.out'...
+Writing MIP solution to '/tmp/aec59cdde6c44f4891899240ac466d25-pulp.sol'...
+335 lines were written
 
 求解状态: Optimal
-求解时间: 5.02 秒
-目标函数值: 64.08
+求解时间: 0.01 秒
+目标函数值: 13.07
 
 === 解 6 ===
-目标函数值: 64.0767
+目标函数值: 13.0667
 
 Chiplet坐标（左下角）:
-  A: (22.00, 22.00)
-  B: (25.50, 2.00)
-  C: (35.50, 0.00)
-  D: (9.50, 6.00)
-  E: (46.00, 20.00)
+  A: (10.00, 10.00)
+  B: (7.00, 20.00)
 
 Chiplet中心坐标:
-  A: (30.00, 30.00)
-  B: (30.50, 12.00)
-  C: (45.50, 10.00)
-  D: (17.50, 13.00)
-  E: (48.00, 22.00)
+  A: (15.00, 15.00)
+  B: (12.00, 25.00)
 
 重叠检查:
   ✓ 无重叠：所有chiplet之间都没有重叠
 
 Chiplet对之间的距离:
-  (A, B): 18.50
-  (A, C): 35.50
-  (A, D): 29.50
-  (A, E): 26.00
-  (B, C): 17.00
-  (B, D): 14.00
-  (B, E): 27.50
-  (C, D): 31.00
-  (C, E): 14.50
-  (D, E): 39.50
+  (A, B): 13.00
 
 与上一解的变化:
-  位置变化的chiplet: B, C, D, E
-  距离变化的chiplet对: (A,B), (A,C), (A,D), (A,E), (B,C), (B,D), (B,E), (C,E), (D,E)
-[DEBUG 绘图] nodes数量: 5, layout中的chiplet数量: 5
-[DEBUG 绘图] 绘制 A: 位置=(22.00, 22.00)
-[DEBUG 绘图] 绘制 B: 位置=(25.50, 2.00)
-[DEBUG 绘图] 绘制 C: 位置=(35.50, 0.00)
-[DEBUG 绘图] 绘制 D: 位置=(9.50, 6.00)
-[DEBUG 绘图] 绘制 E: 位置=(46.00, 20.00)
-[DEBUG 绘图] 实际绘制了 5 个chiplet（共 5 个）
-Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
+  位置变化的chiplet: B
+  距离变化的chiplet对: 无
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(10.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(7.00, 20.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+Ignoring fixed x limits to fulfill fixed data aspect with adjustable data limits.
 
 布局图片已保存: /root/placement/thermal-placement/output/solution_6_layout.png
-网格化布局: grid_size=0.5, grid_w=120, grid_h=120
-问题规模: 5 个模块, 4 对有连接的模块对
-固定chiplet 0 的中心在方框中心 (30.00, 30.00)
-非重叠约束: 10 对模块对（所有模块对），M=200（基板尺寸最大值）
+网格化布局: grid_size=0.5, grid_w=60, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (15.00, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
 目标函数: 1.0 * wirelength + 0.1 * area_proxy
 
 开始求解ILP问题...
-变量数量: 613
-约束数量: 1251
+变量数量: 119
+约束数量: 249
 使用求解器: GLPK
 GLPSOL: GLPK LP/MIP Solver, v4.65
 Parameter(s) specified in the command line:
- --cpxlp /tmp/143e90db4ee248eab3953cce3312c4c5-pulp.lp -o /tmp/143e90db4ee248eab3953cce3312c4c5-pulp.out
- -w /tmp/143e90db4ee248eab3953cce3312c4c5-pulp.sol --tmlim 300
-Reading problem data from '/tmp/143e90db4ee248eab3953cce3312c4c5-pulp.lp'...
-1251 rows, 613 columns, 3281 non-zeros
-320 integer variables, 300 of which are binary
-2292 lines were read
+ --cpxlp /tmp/e5abd20355bf43f7946312dbadd72924-pulp.lp -o /tmp/e5abd20355bf43f7946312dbadd72924-pulp.out
+ -w /tmp/e5abd20355bf43f7946312dbadd72924-pulp.sol --tmlim 300
+Reading problem data from '/tmp/e5abd20355bf43f7946312dbadd72924-pulp.lp'...
+249 rows, 119 columns, 589 non-zeros
+72 integer variables, 64 of which are binary
+429 lines were read
 GLPK Integer Optimizer, v4.65
-1251 rows, 613 columns, 3281 non-zeros
-320 integer variables, 300 of which are binary
+249 rows, 119 columns, 589 non-zeros
+72 integer variables, 64 of which are binary
 Preprocessing...
-131 hidden packing inequaliti(es) were detected
-59 hidden covering inequaliti(es) were detected
-446 constraint coefficient(s) were reduced
-1169 rows, 566 columns, 2803 non-zeros
-287 integer variables, 279 of which are binary
+18 hidden packing inequaliti(es) were detected
+6 hidden covering inequaliti(es) were detected
+52 constraint coefficient(s) were reduced
+157 rows, 81 columns, 331 non-zeros
+42 integer variables, 40 of which are binary
 Scaling...
- A: min|aij| =  1.000e-01  max|aij| =  1.170e+02  ratio =  1.170e+03
-GM: min|aij| =  2.056e-01  max|aij| =  4.865e+00  ratio =  2.366e+01
-EQ: min|aij| =  4.226e-02  max|aij| =  1.000e+00  ratio =  2.366e+01
-2N: min|aij| =  2.500e-02  max|aij| =  1.500e+00  ratio =  6.000e+01
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  3.162e-01  max|aij| =  3.162e+00  ratio =  1.000e+01
+EQ: min|aij| =  1.000e-01  max|aij| =  1.000e+00  ratio =  1.000e+01
+2N: min|aij| =  1.000e-01  max|aij| =  1.250e+00  ratio =  1.250e+01
 Constructing initial basis...
-Size of triangular part is 1169
+Size of triangular part is 157
 Solving LP relaxation...
 GLPK Simplex Optimizer, v4.65
-1169 rows, 566 columns, 2803 non-zeros
-      0: obj =   0.000000000e+00 inf =   2.069e+03 (265)
-    324: obj =   3.333333333e-02 inf =   0.000e+00 (0) 1
+157 rows, 81 columns, 331 non-zeros
+      0: obj =   3.333333333e-02 inf =   2.241e+02 (39)
+     49: obj =   3.333333333e-02 inf =   8.882e-15 (0)
 OPTIMAL LP SOLUTION FOUND
 Integer optimization begins...
 Long-step dual simplex will be used
-+   324: mip =     not found yet >=              -inf        (1; 0)
-+  1346: >>>>>   7.508333333e+01 >=   3.433333333e-02 100.0% (110; 2)
-+  2298: >>>>>   7.159000000e+01 >=   8.034333333e+00  88.8% (169; 41)
-+  6696: >>>>>   7.109000000e+01 >=   1.305266667e+01  81.6% (394; 87)
-+ 40448: >>>>>   6.457750000e+01 >=   2.355083167e+01  63.5% (943; 811)
-+ 59238: >>>>>   6.407666667e+01 >=   3.856000000e+01  39.8% (903; 1866)
-+145709: mip =   6.407666667e+01 >=   6.407566667e+01 < 0.1% (158; 12487)
-+236588: mip =   6.407666667e+01 >=   6.407566667e+01 < 0.1% (124; 21500)
-+264553: mip =   6.407666667e+01 >=     tree is empty   0.0% (0; 25061)
++    49: mip =     not found yet >=              -inf        (1; 0)
++    91: >>>>>   1.756666667e+01 >=   3.333333333e-02  99.8% (9; 0)
++   212: >>>>>   1.306666667e+01 >=   1.306666667e+01   0.0% (10; 7)
++   212: mip =   1.306666667e+01 >=     tree is empty   0.0% (0; 33)
 INTEGER OPTIMAL SOLUTION FOUND
-Time used:   14.7 secs
-Memory used: 6.1 Mb (6430536 bytes)
-Writing MIP solution to '/tmp/143e90db4ee248eab3953cce3312c4c5-pulp.out'...
-Writing MIP solution to '/tmp/143e90db4ee248eab3953cce3312c4c5-pulp.sol'...
-1873 lines were written
+Time used:   0.0 secs
+Memory used: 0.3 Mb (322843 bytes)
+Writing MIP solution to '/tmp/e5abd20355bf43f7946312dbadd72924-pulp.out'...
+Writing MIP solution to '/tmp/e5abd20355bf43f7946312dbadd72924-pulp.sol'...
+377 lines were written
 
 求解状态: Optimal
-求解时间: 14.75 秒
-目标函数值: 64.08
+求解时间: 0.01 秒
+目标函数值: 13.07
 
 === 解 7 ===
-目标函数值: 64.0767
+目标函数值: 13.0667
 
 Chiplet坐标（左下角）:
-  A: (22.00, 22.00)
-  B: (22.00, 2.00)
-  C: (32.00, 2.00)
-  D: (6.00, 8.00)
-  E: (40.00, 22.00)
+  A: (10.00, 10.00)
+  B: (13.00, 0.00)
 
 Chiplet中心坐标:
-  A: (30.00, 30.00)
-  B: (27.00, 12.00)
-  C: (42.00, 12.00)
-  D: (14.00, 15.00)
-  E: (42.00, 24.00)
+  A: (15.00, 15.00)
+  B: (18.00, 5.00)
 
 重叠检查:
   ✓ 无重叠：所有chiplet之间都没有重叠
 
 Chiplet对之间的距离:
-  (A, B): 21.00
-  (A, C): 30.00
-  (A, D): 31.00
-  (A, E): 18.00
-  (B, C): 15.00
-  (B, D): 16.00
-  (B, E): 27.00
-  (C, D): 31.00
-  (C, E): 12.00
-  (D, E): 37.00
+  (A, B): 13.00
 
 与上一解的变化:
-  位置变化的chiplet: B, C, D, E
-  距离变化的chiplet对: (A,B), (A,C), (A,D), (A,E), (B,C), (B,D), (B,E), (C,E), (D,E)
-[DEBUG 绘图] nodes数量: 5, layout中的chiplet数量: 5
-[DEBUG 绘图] 绘制 A: 位置=(22.00, 22.00)
-[DEBUG 绘图] 绘制 B: 位置=(22.00, 2.00)
-[DEBUG 绘图] 绘制 C: 位置=(32.00, 2.00)
-[DEBUG 绘图] 绘制 D: 位置=(6.00, 8.00)
-[DEBUG 绘图] 绘制 E: 位置=(40.00, 22.00)
-[DEBUG 绘图] 实际绘制了 5 个chiplet（共 5 个）
+  位置变化的chiplet: B
+  距离变化的chiplet对: 无
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(10.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(13.00, 0.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
 Ignoring fixed x limits to fulfill fixed data aspect with adjustable data limits.
 
 布局图片已保存: /root/placement/thermal-placement/output/solution_7_layout.png
-网格化布局: grid_size=0.5, grid_w=120, grid_h=120
-问题规模: 5 个模块, 4 对有连接的模块对
-固定chiplet 0 的中心在方框中心 (30.00, 30.00)
-非重叠约束: 10 对模块对（所有模块对），M=200（基板尺寸最大值）
+网格化布局: grid_size=0.5, grid_w=60, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (15.00, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
 目标函数: 1.0 * wirelength + 0.1 * area_proxy
 
 开始求解ILP问题...
-变量数量: 692
-约束数量: 1412
+变量数量: 132
+约束数量: 278
 使用求解器: GLPK
 GLPSOL: GLPK LP/MIP Solver, v4.65
 Parameter(s) specified in the command line:
- --cpxlp /tmp/ac0fe8f6819d42fab8007f3be5e165d1-pulp.lp -o /tmp/ac0fe8f6819d42fab8007f3be5e165d1-pulp.out
- -w /tmp/ac0fe8f6819d42fab8007f3be5e165d1-pulp.sol --tmlim 300
-Reading problem data from '/tmp/ac0fe8f6819d42fab8007f3be5e165d1-pulp.lp'...
-1412 rows, 692 columns, 3674 non-zeros
-359 integer variables, 339 of which are binary
-2600 lines were read
+ --cpxlp /tmp/de190b57ee7745ada1d804411e055979-pulp.lp -o /tmp/de190b57ee7745ada1d804411e055979-pulp.out
+ -w /tmp/de190b57ee7745ada1d804411e055979-pulp.sol --tmlim 300
+Reading problem data from '/tmp/de190b57ee7745ada1d804411e055979-pulp.lp'...
+278 rows, 132 columns, 652 non-zeros
+81 integer variables, 73 of which are binary
+479 lines were read
 GLPK Integer Optimizer, v4.65
-1412 rows, 692 columns, 3674 non-zeros
-359 integer variables, 339 of which are binary
+278 rows, 132 columns, 652 non-zeros
+81 integer variables, 73 of which are binary
 Preprocessing...
-153 hidden packing inequaliti(es) were detected
-69 hidden covering inequaliti(es) were detected
-494 constraint coefficient(s) were reduced
-1325 rows, 642 columns, 3167 non-zeros
-323 integer variables, 315 of which are binary
+21 hidden packing inequaliti(es) were detected
+7 hidden covering inequaliti(es) were detected
+58 constraint coefficient(s) were reduced
+177 rows, 90 columns, 372 non-zeros
+47 integer variables, 45 of which are binary
 Scaling...
- A: min|aij| =  1.000e-01  max|aij| =  1.170e+02  ratio =  1.170e+03
-GM: min|aij| =  2.056e-01  max|aij| =  4.865e+00  ratio =  2.366e+01
-EQ: min|aij| =  4.226e-02  max|aij| =  1.000e+00  ratio =  2.366e+01
-2N: min|aij| =  2.500e-02  max|aij| =  1.500e+00  ratio =  6.000e+01
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  3.162e-01  max|aij| =  3.162e+00  ratio =  1.000e+01
+EQ: min|aij| =  1.000e-01  max|aij| =  1.000e+00  ratio =  1.000e+01
+2N: min|aij| =  1.000e-01  max|aij| =  1.250e+00  ratio =  1.250e+01
 Constructing initial basis...
-Size of triangular part is 1325
+Size of triangular part is 177
 Solving LP relaxation...
 GLPK Simplex Optimizer, v4.65
-1325 rows, 642 columns, 3167 non-zeros
-      0: obj =   0.000000000e+00 inf =   2.386e+03 (302)
-    372: obj =   3.333333333e-02 inf =   0.000e+00 (0) 2
+177 rows, 90 columns, 372 non-zeros
+      0: obj =   3.333333333e-02 inf =   2.576e+02 (44)
+     58: obj =   3.333333333e-02 inf =   8.882e-15 (0)
 OPTIMAL LP SOLUTION FOUND
 Integer optimization begins...
 Long-step dual simplex will be used
-+   372: mip =     not found yet >=              -inf        (1; 0)
-+  1584: >>>>>   7.508333333e+01 >=   3.433333333e-02 100.0% (133; 2)
-+  5179: >>>>>   6.658333333e+01 >=   1.254566833e+01  81.2% (285; 75)
-+ 36728: >>>>>   6.457750000e+01 >=   2.355083167e+01  63.5% (766; 715)
-+ 85280: >>>>>   6.407666667e+01 >=   5.607666667e+01  12.5% (553; 4193)
-+108691: mip =   6.407666667e+01 >=   6.212000000e+01   3.1% (324; 25848)
-+121271: mip =   6.407666667e+01 >=   6.212000000e+01   3.1% (325; 51007)
-+134782: mip =   6.407666667e+01 >=   6.262000000e+01   2.3% (265; 76379)
-+148022: mip =   6.407666667e+01 >=   6.262000000e+01   2.3% (355; 100216)
-+161301: mip =   6.407666667e+01 >=   6.262000000e+01   2.3% (457; 123957)
-+201131: mip =   6.407666667e+01 >=   6.407566667e+01 < 0.1% (309; 142481)
++    58: mip =     not found yet >=              -inf        (1; 0)
++   107: >>>>>   1.756666667e+01 >=   3.333333333e-02  99.8% (10; 0)
++   318: >>>>>   1.306666667e+01 >=   1.305833333e+01 < 0.1% (11; 9)
++   318: mip =   1.306666667e+01 >=     tree is empty   0.0% (0; 39)
+INTEGER OPTIMAL SOLUTION FOUND
+Time used:   0.0 secs
+Memory used: 0.4 Mb (373466 bytes)
+Writing MIP solution to '/tmp/de190b57ee7745ada1d804411e055979-pulp.out'...
+Writing MIP solution to '/tmp/de190b57ee7745ada1d804411e055979-pulp.sol'...
+419 lines were written
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 13.07
+
+=== 解 8 ===
+目标函数值: 13.0667
+
+Chiplet坐标（左下角）:
+  A: (10.00, 10.00)
+  B: (20.00, 7.00)
+
+Chiplet中心坐标:
+  A: (15.00, 15.00)
+  B: (25.00, 12.00)
+
+重叠检查:
+  ✓ 无重叠：所有chiplet之间都没有重叠
+
+Chiplet对之间的距离:
+  (A, B): 13.00
+
+与上一解的变化:
+  位置变化的chiplet: B
+  距离变化的chiplet对: 无
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(10.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(20.00, 7.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
+
+布局图片已保存: /root/placement/thermal-placement/output/solution_8_layout.png
+网格化布局: grid_size=0.5, grid_w=60, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (15.00, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 145
+约束数量: 307
+使用求解器: GLPK
+GLPSOL: GLPK LP/MIP Solver, v4.65
+Parameter(s) specified in the command line:
+ --cpxlp /tmp/26a1e5ad1fc3452dbb0d954fd23e2008-pulp.lp -o /tmp/26a1e5ad1fc3452dbb0d954fd23e2008-pulp.out
+ -w /tmp/26a1e5ad1fc3452dbb0d954fd23e2008-pulp.sol --tmlim 300
+Reading problem data from '/tmp/26a1e5ad1fc3452dbb0d954fd23e2008-pulp.lp'...
+307 rows, 145 columns, 715 non-zeros
+90 integer variables, 82 of which are binary
+529 lines were read
+GLPK Integer Optimizer, v4.65
+307 rows, 145 columns, 715 non-zeros
+90 integer variables, 82 of which are binary
+Preprocessing...
+24 hidden packing inequaliti(es) were detected
+8 hidden covering inequaliti(es) were detected
+64 constraint coefficient(s) were reduced
+197 rows, 99 columns, 413 non-zeros
+52 integer variables, 50 of which are binary
+Scaling...
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  3.162e-01  max|aij| =  3.162e+00  ratio =  1.000e+01
+EQ: min|aij| =  1.000e-01  max|aij| =  1.000e+00  ratio =  1.000e+01
+2N: min|aij| =  1.000e-01  max|aij| =  1.250e+00  ratio =  1.250e+01
+Constructing initial basis...
+Size of triangular part is 197
+Solving LP relaxation...
+GLPK Simplex Optimizer, v4.65
+197 rows, 99 columns, 413 non-zeros
+      0: obj =   3.333333333e-02 inf =   2.927e+02 (50)
+     67: obj =   3.333333333e-02 inf =   8.882e-15 (0)
+OPTIMAL LP SOLUTION FOUND
+Integer optimization begins...
+Long-step dual simplex will be used
++    67: mip =     not found yet >=              -inf        (1; 0)
++   117: >>>>>   1.756666667e+01 >=   3.333333333e-02  99.8% (11; 0)
++   435: >>>>>   1.606666667e+01 >=   1.305833333e+01  18.7% (12; 11)
++   440: >>>>>   1.306666667e+01 >=   1.306666667e+01   0.0% (6; 20)
++   440: mip =   1.306666667e+01 >=     tree is empty   0.0% (0; 45)
+INTEGER OPTIMAL SOLUTION FOUND
+Time used:   0.0 secs
+Memory used: 0.4 Mb (410659 bytes)
+Writing MIP solution to '/tmp/26a1e5ad1fc3452dbb0d954fd23e2008-pulp.out'...
+Writing MIP solution to '/tmp/26a1e5ad1fc3452dbb0d954fd23e2008-pulp.sol'...
+461 lines were written
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 13.07
+
+=== 解 9 ===
+目标函数值: 13.0667
+
+Chiplet坐标（左下角）:
+  A: (10.00, 10.00)
+  B: (20.00, 13.00)
+
+Chiplet中心坐标:
+  A: (15.00, 15.00)
+  B: (25.00, 18.00)
+
+重叠检查:
+  ✓ 无重叠：所有chiplet之间都没有重叠
+
+Chiplet对之间的距离:
+  (A, B): 13.00
+
+与上一解的变化:
+  位置变化的chiplet: B
+  距离变化的chiplet对: 无
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(10.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(20.00, 13.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
+
+布局图片已保存: /root/placement/thermal-placement/output/solution_9_layout.png
+网格化布局: grid_size=0.5, grid_w=60, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (15.00, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 158
+约束数量: 336
+使用求解器: GLPK
+GLPSOL: GLPK LP/MIP Solver, v4.65
+Parameter(s) specified in the command line:
+ --cpxlp /tmp/696fa6ced055482a8e91aae2448dbfa6-pulp.lp -o /tmp/696fa6ced055482a8e91aae2448dbfa6-pulp.out
+ -w /tmp/696fa6ced055482a8e91aae2448dbfa6-pulp.sol --tmlim 300
+Reading problem data from '/tmp/696fa6ced055482a8e91aae2448dbfa6-pulp.lp'...
+336 rows, 158 columns, 778 non-zeros
+99 integer variables, 91 of which are binary
+579 lines were read
+GLPK Integer Optimizer, v4.65
+336 rows, 158 columns, 778 non-zeros
+99 integer variables, 91 of which are binary
+Preprocessing...
+27 hidden packing inequaliti(es) were detected
+9 hidden covering inequaliti(es) were detected
+70 constraint coefficient(s) were reduced
+217 rows, 108 columns, 454 non-zeros
+57 integer variables, 55 of which are binary
+Scaling...
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  3.162e-01  max|aij| =  3.162e+00  ratio =  1.000e+01
+EQ: min|aij| =  1.000e-01  max|aij| =  1.000e+00  ratio =  1.000e+01
+2N: min|aij| =  1.000e-01  max|aij| =  1.250e+00  ratio =  1.250e+01
+Constructing initial basis...
+Size of triangular part is 217
+Solving LP relaxation...
+GLPK Simplex Optimizer, v4.65
+217 rows, 108 columns, 454 non-zeros
+      0: obj =   3.333333333e-02 inf =   3.284e+02 (56)
+     76: obj =   3.333333333e-02 inf =   8.882e-15 (0)
+OPTIMAL LP SOLUTION FOUND
+Integer optimization begins...
+Long-step dual simplex will be used
++    76: mip =     not found yet >=              -inf        (1; 0)
++   126: >>>>>   1.756666667e+01 >=   3.333333333e-02  99.8% (10; 0)
++   501: >>>>>   1.606666667e+01 >=   1.006666667e+01  37.3% (12; 14)
++   502: >>>>>   1.306666667e+01 >=   1.306666667e+01   0.0% (7; 27)
++   502: mip =   1.306666667e+01 >=     tree is empty   0.0% (0; 51)
+INTEGER OPTIMAL SOLUTION FOUND
+Time used:   0.0 secs
+Memory used: 0.4 Mb (443270 bytes)
+Writing MIP solution to '/tmp/696fa6ced055482a8e91aae2448dbfa6-pulp.out'...
+Writing MIP solution to '/tmp/696fa6ced055482a8e91aae2448dbfa6-pulp.sol'...
+503 lines were written
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 13.07
+
+=== 解 10 ===
+目标函数值: 13.0667
+
+Chiplet坐标（左下角）:
+  A: (10.00, 10.00)
+  B: (0.00, 13.00)
+
+Chiplet中心坐标:
+  A: (15.00, 15.00)
+  B: (5.00, 18.00)
+
+重叠检查:
+  ✓ 无重叠：所有chiplet之间都没有重叠
+
+Chiplet对之间的距离:
+  (A, B): 13.00
+
+与上一解的变化:
+  位置变化的chiplet: B
+  距离变化的chiplet对: 无
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(10.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(0.00, 13.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
+
+布局图片已保存: /root/placement/thermal-placement/output/solution_10_layout.png
+网格化布局: grid_size=0.5, grid_w=60, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (15.00, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 171
+约束数量: 365
+使用求解器: GLPK
+GLPSOL: GLPK LP/MIP Solver, v4.65
+Parameter(s) specified in the command line:
+ --cpxlp /tmp/05cc20079c4c418c9ba283e0a9babb05-pulp.lp -o /tmp/05cc20079c4c418c9ba283e0a9babb05-pulp.out
+ -w /tmp/05cc20079c4c418c9ba283e0a9babb05-pulp.sol --tmlim 300
+Reading problem data from '/tmp/05cc20079c4c418c9ba283e0a9babb05-pulp.lp'...
+365 rows, 171 columns, 841 non-zeros
+108 integer variables, 100 of which are binary
+629 lines were read
+GLPK Integer Optimizer, v4.65
+365 rows, 171 columns, 841 non-zeros
+108 integer variables, 100 of which are binary
+Preprocessing...
+30 hidden packing inequaliti(es) were detected
+10 hidden covering inequaliti(es) were detected
+76 constraint coefficient(s) were reduced
+237 rows, 117 columns, 495 non-zeros
+62 integer variables, 60 of which are binary
+Scaling...
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  3.162e-01  max|aij| =  3.162e+00  ratio =  1.000e+01
+EQ: min|aij| =  1.000e-01  max|aij| =  1.000e+00  ratio =  1.000e+01
+2N: min|aij| =  1.000e-01  max|aij| =  1.250e+00  ratio =  1.250e+01
+Constructing initial basis...
+Size of triangular part is 237
+Solving LP relaxation...
+GLPK Simplex Optimizer, v4.65
+237 rows, 117 columns, 495 non-zeros
+      0: obj =   3.333333333e-02 inf =   3.619e+02 (61)
+     85: obj =   3.333333333e-02 inf =   8.882e-15 (0)
+OPTIMAL LP SOLUTION FOUND
+Integer optimization begins...
+Long-step dual simplex will be used
++    85: mip =     not found yet >=              -inf        (1; 0)
++   128: >>>>>   1.756666667e+01 >=   3.333333333e-02  99.8% (7; 0)
++   386: >>>>>   1.606666667e+01 >=   1.006666667e+01  37.3% (10; 10)
++   399: >>>>>   1.306666667e+01 >=   1.055833333e+01  19.2% (5; 21)
++   399: mip =   1.306666667e+01 >=     tree is empty   0.0% (0; 39)
+INTEGER OPTIMAL SOLUTION FOUND
+Time used:   0.0 secs
+Memory used: 0.5 Mb (472365 bytes)
+Writing MIP solution to '/tmp/05cc20079c4c418c9ba283e0a9babb05-pulp.out'...
+Writing MIP solution to '/tmp/05cc20079c4c418c9ba283e0a9babb05-pulp.sol'...
+545 lines were written
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 13.07
+
+=== 解 11 ===
+目标函数值: 13.0667
+
+Chiplet坐标（左下角）:
+  A: (10.00, 10.00)
+  B: (0.00, 7.00)
+
+Chiplet中心坐标:
+  A: (15.00, 15.00)
+  B: (5.00, 12.00)
+
+重叠检查:
+  ✓ 无重叠：所有chiplet之间都没有重叠
+
+Chiplet对之间的距离:
+  (A, B): 13.00
+
+与上一解的变化:
+  位置变化的chiplet: B
+  距离变化的chiplet对: 无
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(10.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(0.00, 7.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
+
+布局图片已保存: /root/placement/thermal-placement/output/solution_11_layout.png
+网格化布局: grid_size=0.5, grid_w=60, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (15.00, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 184
+约束数量: 394
+使用求解器: GLPK
+GLPSOL: GLPK LP/MIP Solver, v4.65
+Parameter(s) specified in the command line:
+ --cpxlp /tmp/8185d91630d1479eb636487662bf3b82-pulp.lp -o /tmp/8185d91630d1479eb636487662bf3b82-pulp.out
+ -w /tmp/8185d91630d1479eb636487662bf3b82-pulp.sol --tmlim 300
+Reading problem data from '/tmp/8185d91630d1479eb636487662bf3b82-pulp.lp'...
+394 rows, 184 columns, 904 non-zeros
+117 integer variables, 109 of which are binary
+679 lines were read
+GLPK Integer Optimizer, v4.65
+394 rows, 184 columns, 904 non-zeros
+117 integer variables, 109 of which are binary
+Preprocessing...
+33 hidden packing inequaliti(es) were detected
+11 hidden covering inequaliti(es) were detected
+82 constraint coefficient(s) were reduced
+257 rows, 126 columns, 536 non-zeros
+67 integer variables, 65 of which are binary
+Scaling...
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  3.162e-01  max|aij| =  3.162e+00  ratio =  1.000e+01
+EQ: min|aij| =  1.000e-01  max|aij| =  1.000e+00  ratio =  1.000e+01
+2N: min|aij| =  1.000e-01  max|aij| =  1.250e+00  ratio =  1.250e+01
+Constructing initial basis...
+Size of triangular part is 257
+Solving LP relaxation...
+GLPK Simplex Optimizer, v4.65
+257 rows, 126 columns, 536 non-zeros
+      0: obj =   3.333333333e-02 inf =   3.949e+02 (66)
+     92: obj =   3.333333333e-02 inf =   8.882e-15 (0)
+OPTIMAL LP SOLUTION FOUND
+Integer optimization begins...
+Long-step dual simplex will be used
++    92: mip =     not found yet >=              -inf        (1; 0)
++   139: >>>>>   1.756666667e+01 >=   3.333333333e-02  99.8% (7; 0)
++   372: >>>>>   1.606666667e+01 >=   1.006666667e+01  37.3% (14; 10)
++   374: >>>>>   1.306666667e+01 >=   1.306666667e+01   0.0% (2; 39)
++   374: mip =   1.306666667e+01 >=     tree is empty   0.0% (0; 49)
+INTEGER OPTIMAL SOLUTION FOUND
+Time used:   0.0 secs
+Memory used: 0.5 Mb (525508 bytes)
+Writing MIP solution to '/tmp/8185d91630d1479eb636487662bf3b82-pulp.out'...
+Writing MIP solution to '/tmp/8185d91630d1479eb636487662bf3b82-pulp.sol'...
+587 lines were written
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 13.07
+
+=== 解 12 ===
+目标函数值: 13.0667
+
+Chiplet坐标（左下角）:
+  A: (10.00, 10.00)
+  B: (7.00, 0.00)
+
+Chiplet中心坐标:
+  A: (15.00, 15.00)
+  B: (12.00, 5.00)
+
+重叠检查:
+  ✓ 无重叠：所有chiplet之间都没有重叠
+
+Chiplet对之间的距离:
+  (A, B): 13.00
+
+与上一解的变化:
+  位置变化的chiplet: B
+  距离变化的chiplet对: 无
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(10.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(7.00, 0.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+Ignoring fixed x limits to fulfill fixed data aspect with adjustable data limits.
+
+布局图片已保存: /root/placement/thermal-placement/output/solution_12_layout.png
+网格化布局: grid_size=0.5, grid_w=60, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (15.00, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 197
+约束数量: 423
+使用求解器: GLPK
+GLPSOL: GLPK LP/MIP Solver, v4.65
+Parameter(s) specified in the command line:
+ --cpxlp /tmp/451cb10ad00148aca79beb7a992db8e0-pulp.lp -o /tmp/451cb10ad00148aca79beb7a992db8e0-pulp.out
+ -w /tmp/451cb10ad00148aca79beb7a992db8e0-pulp.sol --tmlim 300
+Reading problem data from '/tmp/451cb10ad00148aca79beb7a992db8e0-pulp.lp'...
+423 rows, 197 columns, 967 non-zeros
+126 integer variables, 118 of which are binary
+729 lines were read
+GLPK Integer Optimizer, v4.65
+423 rows, 197 columns, 967 non-zeros
+126 integer variables, 118 of which are binary
+Preprocessing...
+36 hidden packing inequaliti(es) were detected
+12 hidden covering inequaliti(es) were detected
+88 constraint coefficient(s) were reduced
+277 rows, 135 columns, 577 non-zeros
+72 integer variables, 70 of which are binary
+Scaling...
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  3.162e-01  max|aij| =  3.162e+00  ratio =  1.000e+01
+EQ: min|aij| =  1.000e-01  max|aij| =  1.000e+00  ratio =  1.000e+01
+2N: min|aij| =  1.000e-01  max|aij| =  1.250e+00  ratio =  1.250e+01
+Constructing initial basis...
+Size of triangular part is 277
+Solving LP relaxation...
+GLPK Simplex Optimizer, v4.65
+277 rows, 135 columns, 577 non-zeros
+      0: obj =   3.333333333e-02 inf =   4.279e+02 (71)
+    100: obj =   3.333333333e-02 inf =   3.131e-14 (0)
+OPTIMAL LP SOLUTION FOUND
+Integer optimization begins...
+Long-step dual simplex will be used
++   100: mip =     not found yet >=              -inf        (1; 0)
++   161: >>>>>   1.756666667e+01 >=   3.333333333e-02  99.8% (12; 0)
++   721: >>>>>   1.606666667e+01 >=   1.006666667e+01  37.3% (11; 17)
++   721: mip =   1.606666667e+01 >=     tree is empty   0.0% (0; 55)
+INTEGER OPTIMAL SOLUTION FOUND
+Time used:   0.0 secs
+Memory used: 0.5 Mb (567339 bytes)
+Writing MIP solution to '/tmp/451cb10ad00148aca79beb7a992db8e0-pulp.out'...
+Writing MIP solution to '/tmp/451cb10ad00148aca79beb7a992db8e0-pulp.sol'...
+629 lines were written
+
+求解状态: Optimal
+求解时间: 0.02 秒
+目标函数值: 16.07
+
+=== 解 13 ===
+目标函数值: 16.0667
+
+Chiplet坐标（左下角）:
+  A: (10.00, 10.00)
+  B: (20.00, 4.00)
+
+Chiplet中心坐标:
+  A: (15.00, 15.00)
+  B: (25.00, 9.00)
+
+重叠检查:
+  ✓ 无重叠：所有chiplet之间都没有重叠
+
+Chiplet对之间的距离:
+  (A, B): 16.00
+
+与上一解的变化:
+  位置变化的chiplet: B
+  距离变化的chiplet对: (A,B)
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(10.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(20.00, 4.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
+
+布局图片已保存: /root/placement/thermal-placement/output/solution_13_layout.png
+网格化布局: grid_size=0.5, grid_w=60, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (15.00, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 210
+约束数量: 452
+使用求解器: GLPK
+GLPSOL: GLPK LP/MIP Solver, v4.65
+Parameter(s) specified in the command line:
+ --cpxlp /tmp/676f11ddd99c463b944946c750c7b948-pulp.lp -o /tmp/676f11ddd99c463b944946c750c7b948-pulp.out
+ -w /tmp/676f11ddd99c463b944946c750c7b948-pulp.sol --tmlim 300
+Reading problem data from '/tmp/676f11ddd99c463b944946c750c7b948-pulp.lp'...
+452 rows, 210 columns, 1030 non-zeros
+135 integer variables, 127 of which are binary
+779 lines were read
+GLPK Integer Optimizer, v4.65
+452 rows, 210 columns, 1030 non-zeros
+135 integer variables, 127 of which are binary
+Preprocessing...
+39 hidden packing inequaliti(es) were detected
+13 hidden covering inequaliti(es) were detected
+94 constraint coefficient(s) were reduced
+297 rows, 144 columns, 618 non-zeros
+77 integer variables, 75 of which are binary
+Scaling...
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  3.162e-01  max|aij| =  3.162e+00  ratio =  1.000e+01
+EQ: min|aij| =  1.000e-01  max|aij| =  1.000e+00  ratio =  1.000e+01
+2N: min|aij| =  1.000e-01  max|aij| =  1.250e+00  ratio =  1.250e+01
+Constructing initial basis...
+Size of triangular part is 297
+Solving LP relaxation...
+GLPK Simplex Optimizer, v4.65
+297 rows, 144 columns, 618 non-zeros
+      0: obj =   3.333333333e-02 inf =   4.645e+02 (77)
+    109: obj =   3.333333333e-02 inf =   5.729e-14 (0)
+OPTIMAL LP SOLUTION FOUND
+Integer optimization begins...
+Long-step dual simplex will be used
++   109: mip =     not found yet >=              -inf        (1; 0)
++   174: >>>>>   1.756666667e+01 >=   3.333333333e-02  99.8% (13; 0)
++   691: >>>>>   1.606666667e+01 >=   1.606666667e+01   0.0% (7; 19)
++   691: mip =   1.606666667e+01 >=     tree is empty   0.0% (0; 49)
+INTEGER OPTIMAL SOLUTION FOUND
+Time used:   0.0 secs
+Memory used: 0.6 Mb (604194 bytes)
+Writing MIP solution to '/tmp/676f11ddd99c463b944946c750c7b948-pulp.out'...
+Writing MIP solution to '/tmp/676f11ddd99c463b944946c750c7b948-pulp.sol'...
+671 lines were written
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 16.07
+
+=== 解 14 ===
+目标函数值: 16.0667
+
+Chiplet坐标（左下角）:
+  A: (10.00, 10.00)
+  B: (0.00, 16.00)
+
+Chiplet中心坐标:
+  A: (15.00, 15.00)
+  B: (5.00, 21.00)
+
+重叠检查:
+  ✓ 无重叠：所有chiplet之间都没有重叠
+
+Chiplet对之间的距离:
+  (A, B): 16.00
+
+与上一解的变化:
+  位置变化的chiplet: B
+  距离变化的chiplet对: 无
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(10.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(0.00, 16.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
+
+布局图片已保存: /root/placement/thermal-placement/output/solution_14_layout.png
+网格化布局: grid_size=0.5, grid_w=60, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (15.00, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 223
+约束数量: 481
+使用求解器: GLPK
+GLPSOL: GLPK LP/MIP Solver, v4.65
+Parameter(s) specified in the command line:
+ --cpxlp /tmp/9f87d23759304f079be4569f8b8d25fe-pulp.lp -o /tmp/9f87d23759304f079be4569f8b8d25fe-pulp.out
+ -w /tmp/9f87d23759304f079be4569f8b8d25fe-pulp.sol --tmlim 300
+Reading problem data from '/tmp/9f87d23759304f079be4569f8b8d25fe-pulp.lp'...
+481 rows, 223 columns, 1093 non-zeros
+144 integer variables, 136 of which are binary
+829 lines were read
+GLPK Integer Optimizer, v4.65
+481 rows, 223 columns, 1093 non-zeros
+144 integer variables, 136 of which are binary
+Preprocessing...
+42 hidden packing inequaliti(es) were detected
+14 hidden covering inequaliti(es) were detected
+100 constraint coefficient(s) were reduced
+317 rows, 153 columns, 659 non-zeros
+82 integer variables, 80 of which are binary
+Scaling...
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  3.162e-01  max|aij| =  3.162e+00  ratio =  1.000e+01
+EQ: min|aij| =  1.000e-01  max|aij| =  1.000e+00  ratio =  1.000e+01
+2N: min|aij| =  1.000e-01  max|aij| =  1.250e+00  ratio =  1.250e+01
+Constructing initial basis...
+Size of triangular part is 317
+Solving LP relaxation...
+GLPK Simplex Optimizer, v4.65
+317 rows, 153 columns, 659 non-zeros
+      0: obj =   3.333333333e-02 inf =   5.001e+02 (82)
+    116: obj =   3.333333333e-02 inf =   3.553e-14 (0)
+OPTIMAL LP SOLUTION FOUND
+Integer optimization begins...
+Long-step dual simplex will be used
++   116: mip =     not found yet >=              -inf        (1; 0)
++   177: >>>>>   1.756666667e+01 >=   3.333333333e-02  99.8% (8; 0)
++   515: >>>>>   1.606666667e+01 >=   1.606666667e+01   0.0% (8; 16)
++   515: mip =   1.606666667e+01 >=     tree is empty   0.0% (0; 45)
+INTEGER OPTIMAL SOLUTION FOUND
+Time used:   0.0 secs
+Memory used: 0.6 Mb (632125 bytes)
+Writing MIP solution to '/tmp/9f87d23759304f079be4569f8b8d25fe-pulp.out'...
+Writing MIP solution to '/tmp/9f87d23759304f079be4569f8b8d25fe-pulp.sol'...
+713 lines were written
+
+求解状态: Optimal
+求解时间: 0.02 秒
+目标函数值: 16.07
+
+=== 解 15 ===
+目标函数值: 16.0667
+
+Chiplet坐标（左下角）:
+  A: (10.00, 10.00)
+  B: (16.00, 0.00)
+
+Chiplet中心坐标:
+  A: (15.00, 15.00)
+  B: (21.00, 5.00)
+
+重叠检查:
+  ✓ 无重叠：所有chiplet之间都没有重叠
+
+Chiplet对之间的距离:
+  (A, B): 16.00
+
+与上一解的变化:
+  位置变化的chiplet: B
+  距离变化的chiplet对: 无
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(10.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(16.00, 0.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+Ignoring fixed x limits to fulfill fixed data aspect with adjustable data limits.
+
+布局图片已保存: /root/placement/thermal-placement/output/solution_15_layout.png
+网格化布局: grid_size=0.5, grid_w=60, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (15.00, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 236
+约束数量: 510
+使用求解器: GLPK
+GLPSOL: GLPK LP/MIP Solver, v4.65
+Parameter(s) specified in the command line:
+ --cpxlp /tmp/63f370da03d94b03a85517cec1e887c8-pulp.lp -o /tmp/63f370da03d94b03a85517cec1e887c8-pulp.out
+ -w /tmp/63f370da03d94b03a85517cec1e887c8-pulp.sol --tmlim 300
+Reading problem data from '/tmp/63f370da03d94b03a85517cec1e887c8-pulp.lp'...
+510 rows, 236 columns, 1156 non-zeros
+153 integer variables, 145 of which are binary
+879 lines were read
+GLPK Integer Optimizer, v4.65
+510 rows, 236 columns, 1156 non-zeros
+153 integer variables, 145 of which are binary
+Preprocessing...
+45 hidden packing inequaliti(es) were detected
+15 hidden covering inequaliti(es) were detected
+106 constraint coefficient(s) were reduced
+337 rows, 162 columns, 700 non-zeros
+87 integer variables, 85 of which are binary
+Scaling...
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  3.162e-01  max|aij| =  3.162e+00  ratio =  1.000e+01
+EQ: min|aij| =  1.000e-01  max|aij| =  1.000e+00  ratio =  1.000e+01
+2N: min|aij| =  1.000e-01  max|aij| =  1.250e+00  ratio =  1.250e+01
+Constructing initial basis...
+Size of triangular part is 337
+Solving LP relaxation...
+GLPK Simplex Optimizer, v4.65
+337 rows, 162 columns, 700 non-zeros
+      0: obj =   3.333333333e-02 inf =   5.357e+02 (87)
+    124: obj =   3.333333333e-02 inf =   3.642e-14 (0)
+*   125: obj =   3.333333333e-02 inf =   3.642e-14 (0)
+OPTIMAL LP SOLUTION FOUND
+Integer optimization begins...
+Long-step dual simplex will be used
++   125: mip =     not found yet >=              -inf        (1; 0)
++   415: >>>>>   1.756666667e+01 >=   7.034333333e+00  60.0% (11; 4)
++   492: >>>>>   1.606666667e+01 >=   1.606666667e+01   0.0% (8; 13)
++   492: mip =   1.606666667e+01 >=     tree is empty   0.0% (0; 39)
+INTEGER OPTIMAL SOLUTION FOUND
+Time used:   0.0 secs
+Memory used: 0.6 Mb (665618 bytes)
+Writing MIP solution to '/tmp/63f370da03d94b03a85517cec1e887c8-pulp.out'...
+Writing MIP solution to '/tmp/63f370da03d94b03a85517cec1e887c8-pulp.sol'...
+755 lines were written
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 16.07
+
+=== 解 16 ===
+目标函数值: 16.0667
+
+Chiplet坐标（左下角）:
+  A: (10.00, 10.00)
+  B: (16.00, 20.00)
+
+Chiplet中心坐标:
+  A: (15.00, 15.00)
+  B: (21.00, 25.00)
+
+重叠检查:
+  ✓ 无重叠：所有chiplet之间都没有重叠
+
+Chiplet对之间的距离:
+  (A, B): 16.00
+
+与上一解的变化:
+  位置变化的chiplet: B
+  距离变化的chiplet对: 无
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(10.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(16.00, 20.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+Ignoring fixed x limits to fulfill fixed data aspect with adjustable data limits.
+
+布局图片已保存: /root/placement/thermal-placement/output/solution_16_layout.png
+网格化布局: grid_size=0.5, grid_w=60, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (15.00, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 249
+约束数量: 539
+使用求解器: GLPK
+GLPSOL: GLPK LP/MIP Solver, v4.65
+Parameter(s) specified in the command line:
+ --cpxlp /tmp/c189b3d4549b4c6082d8bc638aedae73-pulp.lp -o /tmp/c189b3d4549b4c6082d8bc638aedae73-pulp.out
+ -w /tmp/c189b3d4549b4c6082d8bc638aedae73-pulp.sol --tmlim 300
+Reading problem data from '/tmp/c189b3d4549b4c6082d8bc638aedae73-pulp.lp'...
+539 rows, 249 columns, 1219 non-zeros
+162 integer variables, 154 of which are binary
+929 lines were read
+GLPK Integer Optimizer, v4.65
+539 rows, 249 columns, 1219 non-zeros
+162 integer variables, 154 of which are binary
+Preprocessing...
+48 hidden packing inequaliti(es) were detected
+16 hidden covering inequaliti(es) were detected
+112 constraint coefficient(s) were reduced
+357 rows, 171 columns, 741 non-zeros
+92 integer variables, 90 of which are binary
+Scaling...
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  3.162e-01  max|aij| =  3.162e+00  ratio =  1.000e+01
+EQ: min|aij| =  1.000e-01  max|aij| =  1.000e+00  ratio =  1.000e+01
+2N: min|aij| =  1.000e-01  max|aij| =  1.250e+00  ratio =  1.250e+01
+Constructing initial basis...
+Size of triangular part is 357
+Solving LP relaxation...
+GLPK Simplex Optimizer, v4.65
+357 rows, 171 columns, 741 non-zeros
+      0: obj =   3.333333333e-02 inf =   5.735e+02 (93)
+    117: obj =   1.006666667e+01 inf =   1.647e-14 (0)
+*   158: obj =   3.333333333e-02 inf =   3.331e-16 (0) 1
+OPTIMAL LP SOLUTION FOUND
+Integer optimization begins...
+Long-step dual simplex will be used
++   158: mip =     not found yet >=              -inf        (1; 0)
++   493: >>>>>   1.606666667e+01 >=   1.606666667e+01   0.0% (19; 3)
++   493: mip =   1.606666667e+01 >=     tree is empty   0.0% (0; 43)
+INTEGER OPTIMAL SOLUTION FOUND
+Time used:   0.0 secs
+Memory used: 0.6 Mb (676923 bytes)
+Writing MIP solution to '/tmp/c189b3d4549b4c6082d8bc638aedae73-pulp.out'...
+Writing MIP solution to '/tmp/c189b3d4549b4c6082d8bc638aedae73-pulp.sol'...
+797 lines were written
+
+求解状态: Optimal
+求解时间: 0.02 秒
+目标函数值: 16.07
+
+=== 解 17 ===
+目标函数值: 16.0667
+
+Chiplet坐标（左下角）:
+  A: (10.00, 10.00)
+  B: (20.00, 16.00)
+
+Chiplet中心坐标:
+  A: (15.00, 15.00)
+  B: (25.00, 21.00)
+
+重叠检查:
+  ✓ 无重叠：所有chiplet之间都没有重叠
+
+Chiplet对之间的距离:
+  (A, B): 16.00
+
+与上一解的变化:
+  位置变化的chiplet: B
+  距离变化的chiplet对: 无
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(10.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(20.00, 16.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
+
+布局图片已保存: /root/placement/thermal-placement/output/solution_17_layout.png
+网格化布局: grid_size=0.5, grid_w=60, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (15.00, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 262
+约束数量: 568
+使用求解器: GLPK
+GLPSOL: GLPK LP/MIP Solver, v4.65
+Parameter(s) specified in the command line:
+ --cpxlp /tmp/04ad027ae5dd4a448a9c8187744c01f4-pulp.lp -o /tmp/04ad027ae5dd4a448a9c8187744c01f4-pulp.out
+ -w /tmp/04ad027ae5dd4a448a9c8187744c01f4-pulp.sol --tmlim 300
+Reading problem data from '/tmp/04ad027ae5dd4a448a9c8187744c01f4-pulp.lp'...
+568 rows, 262 columns, 1282 non-zeros
+171 integer variables, 163 of which are binary
+979 lines were read
+GLPK Integer Optimizer, v4.65
+568 rows, 262 columns, 1282 non-zeros
+171 integer variables, 163 of which are binary
+Preprocessing...
+51 hidden packing inequaliti(es) were detected
+17 hidden covering inequaliti(es) were detected
+118 constraint coefficient(s) were reduced
+377 rows, 180 columns, 782 non-zeros
+97 integer variables, 95 of which are binary
+Scaling...
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  3.162e-01  max|aij| =  3.162e+00  ratio =  1.000e+01
+EQ: min|aij| =  1.000e-01  max|aij| =  1.000e+00  ratio =  1.000e+01
+2N: min|aij| =  1.000e-01  max|aij| =  1.250e+00  ratio =  1.250e+01
+Constructing initial basis...
+Size of triangular part is 377
+Solving LP relaxation...
+GLPK Simplex Optimizer, v4.65
+377 rows, 180 columns, 782 non-zeros
+      0: obj =   3.333333333e-02 inf =   6.112e+02 (99)
+    123: obj =   1.006666667e+01 inf =   1.780e-14 (0)
+*   167: obj =   3.333333333e-02 inf =   2.429e-13 (0) 1
+OPTIMAL LP SOLUTION FOUND
+Integer optimization begins...
+Long-step dual simplex will be used
++   167: mip =     not found yet >=              -inf        (1; 0)
++   518: >>>>>   1.606666667e+01 >=   1.606666667e+01   0.0% (14; 6)
++   518: mip =   1.606666667e+01 >=     tree is empty   0.0% (0; 39)
+INTEGER OPTIMAL SOLUTION FOUND
+Time used:   0.0 secs
+Memory used: 0.7 Mb (698468 bytes)
+Writing MIP solution to '/tmp/04ad027ae5dd4a448a9c8187744c01f4-pulp.out'...
+Writing MIP solution to '/tmp/04ad027ae5dd4a448a9c8187744c01f4-pulp.sol'...
+839 lines were written
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 16.07
+
+=== 解 18 ===
+目标函数值: 16.0667
+
+Chiplet坐标（左下角）:
+  A: (10.00, 10.00)
+  B: (4.00, 20.00)
+
+Chiplet中心坐标:
+  A: (15.00, 15.00)
+  B: (9.00, 25.00)
+
+重叠检查:
+  ✓ 无重叠：所有chiplet之间都没有重叠
+
+Chiplet对之间的距离:
+  (A, B): 16.00
+
+与上一解的变化:
+  位置变化的chiplet: B
+  距离变化的chiplet对: 无
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(10.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(4.00, 20.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+Ignoring fixed x limits to fulfill fixed data aspect with adjustable data limits.
+
+布局图片已保存: /root/placement/thermal-placement/output/solution_18_layout.png
+网格化布局: grid_size=0.5, grid_w=60, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (15.00, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 275
+约束数量: 597
+使用求解器: GLPK
+GLPSOL: GLPK LP/MIP Solver, v4.65
+Parameter(s) specified in the command line:
+ --cpxlp /tmp/0e302f3e72584d1a8587330f8d8b1ebe-pulp.lp -o /tmp/0e302f3e72584d1a8587330f8d8b1ebe-pulp.out
+ -w /tmp/0e302f3e72584d1a8587330f8d8b1ebe-pulp.sol --tmlim 300
+Reading problem data from '/tmp/0e302f3e72584d1a8587330f8d8b1ebe-pulp.lp'...
+597 rows, 275 columns, 1345 non-zeros
+180 integer variables, 172 of which are binary
+1029 lines were read
+GLPK Integer Optimizer, v4.65
+597 rows, 275 columns, 1345 non-zeros
+180 integer variables, 172 of which are binary
+Preprocessing...
+54 hidden packing inequaliti(es) were detected
+18 hidden covering inequaliti(es) were detected
+124 constraint coefficient(s) were reduced
+397 rows, 189 columns, 823 non-zeros
+102 integer variables, 100 of which are binary
+Scaling...
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  3.162e-01  max|aij| =  3.162e+00  ratio =  1.000e+01
+EQ: min|aij| =  1.000e-01  max|aij| =  1.000e+00  ratio =  1.000e+01
+2N: min|aij| =  1.000e-01  max|aij| =  1.250e+00  ratio =  1.250e+01
+Constructing initial basis...
+Size of triangular part is 397
+Solving LP relaxation...
+GLPK Simplex Optimizer, v4.65
+397 rows, 189 columns, 823 non-zeros
+      0: obj =   3.333333333e-02 inf =   6.479e+02 (105)
+    131: obj =   1.006666667e+01 inf =   0.000e+00 (0) 1
+*   176: obj =   3.333333333e-02 inf =   0.000e+00 (0)
+OPTIMAL LP SOLUTION FOUND
+Integer optimization begins...
+Long-step dual simplex will be used
++   176: mip =     not found yet >=              -inf        (1; 0)
++   494: >>>>>   1.606666667e+01 >=   1.606666667e+01   0.0% (13; 6)
++   494: mip =   1.606666667e+01 >=     tree is empty   0.0% (0; 37)
+INTEGER OPTIMAL SOLUTION FOUND
+Time used:   0.0 secs
+Memory used: 0.7 Mb (729463 bytes)
+Writing MIP solution to '/tmp/0e302f3e72584d1a8587330f8d8b1ebe-pulp.out'...
+Writing MIP solution to '/tmp/0e302f3e72584d1a8587330f8d8b1ebe-pulp.sol'...
+881 lines were written
+
+求解状态: Optimal
+求解时间: 0.02 秒
+目标函数值: 16.07
+
+=== 解 19 ===
+目标函数值: 16.0667
+
+Chiplet坐标（左下角）:
+  A: (10.00, 10.00)
+  B: (4.00, 0.00)
+
+Chiplet中心坐标:
+  A: (15.00, 15.00)
+  B: (9.00, 5.00)
+
+重叠检查:
+  ✓ 无重叠：所有chiplet之间都没有重叠
+
+Chiplet对之间的距离:
+  (A, B): 16.00
+
+与上一解的变化:
+  位置变化的chiplet: B
+  距离变化的chiplet对: 无
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(10.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(4.00, 0.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+Ignoring fixed x limits to fulfill fixed data aspect with adjustable data limits.
+
+布局图片已保存: /root/placement/thermal-placement/output/solution_19_layout.png
+网格化布局: grid_size=0.5, grid_w=60, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (15.00, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 288
+约束数量: 626
+使用求解器: GLPK
+GLPSOL: GLPK LP/MIP Solver, v4.65
+Parameter(s) specified in the command line:
+ --cpxlp /tmp/c2a3cf745d65424382d539bbc3e4ef5f-pulp.lp -o /tmp/c2a3cf745d65424382d539bbc3e4ef5f-pulp.out
+ -w /tmp/c2a3cf745d65424382d539bbc3e4ef5f-pulp.sol --tmlim 300
+Reading problem data from '/tmp/c2a3cf745d65424382d539bbc3e4ef5f-pulp.lp'...
+626 rows, 288 columns, 1408 non-zeros
+189 integer variables, 181 of which are binary
+1079 lines were read
+GLPK Integer Optimizer, v4.65
+626 rows, 288 columns, 1408 non-zeros
+189 integer variables, 181 of which are binary
+Preprocessing...
+57 hidden packing inequaliti(es) were detected
+19 hidden covering inequaliti(es) were detected
+130 constraint coefficient(s) were reduced
+417 rows, 198 columns, 864 non-zeros
+107 integer variables, 105 of which are binary
+Scaling...
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  3.162e-01  max|aij| =  3.162e+00  ratio =  1.000e+01
+EQ: min|aij| =  1.000e-01  max|aij| =  1.000e+00  ratio =  1.000e+01
+2N: min|aij| =  1.000e-01  max|aij| =  1.250e+00  ratio =  1.250e+01
+Constructing initial basis...
+Size of triangular part is 417
+Solving LP relaxation...
+GLPK Simplex Optimizer, v4.65
+417 rows, 198 columns, 864 non-zeros
+      0: obj =   3.333333333e-02 inf =   6.824e+02 (110)
+    138: obj =   1.006666667e+01 inf =   0.000e+00 (0) 1
+*   184: obj =   3.333333333e-02 inf =   0.000e+00 (0)
+OPTIMAL LP SOLUTION FOUND
+Integer optimization begins...
+Long-step dual simplex will be used
++   184: mip =     not found yet >=              -inf        (1; 0)
++   469: >>>>>   1.606666667e+01 >=   1.606666667e+01   0.0% (12; 7)
++   469: mip =   1.606666667e+01 >=     tree is empty   0.0% (0; 37)
+INTEGER OPTIMAL SOLUTION FOUND
+Time used:   0.0 secs
+Memory used: 0.7 Mb (768480 bytes)
+Writing MIP solution to '/tmp/c2a3cf745d65424382d539bbc3e4ef5f-pulp.out'...
+Writing MIP solution to '/tmp/c2a3cf745d65424382d539bbc3e4ef5f-pulp.sol'...
+923 lines were written
+
+求解状态: Optimal
+求解时间: 0.02 秒
+目标函数值: 16.07
+
+=== 解 20 ===
+目标函数值: 16.0667
+
+Chiplet坐标（左下角）:
+  A: (10.00, 10.00)
+  B: (0.00, 4.00)
+
+Chiplet中心坐标:
+  A: (15.00, 15.00)
+  B: (5.00, 9.00)
+
+重叠检查:
+  ✓ 无重叠：所有chiplet之间都没有重叠
+
+Chiplet对之间的距离:
+  (A, B): 16.00
+
+与上一解的变化:
+  位置变化的chiplet: B
+  距离变化的chiplet对: 无
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(10.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(0.00, 4.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
+
+布局图片已保存: /root/placement/thermal-placement/output/solution_20_layout.png
+网格化布局: grid_size=0.5, grid_w=60, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (15.00, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 301
+约束数量: 655
+使用求解器: GLPK
+GLPSOL: GLPK LP/MIP Solver, v4.65
+Parameter(s) specified in the command line:
+ --cpxlp /tmp/b9b7be87ad4c4e6ebf0aa89456d076ef-pulp.lp -o /tmp/b9b7be87ad4c4e6ebf0aa89456d076ef-pulp.out
+ -w /tmp/b9b7be87ad4c4e6ebf0aa89456d076ef-pulp.sol --tmlim 300
+Reading problem data from '/tmp/b9b7be87ad4c4e6ebf0aa89456d076ef-pulp.lp'...
+655 rows, 301 columns, 1471 non-zeros
+198 integer variables, 190 of which are binary
+1129 lines were read
+GLPK Integer Optimizer, v4.65
+655 rows, 301 columns, 1471 non-zeros
+198 integer variables, 190 of which are binary
+Preprocessing...
+60 hidden packing inequaliti(es) were detected
+20 hidden covering inequaliti(es) were detected
+136 constraint coefficient(s) were reduced
+437 rows, 207 columns, 905 non-zeros
+112 integer variables, 110 of which are binary
+Scaling...
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  3.162e-01  max|aij| =  3.162e+00  ratio =  1.000e+01
+EQ: min|aij| =  1.000e-01  max|aij| =  1.000e+00  ratio =  1.000e+01
+2N: min|aij| =  1.000e-01  max|aij| =  1.250e+00  ratio =  1.250e+01
+Constructing initial basis...
+Size of triangular part is 437
+Solving LP relaxation...
+GLPK Simplex Optimizer, v4.65
+437 rows, 207 columns, 905 non-zeros
+      0: obj =   3.333333333e-02 inf =   7.169e+02 (115)
+    145: obj =   1.006666667e+01 inf =   0.000e+00 (0) 1
+*   192: obj =   3.333333333e-02 inf =   0.000e+00 (0)
+OPTIMAL LP SOLUTION FOUND
+Integer optimization begins...
+Long-step dual simplex will be used
++   192: mip =     not found yet >=              -inf        (1; 0)
++   465: >>>>>   1.906666667e+01 >=   1.706766667e+01  10.5% (11; 4)
++   468: mip =   1.906666667e+01 >=     tree is empty   0.0% (0; 29)
+INTEGER OPTIMAL SOLUTION FOUND
+Time used:   0.0 secs
+Memory used: 0.8 Mb (807791 bytes)
+Writing MIP solution to '/tmp/b9b7be87ad4c4e6ebf0aa89456d076ef-pulp.out'...
+Writing MIP solution to '/tmp/b9b7be87ad4c4e6ebf0aa89456d076ef-pulp.sol'...
+965 lines were written
+
+求解状态: Optimal
+求解时间: 0.02 秒
+目标函数值: 19.07
+
+=== 解 21 ===
+目标函数值: 19.0667
+
+Chiplet坐标（左下角）:
+  A: (10.00, 10.00)
+  B: (0.00, 1.00)
+
+Chiplet中心坐标:
+  A: (15.00, 15.00)
+  B: (5.00, 6.00)
+
+重叠检查:
+  ✓ 无重叠：所有chiplet之间都没有重叠
+
+Chiplet对之间的距离:
+  (A, B): 19.00
+
+与上一解的变化:
+  位置变化的chiplet: B
+  距离变化的chiplet对: (A,B)
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(10.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(0.00, 1.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+Ignoring fixed x limits to fulfill fixed data aspect with adjustable data limits.
+
+布局图片已保存: /root/placement/thermal-placement/output/solution_21_layout.png
+网格化布局: grid_size=0.5, grid_w=60, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (15.00, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 314
+约束数量: 684
+使用求解器: GLPK
+GLPSOL: GLPK LP/MIP Solver, v4.65
+Parameter(s) specified in the command line:
+ --cpxlp /tmp/904eba251bc0482581504fcfc269a355-pulp.lp -o /tmp/904eba251bc0482581504fcfc269a355-pulp.out
+ -w /tmp/904eba251bc0482581504fcfc269a355-pulp.sol --tmlim 300
+Reading problem data from '/tmp/904eba251bc0482581504fcfc269a355-pulp.lp'...
+684 rows, 314 columns, 1534 non-zeros
+207 integer variables, 199 of which are binary
+1179 lines were read
+GLPK Integer Optimizer, v4.65
+684 rows, 314 columns, 1534 non-zeros
+207 integer variables, 199 of which are binary
+Preprocessing...
+62 hidden packing inequaliti(es) were detected
+20 hidden covering inequaliti(es) were detected
+140 constraint coefficient(s) were reduced
+455 rows, 215 columns, 940 non-zeros
+116 integer variables, 114 of which are binary
+Scaling...
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  3.162e-01  max|aij| =  3.162e+00  ratio =  1.000e+01
+EQ: min|aij| =  1.000e-01  max|aij| =  1.000e+00  ratio =  1.000e+01
+2N: min|aij| =  1.000e-01  max|aij| =  1.250e+00  ratio =  1.250e+01
+Constructing initial basis...
+Size of triangular part is 455
+Solving LP relaxation...
+GLPK Simplex Optimizer, v4.65
+455 rows, 215 columns, 940 non-zeros
+      0: obj =   3.333333333e-02 inf =   7.539e+02 (119)
+    154: obj =   1.006666667e+01 inf =   0.000e+00 (0) 1
+*   204: obj =   3.333333333e-02 inf =   0.000e+00 (0)
+OPTIMAL LP SOLUTION FOUND
+Integer optimization begins...
+Long-step dual simplex will be used
++   204: mip =     not found yet >=              -inf        (1; 0)
++   361: >>>>>   1.906666667e+01 >=   1.003333333e+01  47.4% (6; 1)
++   453: mip =   1.906666667e+01 >=     tree is empty   0.0% (0; 15)
+INTEGER OPTIMAL SOLUTION FOUND
+Time used:   0.0 secs
+Memory used: 0.8 Mb (810977 bytes)
+Writing MIP solution to '/tmp/904eba251bc0482581504fcfc269a355-pulp.out'...
+Writing MIP solution to '/tmp/904eba251bc0482581504fcfc269a355-pulp.sol'...
+1007 lines were written
+
+求解状态: Optimal
+求解时间: 0.02 秒
+目标函数值: 19.07
+
+=== 解 22 ===
+目标函数值: 19.0667
+
+Chiplet坐标（左下角）:
+  A: (10.00, 10.00)
+  B: (19.00, 0.00)
+
+Chiplet中心坐标:
+  A: (15.00, 15.00)
+  B: (24.00, 5.00)
+
+重叠检查:
+  ✓ 无重叠：所有chiplet之间都没有重叠
+
+Chiplet对之间的距离:
+  (A, B): 19.00
+
+与上一解的变化:
+  位置变化的chiplet: B
+  距离变化的chiplet对: 无
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(10.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(19.00, 0.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+Ignoring fixed x limits to fulfill fixed data aspect with adjustable data limits.
+
+布局图片已保存: /root/placement/thermal-placement/output/solution_22_layout.png
+网格化布局: grid_size=0.5, grid_w=60, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (15.00, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 327
+约束数量: 713
+使用求解器: GLPK
+GLPSOL: GLPK LP/MIP Solver, v4.65
+Parameter(s) specified in the command line:
+ --cpxlp /tmp/6f8c79d8f8234b4186c86f6160494d60-pulp.lp -o /tmp/6f8c79d8f8234b4186c86f6160494d60-pulp.out
+ -w /tmp/6f8c79d8f8234b4186c86f6160494d60-pulp.sol --tmlim 300
+Reading problem data from '/tmp/6f8c79d8f8234b4186c86f6160494d60-pulp.lp'...
+713 rows, 327 columns, 1597 non-zeros
+216 integer variables, 208 of which are binary
+1229 lines were read
+GLPK Integer Optimizer, v4.65
+713 rows, 327 columns, 1597 non-zeros
+216 integer variables, 208 of which are binary
+Preprocessing...
+64 hidden packing inequaliti(es) were detected
+20 hidden covering inequaliti(es) were detected
+144 constraint coefficient(s) were reduced
+473 rows, 223 columns, 975 non-zeros
+120 integer variables, 118 of which are binary
+Scaling...
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  3.162e-01  max|aij| =  3.162e+00  ratio =  1.000e+01
+EQ: min|aij| =  1.000e-01  max|aij| =  1.000e+00  ratio =  1.000e+01
+2N: min|aij| =  1.000e-01  max|aij| =  1.250e+00  ratio =  1.250e+01
+Constructing initial basis...
+Size of triangular part is 473
+Solving LP relaxation...
+GLPK Simplex Optimizer, v4.65
+473 rows, 223 columns, 975 non-zeros
+      0: obj =   3.333333333e-02 inf =   7.929e+02 (124)
+    160: obj =   1.006666667e+01 inf =   0.000e+00 (0) 1
+*   211: obj =   3.333333333e-02 inf =   0.000e+00 (0)
+OPTIMAL LP SOLUTION FOUND
+Integer optimization begins...
+Long-step dual simplex will be used
++   211: mip =     not found yet >=              -inf        (1; 0)
++   419: >>>>>   1.906666667e+01 >=   1.003333333e+01  47.4% (6; 2)
++   457: mip =   1.906666667e+01 >=     tree is empty   0.0% (0; 15)
+INTEGER OPTIMAL SOLUTION FOUND
+Time used:   0.0 secs
+Memory used: 0.8 Mb (846699 bytes)
+Writing MIP solution to '/tmp/6f8c79d8f8234b4186c86f6160494d60-pulp.out'...
+Writing MIP solution to '/tmp/6f8c79d8f8234b4186c86f6160494d60-pulp.sol'...
+1049 lines were written
+
+求解状态: Optimal
+求解时间: 0.02 秒
+目标函数值: 19.07
+
+=== 解 23 ===
+目标函数值: 19.0667
+
+Chiplet坐标（左下角）:
+  A: (10.00, 10.00)
+  B: (0.00, 19.00)
+
+Chiplet中心坐标:
+  A: (15.00, 15.00)
+  B: (5.00, 24.00)
+
+重叠检查:
+  ✓ 无重叠：所有chiplet之间都没有重叠
+
+Chiplet对之间的距离:
+  (A, B): 19.00
+
+与上一解的变化:
+  位置变化的chiplet: B
+  距离变化的chiplet对: 无
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(10.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(0.00, 19.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+Ignoring fixed x limits to fulfill fixed data aspect with adjustable data limits.
+
+布局图片已保存: /root/placement/thermal-placement/output/solution_23_layout.png
+网格化布局: grid_size=0.5, grid_w=60, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (15.00, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 340
+约束数量: 742
+使用求解器: GLPK
+GLPSOL: GLPK LP/MIP Solver, v4.65
+Parameter(s) specified in the command line:
+ --cpxlp /tmp/8866cf2c412441208782a6b0dbaebd95-pulp.lp -o /tmp/8866cf2c412441208782a6b0dbaebd95-pulp.out
+ -w /tmp/8866cf2c412441208782a6b0dbaebd95-pulp.sol --tmlim 300
+Reading problem data from '/tmp/8866cf2c412441208782a6b0dbaebd95-pulp.lp'...
+742 rows, 340 columns, 1660 non-zeros
+225 integer variables, 217 of which are binary
+1279 lines were read
+GLPK Integer Optimizer, v4.65
+742 rows, 340 columns, 1660 non-zeros
+225 integer variables, 217 of which are binary
+Preprocessing...
+66 hidden packing inequaliti(es) were detected
+20 hidden covering inequaliti(es) were detected
+148 constraint coefficient(s) were reduced
+491 rows, 231 columns, 1010 non-zeros
+124 integer variables, 122 of which are binary
+Scaling...
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  3.162e-01  max|aij| =  3.162e+00  ratio =  1.000e+01
+EQ: min|aij| =  1.000e-01  max|aij| =  1.000e+00  ratio =  1.000e+01
+2N: min|aij| =  1.000e-01  max|aij| =  1.250e+00  ratio =  1.250e+01
+Constructing initial basis...
+Size of triangular part is 491
+Solving LP relaxation...
+GLPK Simplex Optimizer, v4.65
+491 rows, 231 columns, 1010 non-zeros
+      0: obj =   3.333333333e-02 inf =   8.319e+02 (129)
+    166: obj =   1.006666667e+01 inf =   0.000e+00 (0) 1
+*   216: obj =   3.333333333e-02 inf =   8.304e-14 (0)
+OPTIMAL LP SOLUTION FOUND
+Integer optimization begins...
+Long-step dual simplex will be used
++   216: mip =     not found yet >=              -inf        (1; 0)
++   455: >>>>>   1.906666667e+01 >=   1.906666667e+01   0.0% (5; 3)
++   455: mip =   1.906666667e+01 >=     tree is empty   0.0% (0; 15)
+INTEGER OPTIMAL SOLUTION FOUND
+Time used:   0.0 secs
+Memory used: 0.8 Mb (883097 bytes)
+Writing MIP solution to '/tmp/8866cf2c412441208782a6b0dbaebd95-pulp.out'...
+Writing MIP solution to '/tmp/8866cf2c412441208782a6b0dbaebd95-pulp.sol'...
+1091 lines were written
+
+求解状态: Optimal
+求解时间: 0.02 秒
+目标函数值: 19.07
+
+=== 解 24 ===
+目标函数值: 19.0667
+
+Chiplet坐标（左下角）:
+  A: (10.00, 10.00)
+  B: (20.00, 19.00)
+
+Chiplet中心坐标:
+  A: (15.00, 15.00)
+  B: (25.00, 24.00)
+
+重叠检查:
+  ✓ 无重叠：所有chiplet之间都没有重叠
+
+Chiplet对之间的距离:
+  (A, B): 19.00
+
+与上一解的变化:
+  位置变化的chiplet: B
+  距离变化的chiplet对: 无
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(10.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(20.00, 19.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+Ignoring fixed x limits to fulfill fixed data aspect with adjustable data limits.
+
+布局图片已保存: /root/placement/thermal-placement/output/solution_24_layout.png
+网格化布局: grid_size=0.5, grid_w=60, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (15.00, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 353
+约束数量: 771
+使用求解器: GLPK
+GLPSOL: GLPK LP/MIP Solver, v4.65
+Parameter(s) specified in the command line:
+ --cpxlp /tmp/bde3a52f8d504003aad1118fbf4b9d5d-pulp.lp -o /tmp/bde3a52f8d504003aad1118fbf4b9d5d-pulp.out
+ -w /tmp/bde3a52f8d504003aad1118fbf4b9d5d-pulp.sol --tmlim 300
+Reading problem data from '/tmp/bde3a52f8d504003aad1118fbf4b9d5d-pulp.lp'...
+771 rows, 353 columns, 1723 non-zeros
+234 integer variables, 226 of which are binary
+1329 lines were read
+GLPK Integer Optimizer, v4.65
+771 rows, 353 columns, 1723 non-zeros
+234 integer variables, 226 of which are binary
+Preprocessing...
+68 hidden packing inequaliti(es) were detected
+20 hidden covering inequaliti(es) were detected
+152 constraint coefficient(s) were reduced
+509 rows, 239 columns, 1045 non-zeros
+128 integer variables, 126 of which are binary
+Scaling...
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  3.162e-01  max|aij| =  3.162e+00  ratio =  1.000e+01
+EQ: min|aij| =  1.000e-01  max|aij| =  1.000e+00  ratio =  1.000e+01
+2N: min|aij| =  1.000e-01  max|aij| =  1.250e+00  ratio =  1.250e+01
+Constructing initial basis...
+Size of triangular part is 509
+Solving LP relaxation...
+GLPK Simplex Optimizer, v4.65
+509 rows, 239 columns, 1045 non-zeros
+      0: obj =   3.333333333e-02 inf =   8.730e+02 (135)
+    173: obj =   1.006666667e+01 inf =   0.000e+00 (0) 1
+*   224: obj =   3.333333333e-02 inf =   9.015e-14 (0)
+OPTIMAL LP SOLUTION FOUND
+Integer optimization begins...
+Long-step dual simplex will be used
++   224: mip =     not found yet >=              -inf        (1; 0)
++   409: mip =     not found yet >=     tree is empty        (0; 15)
+PROBLEM HAS NO INTEGER FEASIBLE SOLUTION
+Time used:   0.0 secs
+Memory used: 0.9 Mb (899347 bytes)
+Writing MIP solution to '/tmp/bde3a52f8d504003aad1118fbf4b9d5d-pulp.out'...
+Writing MIP solution to '/tmp/bde3a52f8d504003aad1118fbf4b9d5d-pulp.sol'...
+1133 lines were written
+
+求解状态: Infeasible
+求解时间: 0.02 秒
+
+求解状态: Infeasible，停止搜索
+
+共找到 24 个不同的解。
