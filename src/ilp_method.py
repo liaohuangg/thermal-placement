@@ -84,6 +84,8 @@ class ILPModelContext:
     H: float
     grid_size: Optional[float] = None
     fixed_chiplet_idx: Optional[int] = None
+    cx: Optional[Dict[int, pulp.LpVariable]] = None  # 中心坐标x（如果使用网格化模型）
+    cy: Optional[Dict[int, pulp.LpVariable]] = None  # 中心坐标y（如果使用网格化模型）
 
 
 def build_placement_ilp_model(
@@ -533,6 +535,8 @@ def build_placement_ilp_model(
         bbox_h=bbox_h,
         W=W,
         H=H,
+        cx=cx,
+        cy=cy,
     )
 
 
@@ -1010,4 +1014,6 @@ def build_placement_ilp_model_grid(
         H=H,
         grid_size=grid_size,
         fixed_chiplet_idx=fixed_chiplet_idx,
+        cx=cx,
+        cy=cy,
     )

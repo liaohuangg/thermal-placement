@@ -22,6 +22,7 @@ def add_exclude_layout_constraint(
     require_change_pairs: int = 1,  # 目前没有用到这个参数，先保留接口
     solution_index: int = 0,  # 解的索引，用于生成唯一的约束名称
     min_diff: Optional[float] = None,  # 判断"不同"的最小差异阈值，如果为None则使用grid_size
+    min_dist_diff: Optional[float] = None,  # 距离差异的最小阈值，如果为None则使用min_diff或grid_size
 ) -> None:
     """
     在已有 ILP 模型上添加排除解的约束。
@@ -75,6 +76,12 @@ def add_exclude_layout_constraint(
         else:
             min_diff = 0.01  # 默认值
     print(f"[DEBUG] 排除解约束的最小差异阈值: {min_diff}")
+    
+    # 获取距离差异的最小阈值
+    if min_dist_diff is None:
+        # 如果未指定，使用min_diff
+        min_dist_diff = min_diff
+    print(f"[DEBUG] 距离差异的最小阈值: {min_dist_diff}")
     
     M = max(W, H) * 2  # Big-M常数
     
@@ -137,14 +144,92 @@ def add_exclude_layout_constraint(
         prob += diff_pos[k] >= y_diff, f"diff_pos_from_y_{solution_index}_{k}"
         prob += diff_pos[k] <= x_diff + y_diff, f"diff_pos_upper_{solution_index}_{k}"
     
-    # 排除整个解：至少有一个非固定的chiplet的位置不同
-    # 只对非固定的chiplet求和
+    # ============ 添加排除约束：位置不同 AND 距离不同 ============
+    # 两个排除约束都需要满足：
+    # 1. 至少有一个非固定chiplet的位置不同
+    # 2. 至少有一个chiplet到固定chiplet的距离不同（如果存在固定chiplet）
+    
+    # 第一个约束：位置排除约束
     non_fixed_indices = [k for k in range(n) if fixed_chiplet_idx is None or k != fixed_chiplet_idx]
     if len(non_fixed_indices) > 0:
         prob += pulp.lpSum([diff_pos[k] for k in non_fixed_indices]) >= 1, f"exclude_solution_{solution_index}"
-        print(f"[DEBUG] 排除约束：要求至少 {len(non_fixed_indices)} 个非固定chiplet中有1个位置不同")
+        print(f"[DEBUG] 排除约束1：要求至少 {len(non_fixed_indices)} 个非固定chiplet中有1个位置不同")
     else:
-        print(f"[DEBUG] 警告：所有chiplet都是固定的，无法添加排除约束")
+        print(f"[DEBUG] 警告：所有chiplet都是固定的，无法添加位置排除约束")
+    
+    # 第二个约束：距离排除约束（如果存在固定chiplet）
+    if fixed_chiplet_idx is not None and ctx.cx is not None and ctx.cy is not None:
+        cx = ctx.cx
+        cy = ctx.cy
+        
+        # 固定chiplet的中心坐标是固定的：cx[fixed] = W/2, cy[fixed] = H/2
+        cx_fixed = W / 2.0
+        cy_fixed = H / 2.0
+        
+        print(f"[DEBUG] 添加基于距离的排除约束：固定chiplet {fixed_chiplet_idx} 的中心 ({cx_fixed:.2f}, {cy_fixed:.2f})")
+        
+        # 计算上一解中固定chiplet中心到其他chiplet的距离
+        dist_prev = {}
+        for k in range(n):
+            if k == fixed_chiplet_idx:
+                continue
+            cx_k_prev = pulp.value(cx[k])
+            cy_k_prev = pulp.value(cy[k])
+            if cx_k_prev is not None and cy_k_prev is not None:
+                # 使用曼哈顿距离
+                dist_prev[k] = abs(cx_fixed - float(cx_k_prev)) + abs(cy_fixed - float(cy_k_prev))
+                print(f"[DEBUG]   上一解：chiplet {k} 到固定chiplet的距离 = {dist_prev[k]:.2f}")
+        
+        if len(dist_prev) > 0:
+            # 为每个其他chiplet创建二进制变量，表示其到固定chiplet的距离是否不同
+            diff_dist = {}
+            for k in dist_prev.keys():
+                diff_dist[k] = pulp.LpVariable(f"diff_dist_{solution_index}_{fixed_chiplet_idx}_{k}", cat='Binary')
+            
+            # 对于每个其他chiplet k，判断其到固定chiplet的距离是否不同
+            for k in dist_prev.keys():
+                # 计算当前解中chiplet k的中心到固定chiplet中心的距离
+                # 使用曼哈顿距离：|cx[fixed] - cx[k]| + |cy[fixed] - cy[k]|
+                # 由于cx[fixed]和cy[fixed]是固定的，所以只需要计算 |cx[k] - cx_fixed| + |cy[k] - cy_fixed|
+                
+                # 创建辅助变量表示距离的绝对值
+                dx_abs = pulp.LpVariable(f"dx_abs_dist_{solution_index}_{k}", lowBound=0, upBound=W)
+                dy_abs = pulp.LpVariable(f"dy_abs_dist_{solution_index}_{k}", lowBound=0, upBound=H)
+                
+                # dx_abs >= |cx[k] - cx_fixed|
+                prob += dx_abs >= cx[k] - cx_fixed, f"dx_abs_dist_pos_{solution_index}_{k}"
+                prob += dx_abs >= cx_fixed - cx[k], f"dx_abs_dist_neg_{solution_index}_{k}"
+                
+                # dy_abs >= |cy[k] - cy_fixed|
+                prob += dy_abs >= cy[k] - cy_fixed, f"dy_abs_dist_pos_{solution_index}_{k}"
+                prob += dy_abs >= cy_fixed - cy[k], f"dy_abs_dist_neg_{solution_index}_{k}"
+                
+                # 当前距离 = dx_abs + dy_abs
+                dist_curr = dx_abs + dy_abs
+                
+                # 约束：|dist_curr - dist_prev[k]| >= min_diff * diff_dist[k]
+                # 如果 diff_dist[k] = 1，则 |dist_curr - dist_prev[k]| >= min_diff   
+                # 如果 diff_dist[k] = 0，则约束不生效
+                
+                # 创建辅助变量表示距离差
+                max_dist_diff = W + H
+                dist_diff = pulp.LpVariable(f"dist_diff_{solution_index}_{k}", lowBound=-max_dist_diff, upBound=max_dist_diff)
+                prob += dist_diff == dist_curr - dist_prev[k], f"dist_diff_def_{solution_index}_{k}"
+                
+                # 创建辅助变量表示距离差的绝对值
+                dist_diff_abs = pulp.LpVariable(f"dist_diff_abs_{solution_index}_{k}", lowBound=0, upBound=max_dist_diff)
+                prob += dist_diff_abs >= dist_diff, f"dist_diff_abs_pos_{solution_index}_{k}"
+                prob += dist_diff_abs >= -dist_diff, f"dist_diff_abs_neg_{solution_index}_{k}"
+                
+                # 约束：如果 diff_dist[k] = 1，则 dist_diff_abs >= min_dist_diff
+                prob += dist_diff_abs >= min_dist_diff * diff_dist[k], f"dist_diff_abs_min_{solution_index}_{k}"
+            
+            # 排除约束：至少有一个chiplet到固定chiplet的距离不同
+            prob += pulp.lpSum([diff_dist[k] for k in dist_prev.keys()]) >= 1, f"exclude_solution_by_dist_{solution_index}"
+            print(f"[DEBUG] 排除约束2：要求至少 {len(dist_prev)} 个chiplet中有1个到固定chiplet的距离不同")
+            print(f"[DEBUG] 上一解的距离值：{dist_prev}")
+        else:
+            print(f"[DEBUG] 警告：无法计算距离，跳过基于距离的排除约束")
     
     print(f"[DEBUG] 已添加排除整个解的约束（排除解 {solution_index}）")
     print(f"  上一解的位置: {[(x_prev[k], y_prev[k]) for k in range(n)]}")
@@ -157,6 +242,7 @@ def search_multiple_solutions(
     grid_size: Optional[float] = None,  # 网格大小，如果提供则使用网格化布局
     fixed_chiplet_idx: Optional[int] = None,  # 固定位置的chiplet索引
     exclude_min_diff: Optional[float] = None,  # 排除解约束的最小差异阈值，如果为None则使用grid_size
+    min_dist_diff: Optional[float] = None,  # 距离差异的最小阈值，如果为None则使用exclude_min_diff
 ) -> List[ILPPlacementResult]:
     """
     演示：在同一个 problem 上反复添加排除解约束，搜索多个不同的可行解（子调度）。
@@ -230,6 +316,88 @@ def search_multiple_solutions(
         print(f"第 {i+1} 个解：目标值={res.objective_value:.2f}")
         results.append(res)
 
+        # 输出chiplet坐标和相对位置距离
+        print(f"\n{'='*60}")
+        print(f"解 {i+1} 的详细信息")
+        print(f"{'='*60}")
+        
+        # 输出左下角坐标
+        print("\nChiplet坐标（左下角坐标）：")
+        for idx, node in enumerate(ctx.nodes):
+            x_val = pulp.value(ctx.x[idx])
+            y_val = pulp.value(ctx.y[idx])
+            if x_val is not None and y_val is not None:
+                print(f"  {node.name:3s}: ({x_val:8.2f}, {y_val:8.2f})")
+        
+        # 输出中心坐标
+        if ctx.cx is not None and ctx.cy is not None:
+            print("\nChiplet中心坐标：")
+            for idx, node in enumerate(ctx.nodes):
+                cx_val = pulp.value(ctx.cx[idx])
+                cy_val = pulp.value(ctx.cy[idx])
+                if cx_val is not None and cy_val is not None:
+                    print(f"  {node.name:3s}: ({cx_val:8.2f}, {cy_val:8.2f})")
+        
+        # 输出相对位置距离（固定chiplet中心到其他chiplet的距离）
+        if ctx.fixed_chiplet_idx is not None and ctx.cx is not None and ctx.cy is not None:
+            fixed_idx = ctx.fixed_chiplet_idx
+            fixed_name = ctx.nodes[fixed_idx].name
+            
+            # 固定chiplet的中心坐标
+            cx_fixed = ctx.W / 2.0
+            cy_fixed = ctx.H / 2.0
+            
+            print(f"\n相对位置距离（固定chiplet {fixed_name} 的中心 ({cx_fixed:.2f}, {cy_fixed:.2f}) 到其他chiplet的曼哈顿距离）：")
+            for idx, node in enumerate(ctx.nodes):
+                if idx != fixed_idx:
+                    cx_val = pulp.value(ctx.cx[idx])
+                    cy_val = pulp.value(ctx.cy[idx])
+                    if cx_val is not None and cy_val is not None:
+                        # 计算曼哈顿距离
+                        dist = abs(cx_fixed - float(cx_val)) + abs(cy_fixed - float(cy_val))
+                        print(f"  {node.name:3s}: {dist:8.2f}")
+            
+            # 如果是第2个解及以后，比较与上一解的距离
+            if i > 0 and hasattr(ctx, '_prev_distances') and ctx._prev_distances:
+                print(f"\n距离变化检查（与上一解比较）：")
+                all_same = True
+                for idx, node in enumerate(ctx.nodes):
+                    if idx != fixed_idx:
+                        node_name = node.name
+                        cx_val = pulp.value(ctx.cx[idx])
+                        cy_val = pulp.value(ctx.cy[idx])
+                        if cx_val is not None and cy_val is not None and node_name in ctx._prev_distances:
+                            curr_dist = abs(cx_fixed - float(cx_val)) + abs(cy_fixed - float(cy_val))
+                            prev_dist = ctx._prev_distances[node_name]
+                            diff = abs(curr_dist - prev_dist)
+                            min_diff_val = ctx.grid_size if ctx.grid_size else 0.01
+                            if diff >= min_diff_val:
+                                print(f"  {node_name}: {prev_dist:.2f} -> {curr_dist:.2f} (变化 {diff:.2f}) ✓")
+                                all_same = False
+                            else:
+                                print(f"  {node_name}: {prev_dist:.2f} -> {curr_dist:.2f} (变化 {diff:.2f}) ✗ 相同")
+                if all_same:
+                    print(f"  [警告] 所有chiplet的相对位置距离都与上一解相同！约束可能未生效！")
+                # 更新距离字典
+                ctx._prev_distances = {}
+                for idx, node in enumerate(ctx.nodes):
+                    if idx != fixed_idx:
+                        cx_val = pulp.value(ctx.cx[idx])
+                        cy_val = pulp.value(ctx.cy[idx])
+                        if cx_val is not None and cy_val is not None:
+                            ctx._prev_distances[node.name] = abs(cx_fixed - float(cx_val)) + abs(cy_fixed - float(cy_val))
+            else:
+                # 保存第一个解的距离
+                ctx._prev_distances = {}
+                for idx, node in enumerate(ctx.nodes):
+                    if idx != fixed_idx:
+                        cx_val = pulp.value(ctx.cx[idx])
+                        cy_val = pulp.value(ctx.cy[idx])
+                        if cx_val is not None and cy_val is not None:
+                            ctx._prev_distances[node.name] = abs(cx_fixed - float(cx_val)) + abs(cy_fixed - float(cy_val))
+        
+        print(f"{'='*60}\n")
+
         # 4. 为当前解生成并保存布局图
         nodes_for_draw = []
         for node in ctx.nodes:
@@ -276,7 +444,8 @@ def search_multiple_solutions(
             ctx, 
             require_change_pairs=1, 
             solution_index=i,
-            min_diff=exclude_min_diff
+            min_diff=exclude_min_diff,
+            min_dist_diff=min_dist_diff
         )
 
     return results
