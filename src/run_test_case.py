@@ -49,7 +49,8 @@ def main():
             input_json_path=str(json_file.absolute()),
             grid_size=0.5,  # 使用网格化布局，grid_size=1.0（chiplet位置只能是整数坐标点）
             fixed_chiplet_idx=0,  # 固定第一个chiplet的中心位置
-            min_dist_diff=2.0
+            min_dist_diff=2.0,
+            min_pos_diff=3.0
         )
         
         print("=" * 80)
