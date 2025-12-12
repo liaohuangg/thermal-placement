@@ -1,4 +1,0 @@
-Traceback (most recent call last):
-  File "/home/huangl/new_workspace/placement/thermal-placement/src/ilp_method.py", line 27, in <module>
-    import pulp
-ModuleNotFoundError: No module named 'pulp'

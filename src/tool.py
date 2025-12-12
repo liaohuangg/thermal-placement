@@ -24,6 +24,14 @@ except ImportError:
 
 from input_process import build_chiplet_table, load_chiplets_json
 
+# 导入ILP相关的类型（如果可用）
+try:
+    from ilp_method import ILPModelContext, ILPPlacementResult
+except ImportError:
+    # 如果ilp_method不可用，定义占位类型
+    ILPModelContext = None
+    ILPPlacementResult = None
+
 
 # ---------------------------------------------------------------------------
 # 数据结构与基础读入
@@ -564,3 +572,546 @@ else:
     def print_constraint_formal(*args, **kwargs):
         raise ImportError("pulp库未安装，无法使用约束打印功能")
 
+
+# ---------------------------------------------------------------------------
+# ILP求解结果打印函数
+# ---------------------------------------------------------------------------
+
+def print_pair_distances_only(
+    ctx,
+    result,
+    solution_idx: int,
+    prev_pair_distances_list: Optional[List[Dict[Tuple[int, int], float]]] = None,
+    min_pair_dist_diff: float = 1.0,
+) -> None:
+    """
+    简化输出：只打印每对chiplet的相对距离，以及当前解与之前解的距离比较。
+    
+    参数:
+        ctx: ILP模型上下文
+        result: 求解结果
+        solution_idx: 解的索引（从0开始）
+        prev_pair_distances_list: 可选，之前所有解的chiplet对距离列表
+        min_pair_dist_diff: 判断距离是否相同的最小差异阈值
+    """
+    if pulp is None:
+        raise ImportError("pulp库未安装，无法使用打印功能")
+    
+    if result.status != "Optimal":
+        return
+    
+    nodes = ctx.nodes
+    n = len(nodes)
+    
+    # 获取当前解的坐标
+    x_curr = {}
+    y_curr = {}
+    for k in range(n):
+        x_val = pulp.value(ctx.x[k]) if ctx.x[k] is not None else None
+        y_val = pulp.value(ctx.y[k]) if ctx.y[k] is not None else None
+        if x_val is not None and y_val is not None:
+            x_curr[k] = float(x_val)
+            y_curr[k] = float(y_val)
+        else:
+            return  # 如果无法获取坐标，直接返回
+    
+    # 计算当前解的每对chiplet的相对距离（x轴和y轴的绝对值差）
+    curr_pair_distances = {}
+    chiplet_pairs = [(i, j) for i in range(n) for j in range(i+1, n)]
+    
+    for i, j in chiplet_pairs:
+        if i in x_curr and j in x_curr and i in y_curr and j in y_curr:
+            # 计算x轴和y轴的相对距离（绝对值差）
+            x_dist = abs(x_curr[i] - x_curr[j])
+            y_dist = abs(y_curr[i] - y_curr[j])
+            curr_pair_distances[(i, j)] = (x_dist, y_dist)
+    
+    # 输出当前解的相对距离
+    print(f"\n=== 解 {solution_idx + 1} ===")
+    print(f"\n每对chiplet的相对距离（|x[i]-x[j]|, |y[i]-y[j]|）:")
+    for i, j in sorted(chiplet_pairs):
+        if (i, j) in curr_pair_distances:
+            x_dist, y_dist = curr_pair_distances[(i, j)]
+            name_i = nodes[i].name if hasattr(nodes[i], 'name') else f"Chiplet_{i}"
+            name_j = nodes[j].name if hasattr(nodes[j], 'name') else f"Chiplet_{j}"
+            print(f"  ({i},{j}) [{name_i}, {name_j}]: x距离={x_dist:.3f}, y距离={y_dist:.3f}")
+    
+    # 与之前解比较
+    if prev_pair_distances_list and len(prev_pair_distances_list) > 0:
+        print(f"\n与之前解的距离比较（阈值={min_pair_dist_diff:.3f}）:")
+        for prev_idx, prev_distances in enumerate(prev_pair_distances_list):
+            print(f"\n  与解 {prev_idx + 1} 比较:")
+            same_pairs = []
+            diff_pairs = []
+            
+            for i, j in sorted(chiplet_pairs):
+                if (i, j) in curr_pair_distances and (i, j) in prev_distances:
+                    curr_x_dist, curr_y_dist = curr_pair_distances[(i, j)]
+                    prev_dist = prev_distances[(i, j)]  # 这是曼哈顿距离
+                    
+                    # 计算距离差（需要获取之前解的x和y距离）
+                    # 由于prev_distances只保存了曼哈顿距离，我们需要重新计算
+                    # 这里简化处理：如果曼哈顿距离差小于阈值，认为相同
+                    dist_diff = abs(curr_x_dist + curr_y_dist - prev_dist)
+                    
+                    if dist_diff < min_pair_dist_diff:
+                        same_pairs.append((i, j))
+                    else:
+                        diff_pairs.append((i, j))
+            
+            if same_pairs:
+                print(f"    相同的chiplet对: {', '.join([f'({p[0]},{p[1]})' for p in same_pairs])}")
+            if diff_pairs:
+                print(f"    不同的chiplet对: {', '.join([f'({p[0]},{p[1]})' for p in diff_pairs])}")
+            if not same_pairs and not diff_pairs:
+                print(f"    (无数据)")
+    else:
+        print(f"\n(第一个解，无历史解可比较)")
+
+
+def print_all_variables(
+    ctx: ILPModelContext, 
+    result: ILPPlacementResult,
+    prev_pair_distances_list: Optional[List[Dict[Tuple[int, int], float]]] = None
+) -> None:
+    """
+    打印所有变量的值，包括排除约束相关的变量。
+    
+    参数:
+        ctx: ILP模型上下文
+        result: 求解结果
+        prev_pair_distances_list: 可选，之前所有解的chiplet对距离列表，用于显示对比信息
+    """
+    if result.status != "Optimal":
+        return
+    
+    nodes = ctx.nodes
+    n = len(nodes)
+    
+    print("\n" + "=" * 80)
+    print("变量值详情")
+    print("=" * 80)
+    
+    # 1. 坐标变量 (x, y)
+    print("\n【坐标变量】")
+    for k in range(n):
+        x_val = pulp.value(ctx.x[k]) if ctx.x[k] is not None else None
+        y_val = pulp.value(ctx.y[k]) if ctx.y[k] is not None else None
+        node_name = nodes[k].name if hasattr(nodes[k], 'name') else f"Chiplet_{k}"
+        print(f"  x[{k}] ({node_name}): {x_val}")
+        print(f"  y[{k}] ({node_name}): {y_val}")
+    
+    # 2. 网格坐标变量 (x_grid, y_grid)
+    print("\n【网格坐标变量】")
+    for k in range(n):
+        x_grid_var = ctx.prob.variablesDict().get(f"x_grid_{k}")
+        y_grid_var = ctx.prob.variablesDict().get(f"y_grid_{k}")
+        x_grid_val = pulp.value(x_grid_var) if x_grid_var is not None else None
+        y_grid_val = pulp.value(y_grid_var) if y_grid_var is not None else None
+        node_name = nodes[k].name if hasattr(nodes[k], 'name') else f"Chiplet_{k}"
+        print(f"  x_grid[{k}] ({node_name}): {x_grid_val}")
+        print(f"  y_grid[{k}] ({node_name}): {y_grid_val}")
+    
+    # 3. 旋转变量 (r)
+    print("\n【旋转变量】")
+    for k in range(n):
+        r_val = pulp.value(ctx.r[k]) if ctx.r[k] is not None else None
+        rotated_str = "是" if (r_val is not None and r_val > 0.5) else "否"
+        node_name = nodes[k].name if hasattr(nodes[k], 'name') else f"Chiplet_{k}"
+        print(f"  r[{k}] ({node_name}): {r_val} (旋转: {rotated_str})")
+    
+    # 4. 宽度和高度变量 (w, h)
+    print("\n【尺寸变量】")
+    for k in range(n):
+        w_var = ctx.prob.variablesDict().get(f"w_{k}")
+        h_var = ctx.prob.variablesDict().get(f"h_{k}")
+        w_val = pulp.value(w_var) if w_var is not None else None
+        h_val = pulp.value(h_var) if h_var is not None else None
+        node_name = nodes[k].name if hasattr(nodes[k], 'name') else f"Chiplet_{k}"
+        print(f"  w[{k}] ({node_name}): {w_val}")
+        print(f"  h[{k}] ({node_name}): {h_val}")
+    
+    # 5. 中心坐标变量 (cx, cy)
+    if hasattr(ctx, 'cx') and ctx.cx is not None:
+        print("\n【中心坐标变量】")
+        for k in range(n):
+            cx_val = pulp.value(ctx.cx[k]) if ctx.cx[k] is not None else None
+            cy_val = pulp.value(ctx.cy[k]) if ctx.cy[k] is not None else None
+            node_name = nodes[k].name if hasattr(nodes[k], 'name') else f"Chiplet_{k}"
+            print(f"  cx[{k}] ({node_name}): {cx_val}")
+            print(f"  cy[{k}] ({node_name}): {cy_val}")
+    
+    # 6. 相邻方式变量 (z1, z2, z1L, z1R, z2D, z2U)
+    if len(ctx.connected_pairs) > 0:
+        print("\n【相邻方式变量】")
+        for i, j in ctx.connected_pairs:
+            name_i = nodes[i].name if hasattr(nodes[i], 'name') else f"Chiplet_{i}"
+            name_j = nodes[j].name if hasattr(nodes[j], 'name') else f"Chiplet_{j}"
+            z1_val = pulp.value(ctx.z1[(i, j)]) if (i, j) in ctx.z1 else None
+            z2_val = pulp.value(ctx.z2[(i, j)]) if (i, j) in ctx.z2 else None
+            z1L_val = pulp.value(ctx.z1L[(i, j)]) if (i, j) in ctx.z1L else None
+            z1R_val = pulp.value(ctx.z1R[(i, j)]) if (i, j) in ctx.z1R else None
+            z2D_val = pulp.value(ctx.z2D[(i, j)]) if (i, j) in ctx.z2D else None
+            z2U_val = pulp.value(ctx.z2U[(i, j)]) if (i, j) in ctx.z2U else None
+            print(f"  模块对 ({name_i}, {name_j}):")
+            print(f"    z1[{i},{j}] (水平相邻): {z1_val}")
+            print(f"    z2[{i},{j}] (垂直相邻): {z2_val}")
+            if z1_val is not None and z1_val > 0.5:
+                print(f"      z1R[{i},{j}] (i在右): {z1R_val}")
+            if z2_val is not None and z2_val > 0.5:
+                print(f"      z2D[{i},{j}] (i在下): {z2D_val}")
+                print(f"      z2U[{i},{j}] (i在上): {z2U_val}")
+    
+    # 7. 非重叠约束变量 (p_left, p_right, p_down, p_up)
+    print("\n【非重叠约束变量】")
+    all_pairs = []
+    for i in range(n):
+        for j in range(i + 1, n):
+            all_pairs.append((i, j))
+    
+    for i, j in all_pairs:
+        name_i = nodes[i].name if hasattr(nodes[i], 'name') else f"Chiplet_{i}"
+        name_j = nodes[j].name if hasattr(nodes[j], 'name') else f"Chiplet_{j}"
+        p_left_var = ctx.prob.variablesDict().get(f"p_left_{i}_{j}")
+        p_right_var = ctx.prob.variablesDict().get(f"p_right_{i}_{j}")
+        p_down_var = ctx.prob.variablesDict().get(f"p_down_{i}_{j}")
+        p_up_var = ctx.prob.variablesDict().get(f"p_up_{i}_{j}")
+        
+        p_left_val = pulp.value(p_left_var) if p_left_var is not None else None
+        p_right_val = pulp.value(p_right_var) if p_right_var is not None else None
+        p_down_val = pulp.value(p_down_var) if p_down_var is not None else None
+        p_up_val = pulp.value(p_up_var) if p_up_var is not None else None
+        
+        print(f"  模块对 ({name_i}, {name_j}):")
+        print(f"    p_left[{i},{j}]: {p_left_val}")
+        print(f"    p_right[{i},{j}]: {p_right_val}")
+        print(f"    p_down[{i},{j}]: {p_down_val}")
+        print(f"    p_up[{i},{j}]: {p_up_val}")
+    
+    # 8. 边界框变量
+    print("\n【边界框变量】")
+    bbox_w_val = pulp.value(ctx.bbox_w) if ctx.bbox_w is not None else None
+    bbox_h_val = pulp.value(ctx.bbox_h) if ctx.bbox_h is not None else None
+    print(f"  bbox_w: {bbox_w_val}")
+    print(f"  bbox_h: {bbox_h_val}")
+    
+    # 9. 其他辅助变量（shared_x, shared_y, dx_abs, dy_abs, bbox_min/max等）
+    print("\n【其他辅助变量】")
+    other_vars = []
+    for var_name, var in ctx.prob.variablesDict().items():
+        if var_name.startswith("shared_") or var_name.startswith("dx_abs_") or \
+           var_name.startswith("dy_abs_") or var_name.startswith("bbox_") or \
+           var_name.startswith("bbox_area_proxy"):
+            # 排除排除约束相关的变量（这些会在后面单独打印）
+            if not (var_name.startswith("dx_abs_pair_") or var_name.startswith("dy_abs_pair_") or \
+                    var_name.startswith("dx_grid_abs_pair_") or var_name.startswith("dy_grid_abs_pair_")):
+                val = pulp.value(var) if var is not None else None
+                if val is not None:
+                    other_vars.append((var_name, val))
+    
+    if other_vars:
+        for var_name, val in sorted(other_vars):
+            print(f"  {var_name}: {val}")
+    else:
+        print("  (无)")
+    
+    # 10. 排除解约束相关变量和约束（仅在第二次及以后的求解中打印）
+    exclude_vars = []
+    # 收集所有排除解约束相关的变量，包括所有可能的变量名模式
+    for var_name, var in ctx.prob.variablesDict().items():
+        # 检查是否是排除解约束相关的变量
+        is_exclude_var = (
+            var_name.startswith("dx_abs_pair_") or 
+            var_name.startswith("dy_abs_pair_") or 
+            var_name.startswith("dx_grid_abs_pair_") or 
+            var_name.startswith("dy_grid_abs_pair_") or 
+            var_name.startswith("dist_curr_pair_") or 
+            var_name.startswith("dist_diff_pair_") or 
+            var_name.startswith("dist_diff_abs_pair_") or 
+            var_name.startswith("diff_dist_pair_") or 
+            var_name.startswith("same_dist_pair_")
+        )
+        if is_exclude_var:
+            val = pulp.value(var) if var is not None else None
+            # 即使值为None也记录，以便调试
+            exclude_vars.append((var_name, val))
+    
+    if exclude_vars:
+        print("\n" + "=" * 80)
+        print("排除解约束相关变量和约束")
+        print("=" * 80)
+        
+        # 10.1 打印排除约束相关的变量
+        print("\n【排除约束变量】")
+        
+        # 按变量类型分组
+        dx_abs_pair_vars = []
+        dy_abs_pair_vars = []
+        dx_grid_abs_pair_vars = []
+        dy_grid_abs_pair_vars = []
+        dist_curr_pair_vars = []
+        dist_diff_pair_vars = []
+        dist_diff_abs_pair_vars = []
+        diff_dist_pair_vars = []
+        same_dist_pair_vars = []
+        
+        for var_name, val in exclude_vars:
+            if var_name.startswith("dx_grid_abs_pair_"):
+                dx_grid_abs_pair_vars.append((var_name, val))
+            elif var_name.startswith("dy_grid_abs_pair_"):
+                dy_grid_abs_pair_vars.append((var_name, val))
+            elif var_name.startswith("dist_curr_pair_"):
+                dist_curr_pair_vars.append((var_name, val))
+            elif var_name.startswith("dx_abs_pair_"):
+                dx_abs_pair_vars.append((var_name, val))
+            elif var_name.startswith("dy_abs_pair_"):
+                dy_abs_pair_vars.append((var_name, val))
+            elif var_name.startswith("dist_diff_pair_") and not var_name.startswith("dist_diff_abs_pair_"):
+                dist_diff_pair_vars.append((var_name, val))
+            elif var_name.startswith("dist_diff_abs_pair_"):
+                dist_diff_abs_pair_vars.append((var_name, val))
+            elif var_name.startswith("diff_dist_pair_"):
+                diff_dist_pair_vars.append((var_name, val))
+            elif var_name.startswith("same_dist_pair_"):
+                same_dist_pair_vars.append((var_name, val))
+        
+        if dx_grid_abs_pair_vars:
+            print("\n  dx_grid_abs_pair (chiplet对的x方向grid坐标距离绝对值):")
+            for var_name, val in sorted(dx_grid_abs_pair_vars):
+                print(f"    {var_name}: {val}")
+        
+        if dy_grid_abs_pair_vars:
+            print("\n  dy_grid_abs_pair (chiplet对的y方向grid坐标距离绝对值):")
+            for var_name, val in sorted(dy_grid_abs_pair_vars):
+                print(f"    {var_name}: {val}")
+        
+        # 按chiplet对组织显示，使输出更清晰
+        import re
+        pair_info = {}  # key: (i, j), value: dict with all related vars
+        
+        # 解析所有变量，按chiplet对分组
+        unmatched_vars = []  # 记录无法匹配的变量
+        for var_name, val in exclude_vars:
+            # 匹配模式：{prefix}_{suffix}_{i}_{j} 或 {prefix}_{suffix}_{i}_{j}_prev{prev_idx}
+            # 注意：变量名可能是 dist_diff_abs_pair_{suffix}_{i}_{j}_prev{prev_idx}
+            match = re.search(r'([^_]+(?:_[^_]+)*)_[^_]+_(\d+)_(\d+)(?:_prev(\d+))?', var_name)
+            if match:
+                prefix = match.group(1)
+                i_val = int(match.group(2))
+                j_val = int(match.group(3))
+                prev_idx = match.group(4)
+                pair_key = (i_val, j_val)
+                
+                if pair_key not in pair_info:
+                    pair_info[pair_key] = {
+                        'dx_grid_abs': None,
+                        'dy_grid_abs': None,
+                        'dist_curr': None,
+                        'dist_diff': {},
+                        'dist_diff_abs': {},
+                        'diff_dist': None,
+                        'same_dist': {}
+                    }
+                
+                # 处理各种变量前缀
+                if prefix == 'dx_grid_abs_pair':
+                    pair_info[pair_key]['dx_grid_abs'] = val
+                elif prefix == 'dy_grid_abs_pair':
+                    pair_info[pair_key]['dy_grid_abs'] = val
+                elif prefix == 'dist_curr_pair':
+                    pair_info[pair_key]['dist_curr'] = val
+                elif prefix == 'dist_diff_pair' and prev_idx:
+                    pair_info[pair_key]['dist_diff'][int(prev_idx)] = val
+                elif prefix == 'dist_diff_abs_pair' and prev_idx:
+                    pair_info[pair_key]['dist_diff_abs'][int(prev_idx)] = val
+                elif prefix == 'diff_dist_pair':
+                    pair_info[pair_key]['diff_dist'] = val
+                elif prefix == 'same_dist_pair' and prev_idx:
+                    pair_info[pair_key]['same_dist'][int(prev_idx)] = val
+                else:
+                    # 无法匹配的变量，记录到unmatched_vars
+                    unmatched_vars.append((var_name, val))
+            else:
+                # 无法解析的变量，记录到unmatched_vars
+                unmatched_vars.append((var_name, val))
+        
+        # 按chiplet对显示详细信息
+        if pair_info:
+            print("\n  【按chiplet对分组显示】")
+            for (i, j) in sorted(pair_info.keys()):
+                info = pair_info[(i, j)]
+                name_i = nodes[i].name if hasattr(nodes[i], 'name') and i < len(nodes) else f"Chiplet_{i}"
+                name_j = nodes[j].name if hasattr(nodes[j], 'name') and j < len(nodes) else f"Chiplet_{j}"
+                
+                print(f"\n    模块对 ({name_i}, {name_j}) [索引: ({i}, {j})]:")
+                
+                if info['dx_grid_abs'] is not None:
+                    print(f"      dx_grid_abs (x方向grid距离): {info['dx_grid_abs']:.2f}")
+                if info['dy_grid_abs'] is not None:
+                    print(f"      dy_grid_abs (y方向grid距离): {info['dy_grid_abs']:.2f}")
+                if info['dist_curr'] is not None:
+                    print(f"      dist_curr (当前距离，grid单位): {info['dist_curr']:.2f}")
+                    print(f"        验证: dx_grid_abs + dy_grid_abs = {info['dx_grid_abs']:.2f} + {info['dy_grid_abs']:.2f} = {info['dx_grid_abs'] + info['dy_grid_abs']:.2f}")
+                
+                if info['dist_diff'] or info['dist_diff_abs']:
+                    print(f"      与之前解的距离比较:")
+                    for prev_idx in sorted(set(list(info['dist_diff'].keys()) + list(info['dist_diff_abs'].keys()))):
+                        dist_diff = info['dist_diff'].get(prev_idx, None)
+                        dist_diff_abs = info['dist_diff_abs'].get(prev_idx, None)
+                        same_dist = info['same_dist'].get(prev_idx, None)
+                        
+                        # 显示之前解的距离（如果可用）
+                        prev_dist = None
+                        if prev_pair_distances_list and prev_idx < len(prev_pair_distances_list):
+                            prev_dist = prev_pair_distances_list[prev_idx].get((i, j), None)
+                        
+                        print(f"        解 {prev_idx}:")
+                        if prev_dist is not None:
+                            print(f"          之前解的距离: {prev_dist:.2f} (grid单位)")
+                        if info['dist_curr'] is not None:
+                            print(f"          当前解的距离: {info['dist_curr']:.2f} (grid单位)")
+                        if dist_diff is not None:
+                            print(f"          距离差 (dist_diff): {dist_diff:.2f}")
+                            if prev_dist is not None and info['dist_curr'] is not None:
+                                print(f"            验证: {info['dist_curr']:.2f} - {prev_dist:.2f} = {dist_diff:.2f}")
+                        if dist_diff_abs is not None:
+                            print(f"          距离差绝对值 (dist_diff_abs): {dist_diff_abs:.2f}")
+                        if same_dist is not None:
+                            same_str = "是" if same_dist > 0.5 else "否"
+                            print(f"          是否相同 (same_dist_pair): {same_dist} ({same_str})")
+                            if dist_diff_abs is not None:
+                                if same_dist > 0.5:
+                                    print(f"            → 距离差 {dist_diff_abs:.2f} < 阈值，标记为相同")
+                                else:
+                                    print(f"            → 距离差 {dist_diff_abs:.2f} >= 阈值，标记为不同")
+                
+                if info['diff_dist'] is not None:
+                    diff_str = "是" if info['diff_dist'] > 0.5 else "否"
+                    print(f"      diff_dist_pair (与所有之前解都不同): {info['diff_dist']} ({diff_str})")
+                    if info['diff_dist'] > 0.5:
+                        print(f"        → 该chiplet对的距离与所有之前解都不同，满足排除约束")
+        
+        # 保留原有的详细变量列表输出（作为补充）
+        if dist_curr_pair_vars:
+            print("\n  【详细变量列表 - dist_curr_pair】")
+            for var_name, val in sorted(dist_curr_pair_vars):
+                print(f"    {var_name}: {val:.2f}")
+        
+        if dx_abs_pair_vars:
+            print("\n  【详细变量列表 - dx_abs_pair (旧版本)】")
+            for var_name, val in sorted(dx_abs_pair_vars):
+                print(f"    {var_name}: {val:.2f}")
+        
+        if dy_abs_pair_vars:
+            print("\n  【详细变量列表 - dy_abs_pair (旧版本)】")
+            for var_name, val in sorted(dy_abs_pair_vars):
+                print(f"    {var_name}: {val:.2f}")
+        
+        if dist_diff_pair_vars:
+            print("\n  【详细变量列表 - dist_diff_pair】")
+            for var_name, val in sorted(dist_diff_pair_vars):
+                print(f"    {var_name}: {val:.2f}")
+        
+        if dist_diff_abs_pair_vars:
+            print("\n  【详细变量列表 - dist_diff_abs_pair】")
+            for var_name, val in sorted(dist_diff_abs_pair_vars):
+                if val is not None:
+                    print(f"    {var_name}: {val:.2f}")
+                else:
+                    print(f"    {var_name}: None (未求解)")
+        
+        if diff_dist_pair_vars:
+            print("\n  【详细变量列表 - diff_dist_pair (二进制)】")
+            for var_name, val in sorted(diff_dist_pair_vars):
+                if val is not None:
+                    diff_str = "是" if val > 0.5 else "否"
+                    print(f"    {var_name}: {val} ({diff_str})")
+                else:
+                    print(f"    {var_name}: None (未求解)")
+        
+        # 打印所有其他排除解约束相关的变量（包括无法匹配的）
+        if unmatched_vars:
+            print("\n  【其他排除解约束相关变量（未在分组中显示）】")
+            for var_name, val in sorted(unmatched_vars):
+                if val is not None:
+                    print(f"    {var_name}: {val}")
+                else:
+                    print(f"    {var_name}: None (未求解)")
+        
+        # 打印所有排除解约束相关变量的完整列表（用于调试）
+        print("\n  【完整变量列表（所有排除解约束相关变量）】")
+        for var_name, val in sorted(exclude_vars):
+            if val is not None:
+                # 根据变量类型格式化输出
+                if var_name.startswith("diff_dist_pair_") or var_name.startswith("same_dist_pair_"):
+                    # 二进制变量
+                    binary_str = "是" if val > 0.5 else "否"
+                    print(f"    {var_name}: {val} ({binary_str})")
+                elif isinstance(val, (int, float)):
+                    # 数值变量
+                    print(f"    {var_name}: {val:.4f}")
+                else:
+                    print(f"    {var_name}: {val}")
+            else:
+                print(f"    {var_name}: None (未求解)")
+        
+        if same_dist_pair_vars:
+            print("\n  same_dist_pair (chiplet对的距离是否与某个之前解相同，二进制变量):")
+            # 按chiplet对和之前解索引分组显示
+            same_dist_by_pair = {}
+            import re
+            for var_name, val in same_dist_pair_vars:
+                # 解析变量名：same_dist_pair_{suffix}_{i}_{j}_prev{prev_idx}
+                # 使用正则表达式匹配：same_dist_pair_*_数字_数字_prev数字
+                match = re.search(r'same_dist_pair_[^_]+_(\d+)_(\d+)_prev(\d+)', var_name)
+                if match:
+                    i_val = int(match.group(1))
+                    j_val = int(match.group(2))
+                    prev_idx = int(match.group(3))
+                    pair_key = (i_val, j_val, prev_idx)
+                    if pair_key not in same_dist_by_pair:
+                        same_dist_by_pair[pair_key] = []
+                    same_dist_by_pair[pair_key].append((var_name, val))
+                else:
+                    # 如果正则匹配失败，直接显示变量名
+                    if "unknown" not in same_dist_by_pair:
+                        same_dist_by_pair["unknown"] = []
+                    same_dist_by_pair["unknown"].append((var_name, val))
+            
+            # 按chiplet对和之前解索引排序显示
+            for key, vars_list in sorted(same_dist_by_pair.items()):
+                if key == "unknown":
+                    print("    无法解析的变量:")
+                    for var_name, val in sorted(vars_list):
+                        print(f"      {var_name}: {val}")
+                else:
+                    i, j, prev_idx = key
+                    name_i = nodes[i].name if hasattr(nodes[i], 'name') and i < len(nodes) else f"Chiplet_{i}"
+                    name_j = nodes[j].name if hasattr(nodes[j], 'name') and j < len(nodes) else f"Chiplet_{j}"
+                    print(f"    模块对 ({name_i}, {name_j}) 与解 {prev_idx}:")
+                    for var_name, val in sorted(vars_list):
+                        print(f"      {var_name}: {val}")
+        
+        # 10.2 打印排除约束相关的约束
+        print("\n【排除约束】")
+        exclude_constraints = []
+        for constraint_name, constraint in ctx.prob.constraints.items():
+            if constraint_name.startswith("dx_abs_pair_") or constraint_name.startswith("dy_abs_pair_") or \
+               constraint_name.startswith("dx_grid_abs_pair_") or constraint_name.startswith("dy_grid_abs_pair_") or \
+               constraint_name.startswith("dist_curr_pair_") or \
+               constraint_name.startswith("dist_diff_pair_") or constraint_name.startswith("dist_diff_abs_pair_") or \
+               constraint_name.startswith("exclude_solution_dist_pair_") or \
+               constraint_name.startswith("same_dist_pair_") or constraint_name.startswith("diff_dist_pair_implies_") or \
+               constraint_name.startswith("not_same_implies_") or constraint_name.startswith("all_not_same_implies_"):
+                exclude_constraints.append(constraint_name)
+        
+        if exclude_constraints:
+            print(f"  共找到 {len(exclude_constraints)} 个排除约束:")
+            for constraint_name in sorted(exclude_constraints):
+                constraint = ctx.prob.constraints[constraint_name]
+                print(f"    {constraint_name}: {constraint}")
+        else:
+            print("  (未找到排除约束)")
+    else:
+        print("\n【排除解约束】")
+        print("  (第一次求解，无排除约束)")
