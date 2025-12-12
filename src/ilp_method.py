@@ -558,14 +558,76 @@ def build_placement_ilp_model_grid(
     # ============ 步骤5: 定义目标函数 ============
     # 5.1 线长（曼哈顿距离）
     wirelength = 0
+    
+    # Big-M方法添加绝对值约束的辅助函数
+    def add_absolute_value_constraint_big_m(
+        prob: pulp.LpProblem,
+        abs_var: pulp.LpVariable,
+        orig_var: pulp.LpVariable,
+        M: float,
+        constraint_prefix: str,
+    ) -> None:
+        """
+        使用Big-M方法添加绝对值约束：abs_var = |orig_var|
+        
+        实现方法（参考Big-M方法）：
+        1. 创建二进制变量 is_positive，表示 orig_var >= 0
+        2. 使用4个约束强制 abs_var = |orig_var|
+           - 当 orig_var >= 0 时 (is_positive=1): abs_var = orig_var
+           - 当 orig_var < 0 时 (is_positive=0): abs_var = -orig_var
+        3. 使用2个约束强制 is_positive 的正确性
+        """
+        # 创建二进制变量：is_positive = 1 当且仅当 orig_var >= 0
+        is_positive = pulp.LpVariable(f"{constraint_prefix}_is_positive", cat='Binary')
+        
+        # 约束1: 当 orig_var >= 0 时 (is_positive=1)，约束简化为: abs_var >= orig_var
+        prob += abs_var >= orig_var - M * (1 - is_positive), f"{constraint_prefix}_abs_ge_orig"
+        
+        # 约束2: 当 orig_var >= 0 时 (is_positive=1)，约束简化为: abs_var <= orig_var
+        prob += abs_var <= orig_var + M * (1 - is_positive), f"{constraint_prefix}_abs_le_orig"
+        
+        # 约束3: 当 orig_var < 0 时 (is_positive=0)，约束简化为: abs_var >= -orig_var
+        prob += abs_var >= -orig_var - M * is_positive, f"{constraint_prefix}_abs_ge_neg_orig"
+        
+        # 约束4: 当 orig_var < 0 时 (is_positive=0)，约束简化为: abs_var <= -orig_var
+        prob += abs_var <= -orig_var + M * is_positive, f"{constraint_prefix}_abs_le_neg_orig"
+        
+        # 约束5: 强制 is_positive = 1 当 orig_var >= 0
+        prob += orig_var >= -M * (1 - is_positive), f"{constraint_prefix}_force_positive"
+        
+        # 约束6: 强制 is_positive = 0 当 orig_var < 0
+        epsilon = 0.001
+        prob += orig_var <= M * is_positive - epsilon, f"{constraint_prefix}_force_negative"
+    
     for i, j in connected_pairs:
         dx_abs = pulp.LpVariable(f"dx_abs_{i}_{j}", lowBound=0)
         dy_abs = pulp.LpVariable(f"dy_abs_{i}_{j}", lowBound=0)
         
-        prob += dx_abs >= cx[i] - cx[j], f"dx_abs1_{i}_{j}"
-        prob += dx_abs >= cx[j] - cx[i], f"dx_abs2_{i}_{j}"
-        prob += dy_abs >= cy[i] - cy[j], f"dy_abs1_{i}_{j}"
-        prob += dy_abs >= cy[j] - cy[i], f"dy_abs2_{i}_{j}"
+        # 创建辅助变量表示差值
+        dx_diff = pulp.LpVariable(f"dx_diff_{i}_{j}", lowBound=-W, upBound=W, cat='Continuous')
+        dy_diff = pulp.LpVariable(f"dy_diff_{i}_{j}", lowBound=-H, upBound=H, cat='Continuous')
+        
+        # 定义差值
+        prob += dx_diff == cx[i] - cx[j], f"dx_diff_def_{i}_{j}"
+        prob += dy_diff == cy[i] - cy[j], f"dy_diff_def_{i}_{j}"
+        
+        # 使用Big-M方法添加绝对值约束
+        M_dx = W  # Big-M常数
+        M_dy = H  # Big-M常数
+        add_absolute_value_constraint_big_m(
+            prob=prob,
+            abs_var=dx_abs,
+            orig_var=dx_diff,
+            M=M_dx,
+            constraint_prefix=f"dx_abs_{i}_{j}"
+        )
+        add_absolute_value_constraint_big_m(
+            prob=prob,
+            abs_var=dy_abs,
+            orig_var=dy_diff,
+            M=M_dy,
+            constraint_prefix=f"dy_abs_{i}_{j}"
+        )
         
         wirelength += dx_abs + dy_abs
     
