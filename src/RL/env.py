@@ -76,11 +76,10 @@ class ChipletPlacementEnv:
         max_height: Optional[float] = None,
         min_overlap: float = 1.0,
         # 奖励权重
-        overlap_penalty: float = 1000.0,
-        adjacency_penalty: float = 500.0,  # 违反相邻约束的惩罚
         adjacency_reward: float = 100.0,  # 满足相邻约束的奖励
-        area_reward_scale: float = 10.0,
         placement_reward: float = 50.0,
+        compact: float = 30.0,# 利用率奖励权重
+        min_wirelength_reward_scale: float = 0.0  # 最短线长奖励权重，负数越短越好
     ):
         """
         初始化环境
@@ -91,22 +90,19 @@ class ChipletPlacementEnv:
             grid_resolution: 网格分辨率
             max_width/max_height: 边界框尺寸
             min_overlap: 相邻最小重叠长度
-            overlap_penalty: 重叠惩罚
-            adjacency_penalty: 违反相邻约束的惩罚
             adjacency_reward: 满足相邻约束的奖励
-            area_reward_scale: 面积利用率奖励
             placement_reward: 成功放置奖励
+            compact: 利用率奖励权重
         """
         self.problem = problem
         self.grid_resolution = grid_resolution
         self.min_overlap = min_overlap
         
         # 奖励权重
-        self.overlap_penalty = overlap_penalty
-        self.adjacency_penalty = adjacency_penalty
         self.adjacency_reward = adjacency_reward
-        self.area_reward_scale = area_reward_scale
         self.placement_reward = placement_reward
+        self.compact = compact
+        self.min_wirelength_reward_scale = min_wirelength_reward_scale
         
         # 初始化芯片
         self.chiplets: Dict[str, Chiplet] = {
@@ -223,7 +219,6 @@ class ChipletPlacementEnv:
         
         # 2. 检查与已放置芯片的关系
         adjacent_neighbors = self._get_adjacent_neighbors(chip_id)
-        is_adjacent_to_any_neighbor = False
         
         for placed_chip_id, placed_chip in self.state.layout.items():
             # 首先检查是否有重叠（所有芯片都不能重叠，无论是否邻接）
@@ -233,15 +228,12 @@ class ChipletPlacementEnv:
                 else:
                     return False, f"overlap_with_non_neighbor_{placed_chip_id}"
             
-            # 对于邻接芯片，检查是否满足相邻约束
+            # 对于邻接芯片，必须满足相邻约束
             if placed_chip_id in adjacent_neighbors:
                 is_adjacent, overlap_len, direction = get_adjacency_info(new_chiplet, placed_chip)
-                if is_adjacent and overlap_len >= self.min_overlap:
-                    is_adjacent_to_any_neighbor = True
-        
-        # 3. 如果有邻接邻域，必须与至少一个相邻
-        if adjacent_neighbors and not is_adjacent_to_any_neighbor:
-            return False, "not_adjacent_to_any_neighbor"
+                if not (is_adjacent and overlap_len >= self.min_overlap):
+                    # 关键修改：与任何一个已放置的邻居不相邻都不行
+                    return False, f"not_adjacent_to_neighbor_{placed_chip_id}"
         
         return True, "ok"
     
@@ -249,7 +241,9 @@ class ChipletPlacementEnv:
         """
         获取芯片的有效放置位置列表
         
-        返回所有满足约束的 (x_idx, y_idx, rotation) 组合
+        采用数学方法：
+        - 第一个芯片：中心区域采样
+        - 后续芯片：直接计算与已放置芯片相邻的位置（四周）
         
         Args:
             chip_id: 芯片ID
@@ -261,33 +255,202 @@ class ChipletPlacementEnv:
         chiplet_template = self.chiplets[chip_id]
         adjacent_neighbors = self._get_adjacent_neighbors(chip_id)
         
-        # 如果是第一个芯片，所有位置都有效
+        # 第一个芯片：在中心区域采样
         if not self.state.layout:
-            for x_idx in range(self.grid_size_x):
-                for y_idx in range(self.grid_size_y):
+            center_x = self.grid_size_x // 2
+            center_y = self.grid_size_y // 2
+            search_range = max(5, min(self.grid_size_x, self.grid_size_y) // 4)
+            
+            for x_idx in range(max(0, center_x - search_range), min(self.grid_size_x, center_x + search_range)):
+                for y_idx in range(max(0, center_y - search_range), min(self.grid_size_y, center_y + search_range)):
                     for rotation in range(self.num_rotations):
                         valid_positions.append((x_idx, y_idx, rotation))
             return valid_positions
         
-        # 对于后续芯片，只考虑邻接邻域附近的位置
-        # 优化：只检查与邻接邻域接近的网格位置
-        for x_idx in range(self.grid_size_x):
-            for y_idx in range(self.grid_size_y):
-                for rotation in range(self.num_rotations):
-                    # 创建测试芯片
-                    test_chiplet = deepcopy(chiplet_template)
-                    if rotation == 1:
-                        test_chiplet.width, test_chiplet.height = test_chiplet.height, test_chiplet.width
-                    
-                    test_chiplet.x = x_idx * self.step_x
-                    test_chiplet.y = y_idx * self.step_y
-                    
-                    # 检查是否合法
-                    is_valid, reason = self._is_valid_placement(test_chiplet, chip_id)
-                    if is_valid:
-                        valid_positions.append((x_idx, y_idx, rotation))
+        # 后续芯片：计算与邻接芯片相邻的位置
+        # 关键逻辑：对每个邻接邻域分别计算候选位置，然后求交集
+        
+        all_neighbor_candidates = []  # 每个邻接邻域的候选位置列表
+        
+        for neighbor_id in adjacent_neighbors:
+            placed_chip = self.state.layout[neighbor_id]
+            neighbor_candidates = {}  # 当前邻域的候选位置 {(x_idx, y_idx): rotation_set}
+            
+            # 对每种旋转计算可能的边接触位置
+            for rotation in range(self.num_rotations):
+                if rotation == 0:
+                    w = chiplet_template.width
+                    h = chiplet_template.height
+                else:
+                    w = chiplet_template.height
+                    h = chiplet_template.width
+                
+                # 计算理想的边接触位置（连续坐标）
+                x_left_ideal = placed_chip.x - w  # 左边
+                x_right_ideal = placed_chip.x + placed_chip.width  # 右边
+                y_down_ideal = placed_chip.y - h  # 下边
+                y_up_ideal = placed_chip.y + placed_chip.height  # 上边
+                
+                # 对每个理想位置，检查 floor 和 ceil 两个可能的网格点
+                candidate_x_positions = []
+                for x_ideal in [x_left_ideal, x_right_ideal]:
+                    x_floor = int(np.floor(x_ideal / self.step_x))
+                    x_ceil = int(np.ceil(x_ideal / self.step_x))
+                    if x_floor == x_ceil:
+                        candidate_x_positions.append(x_floor)
+                    else:
+                        candidate_x_positions.extend([x_floor, x_ceil])
+                
+                candidate_y_positions = []
+                for y_ideal in [y_down_ideal, y_up_ideal]:
+                    y_floor = int(np.floor(y_ideal / self.step_y))
+                    y_ceil = int(np.ceil(y_ideal / self.step_y))
+                    if y_floor == y_ceil:
+                        candidate_y_positions.append(y_floor)
+                    else:
+                        candidate_y_positions.extend([y_floor, y_ceil])
+                
+                # 水平方向：与Y重叠区域组合
+                y_overlap_indices = self._get_overlapping_y_indices(placed_chip, h)
+                for x_idx in candidate_x_positions:
+                    if 0 <= x_idx < self.grid_size_x:
+                        for y_idx in y_overlap_indices:
+                            # 验证是否真的满足邻接约束
+                            temp_chip = Chiplet(chip_id, w, h)
+                            temp_chip.x = x_idx * self.step_x
+                            temp_chip.y = y_idx * self.step_y
+                            
+                            if not has_overlap(temp_chip, placed_chip):
+                                is_adj, overlap_len, _ = get_adjacency_info(temp_chip, placed_chip)
+                                if is_adj and overlap_len >= self.min_overlap:
+                                    key = (x_idx, y_idx)
+                                    if key not in neighbor_candidates:
+                                        neighbor_candidates[key] = set()
+                                    neighbor_candidates[key].add(rotation)
+                
+                # 竖直方向：与X重叠区域组合
+                x_overlap_indices = self._get_overlapping_x_indices(placed_chip, w)
+                for y_idx in candidate_y_positions:
+                    if 0 <= y_idx < self.grid_size_y:
+                        for x_idx in x_overlap_indices:
+                            temp_chip = Chiplet(chip_id, w, h)
+                            temp_chip.x = x_idx * self.step_x
+                            temp_chip.y = y_idx * self.step_y
+                            
+                            if not has_overlap(temp_chip, placed_chip):
+                                is_adj, overlap_len, _ = get_adjacency_info(temp_chip, placed_chip)
+                                if is_adj and overlap_len >= self.min_overlap:
+                                    key = (x_idx, y_idx)
+                                    if key not in neighbor_candidates:
+                                        neighbor_candidates[key] = set()
+                                    neighbor_candidates[key].add(rotation)
+            
+            all_neighbor_candidates.append(neighbor_candidates)
+        
+        # 求交集：只保留在所有邻接邻域中都有效的位置
+        if not all_neighbor_candidates:
+            candidate_positions = {}
+        elif len(all_neighbor_candidates) == 1:
+            # 只有一个邻接邻域，直接使用
+            candidate_positions = all_neighbor_candidates[0]
+        else:
+            # 多个邻接邻域，求交集
+            candidate_positions = all_neighbor_candidates[0].copy()
+            
+            for neighbor_candidates in all_neighbor_candidates[1:]:
+                new_candidates = {}
+                for (x_idx, y_idx) in candidate_positions:
+                    if (x_idx, y_idx) in neighbor_candidates:
+                        # 该位置在两个邻域中都存在，取旋转的交集
+                        rotation_intersection = candidate_positions[(x_idx, y_idx)] & neighbor_candidates[(x_idx, y_idx)]
+                        if rotation_intersection:
+                            new_candidates[(x_idx, y_idx)] = rotation_intersection
+                candidate_positions = new_candidates
+        
+        # 验证候选位置的合法性（检查重叠和邻接）
+        for (x_idx, y_idx), rotation_set in candidate_positions.items():
+            for rotation in rotation_set:
+                if rotation == 0:
+                    w = chiplet_template.width
+                    h = chiplet_template.height
+                else:
+                    w = chiplet_template.height
+                    h = chiplet_template.width
+                
+                temp_chip = Chiplet(chip_id, w, h)
+                temp_chip.x = x_idx * self.step_x
+                temp_chip.y = y_idx * self.step_y
+                
+                # 检查是否合法
+                is_valid, reason = self._is_valid_placement(temp_chip, chip_id)
+                if is_valid:
+                    valid_positions.append((x_idx, y_idx, rotation))
         
         return valid_positions
+    
+    def _get_overlapping_x_indices(self, placed_chip: Chiplet, new_width: float) -> List[int]:
+        """
+        计算与placed_chip在X方向有重叠的网格索引范围
+        
+        placed_chip: [placed_chip.x, placed_chip.x + placed_chip.width]
+        new_chip: [x, x + new_width]
+        需要重叠 >= min_overlap
+        
+        新芯片在左边（接触）时：x + new_width ≈ placed_chip.x
+                    x ≈ placed_chip.x - new_width
+        新芯片在右边（接触）时：x ≈ placed_chip.x + placed_chip.width
+        
+        要有重叠，需要：overlap = min(x+w, a_x+a_w) - max(x, a_x) >= min_overlap
+        """
+        indices = []
+        
+        # 范围：保证至少有min_overlap的重叠
+        # 最左位置：x + new_width = a_x (刚好接触左边)
+        x_min_left = placed_chip.x - new_width
+        # 最右位置：x = a_x + a_w (刚好接触右边)
+        x_max_right = placed_chip.x + placed_chip.width
+        
+        # 但要有充分重叠，范围应该缩小
+        # 左边：x应该在 [a_x - new_width, a_x - new_width + min_overlap] (才能与A左边对齐)
+        # 右边：x应该在 [a_x + a_w - min_overlap, a_x + a_w] (才能与A右边对齐)
+        
+        # 简化：计算所有能与A产生>=min_overlap的x范围
+        # max(x, a_x) < min(x+w, a_x+a_w) && min < max
+        # 即：x < a_x+a_w && x+w > a_x
+        # 即：a_x - w < x < a_x + a_w
+        x_min = placed_chip.x - new_width
+        x_max = placed_chip.x + placed_chip.width
+        
+        for x_idx in range(int(np.floor(x_min / self.step_x)), int(np.ceil(x_max / self.step_x))):
+            if 0 <= x_idx < self.grid_size_x:
+                # 验证确实有重叠
+                x = x_idx * self.step_x
+                overlap = min(x + new_width, placed_chip.x + placed_chip.width) - max(x, placed_chip.x)
+                if overlap >= self.min_overlap:
+                    if x_idx not in indices:
+                        indices.append(x_idx)
+        
+        return indices
+    
+    def _get_overlapping_y_indices(self, placed_chip: Chiplet, new_height: float) -> List[int]:
+        """
+        计算与placed_chip在Y方向有重叠的网格索引范围
+        """
+        indices = []
+        
+        y_min = placed_chip.y - new_height
+        y_max = placed_chip.y + placed_chip.height
+        
+        for y_idx in range(int(np.floor(y_min / self.step_y)), int(np.ceil(y_max / self.step_y))):
+            if 0 <= y_idx < self.grid_size_y:
+                # 验证确实有重叠
+                y = y_idx * self.step_y
+                overlap = min(y + new_height, placed_chip.y + placed_chip.height) - max(y, placed_chip.y)
+                if overlap >= self.min_overlap:
+                    if y_idx not in indices:
+                        indices.append(y_idx)
+        
+        return indices
     
     def get_observation(self) -> np.ndarray:
         """
@@ -403,7 +566,7 @@ class ChipletPlacementEnv:
             (observation, reward, done, info)
         """
         if self.state.current_step >= self.num_chiplets:
-            return self.get_observation(), -self.overlap_penalty, True, {
+            return self.get_observation(), 0.0, True, {
                 "step": self.state.current_step,
                 "total_steps": self.num_chiplets,
                 "error": "done"
@@ -411,7 +574,7 @@ class ChipletPlacementEnv:
         
         current_chip_id = self._get_current_chip_id()
         if current_chip_id is None:
-            return self.get_observation(), -self.overlap_penalty, False, {
+            return self.get_observation(), 0.0, False, {
                 "step": self.state.current_step,
                 "total_steps": self.num_chiplets,
                 "error": "no_chip"
@@ -432,7 +595,7 @@ class ChipletPlacementEnv:
         # 检查合法性
         is_valid, reason = self._is_valid_placement(new_chiplet, current_chip_id)
         if not is_valid:
-            return self.get_observation(), -self.overlap_penalty, False, {
+            return self.get_observation(), 0.0, False, {
                 "step": self.state.current_step,
                 "total_steps": self.num_chiplets,
                 "chip_id": current_chip_id,
@@ -446,7 +609,28 @@ class ChipletPlacementEnv:
         self.state.current_step += 1
         
         # 计算奖励
-        reward = self.placement_reward
+        reward = self.placement_reward# 放置奖励
+        
+        # 利用率奖励（每步计算）
+        if len(self.state.layout) > 1:
+            chiplets = list(self.state.layout.values())
+            
+            # 计算边界框
+            x_coords = [c.x for c in chiplets] + [c.x + c.width for c in chiplets]
+            y_coords = [c.y for c in chiplets] + [c.y + c.height for c in chiplets]
+            
+            bbox_width = max(x_coords) - min(x_coords)
+            bbox_height = max(y_coords) - min(y_coords)
+            bbox_area = bbox_width * bbox_height
+            
+            # 芯片总面积
+            chip_total_area = sum(c.width * c.height for c in chiplets)
+            
+            # 利用率 = 芯片面积 / 边界框面积
+            compactness = chip_total_area / bbox_area if bbox_area > 0 else 0
+            
+            # 紧凑性奖励（值域0-1，越接近1越好）
+            reward += compactness * self.compact  # 每步奖励紧凑布局
         
         # 检查相邻约束
         neighbors = self.problem.get_neighbors(current_chip_id)
@@ -456,15 +640,39 @@ class ChipletPlacementEnv:
                 is_adj, overlap_len, _ = get_adjacency_info(new_chiplet, neighbor_chip)
                 if is_adj and overlap_len >= self.min_overlap:
                     reward += self.adjacency_reward
-                else:
-                    reward -= self.adjacency_penalty
+                    
+                #     # 边缘对齐奖励（工艺友好）
+                #     # 检查左/右边缘是否对齐（X坐标）
+                #     ALIGN_THRESHOLD = 0.5  # 对齐容差
+                #     if abs(new_chiplet.x - neighbor_chip.x) < ALIGN_THRESHOLD or \
+                #        abs((new_chiplet.x + new_chiplet.width) - (neighbor_chip.x + neighbor_chip.width)) < ALIGN_THRESHOLD:
+                #         reward += 20.0  # X边缘对齐奖励
+                    
+                #     # 检查上/下边缘是否对齐（Y坐标）
+                #     if abs(new_chiplet.y - neighbor_chip.y) < ALIGN_THRESHOLD or \
+                #        abs((new_chiplet.y + new_chiplet.height) - (neighbor_chip.y + neighbor_chip.height)) < ALIGN_THRESHOLD:
+                #         reward += 20.0  # Y边缘对齐奖励
+                # # 注意：由于交集逻辑保证所有邻接约束满足，else分支不应触发
         
         # 检查完成
         done = self.state.current_step >= self.num_chiplets
         
         if done:
-            utilization, _, _, _, _ = calculate_layout_utilization(self.state.layout)
-            reward += utilization * self.area_reward_scale
+      
+            # 计算最短线长指标（所有有connection的芯片对的中心欧氏距离之和，负数越短越好）
+            if self.min_wirelength_reward_scale != 0.0 and len(self.state.layout) > 1:
+                total_dist = 0.0
+                for chip_id1, chip_id2 in self.problem.connection_graph.edges():
+                    c1 = self.state.layout[chip_id1]
+                    c2 = self.state.layout[chip_id2]
+                    cx1 = c1.x + c1.width / 2
+                    cy1 = c1.y + c1.height / 2
+                    cx2 = c2.x + c2.width / 2
+                    cy2 = c2.y + c2.height / 2
+                    dist = ((cx1 - cx2) ** 2 + (cy1 - cy2) ** 2) ** 0.5
+                    total_dist += dist
+                # 线长越短越好，奖励为负线长乘以权重
+                reward += -total_dist * self.min_wirelength_reward_scale
         
         info = {
             "chip_id": current_chip_id,
@@ -552,7 +760,7 @@ class ChipletPlacementEnv:
 # 便捷函数
 def create_env_from_json(json_path: str, **kwargs) -> ChipletPlacementEnv:
     """
-    从 JSON 文件创建环境
+    从 JSON 文件创建环境（兼容chiplets和dies格式）
     
     Args:
         json_path: JSON 文件路径
@@ -561,7 +769,29 @@ def create_env_from_json(json_path: str, **kwargs) -> ChipletPlacementEnv:
     Returns:
         ChipletPlacementEnv 实例
     """
-    problem = load_problem_from_json(json_path)
+    # 手动加载JSON，兼容两种格式
+    with open(json_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    
+    problem = LayoutProblem()
+    
+    # 支持'chiplets'或'dies'字段
+    chiplets_data = data.get('chiplets', data.get('dies', []))
+    if not chiplets_data:
+        raise KeyError("JSON文件必须包含 'chiplets' 或 'dies' 字段")
+    
+    for chiplet_data in chiplets_data:
+        name = chiplet_data.get('name') or chiplet_data.get('id')
+        width = chiplet_data.get('width', 10)
+        height = chiplet_data.get('height', 10)
+        problem.add_chiplet(Chiplet(name, width, height))
+    
+    # 添加连接
+    connections = data.get('connections', [])
+    for conn in connections:
+        if len(conn) >= 2:
+            problem.add_connection(conn[0], conn[1])
+    
     return ChipletPlacementEnv(problem, **kwargs)
 
 
@@ -659,7 +889,7 @@ if __name__ == "__main__":
     
     # 从JSON加载问题（支持'chiplets'格式）
     import json
-    json_file = "../../baseline/ICCAD23/test_input/12core.json"
+    json_file = "../../baseline/ICCAD23/test_input/5core.json"
     with open(json_file, 'r') as f:
         data = json.load(f)
     
@@ -679,7 +909,7 @@ if __name__ == "__main__":
         if len(conn) >= 2:
             problem.add_connection(conn[0], conn[1])
     
-    placement_order = creat_order_dfs(problem)
+    placement_order = creat_order_bfs(problem)
     
     # 创建环境 - 使用很细的网格（50×50）和较小的min_overlap
     env = ChipletPlacementEnv(
@@ -729,6 +959,7 @@ if __name__ == "__main__":
 
         #todo
         #action=RL_agent.select_action(obs,valid_actions)
+
         obs, reward, done, info = env.step(action)
         total_reward += reward
         
@@ -758,4 +989,3 @@ if __name__ == "__main__":
         show_coordinates=True
     )
     
-    print("\n✓ 所有测试完成")

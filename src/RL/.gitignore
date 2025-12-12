@@ -26,6 +26,7 @@ checkpoints/*.pth
 output/*.png
 output/*.jpg
 output/*.pdf
+results/
 *.png
 *.jpg
 *.pdf
@@ -49,3 +50,6 @@ Thumbs.db
 *.tmp
 *.bak
 *.cache
+README.md
+RUN_USAGE.md
+LOSS_CALCULATION.md
