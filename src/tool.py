@@ -17,6 +17,11 @@ from typing import Dict, List, Tuple, Optional
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch, Rectangle
 
+try:
+    import pulp
+except ImportError:
+    pulp = None
+
 from input_process import build_chiplet_table, load_chiplets_json
 
 
@@ -291,6 +296,7 @@ def draw_chiplet_diagram(
     save_path: Optional[str] = None,
     layout: Optional[Dict[str, Tuple[float, float]]] = None,
     edge_types: Optional[Dict[Tuple[str, str], str]] = None,
+    fixed_chiplet_names: Optional[set] = None,  # 固定的chiplet名称集合，这些chiplet将用粉红色绘制
 ):
     """
     画出 chiplet 方框图。
@@ -313,6 +319,8 @@ def draw_chiplet_diagram(
         如果 edges 是新格式或提供了此参数，将根据类型使用不同颜色：
         - 硅桥互联边：绿色
         - 普通链接边：灰色
+    fixed_chiplet_names:
+        固定的chiplet名称集合。如果提供，这些chiplet将用粉红色绘制，其他chiplet用淡蓝色。
     """
 
     if not nodes:
@@ -345,12 +353,17 @@ def draw_chiplet_diagram(
         w = float(node.dimensions.get("x", 0.0))
         h = float(node.dimensions.get("y", 0.0))
 
-        # 淡蓝色方框
+        # 判断是否为固定chiplet，固定chiplet使用粉红色，其他使用淡蓝色
+        if fixed_chiplet_names is not None and node.name in fixed_chiplet_names:
+            facecolor = "pink"  # 粉红色
+        else:
+            facecolor = "#cce6ff"  # 淡蓝色
+        
         rect = Rectangle(
             (origin_x, origin_y),
             w,
             h,
-            facecolor="#cce6ff",
+            facecolor=facecolor,
             edgecolor="black",
             linewidth=1.0,
         )
@@ -512,4 +525,42 @@ if __name__ == "__main__":
     for src, dst, edge_type in normal_edges:
         print(f"  {src} <-> {dst} (类型: {edge_type})")
 
+
+# ---------------------------------------------------------------------------
+# 约束打印功能（用于调试ILP约束）
+# ---------------------------------------------------------------------------
+
+if pulp is not None:
+    # 约束方向映射表
+    SENSE_MAP = {
+        pulp.LpConstraintLE: "<=",
+        pulp.LpConstraintGE: ">=",
+        pulp.LpConstraintEQ: "=",
+    }
+
+    def print_constraint_formal(constraint: pulp.LpConstraint) -> None:
+        """
+        打印约束的形式化数学表达。
+        
+        参数:
+            constraint: Pulp约束对象
+        """
+        # 处理左侧表达式：移除冗余的 *1.0，美化输出
+        lhs = str(constraint.expr).replace("*1.0", "").replace(" + ", " + ").strip()
+        
+        # 处理右侧常数：Pulp内部存储为 expr + constant <= 0，所以需要取负号
+        rhs = round(-constraint.constant, 4)
+        
+        # 获取约束方向字符串
+        sense_str = SENSE_MAP.get(constraint.sense, "?")
+        
+        # 构建形式化表达式
+        formal_expr = f"[{constraint.name}] {lhs} {sense_str} {rhs}"
+        
+        # 打印约束（可以修改为输出到日志文件）
+        # print(f"[ADD CONSTRAINT] {formal_expr}")
+else:
+    # 如果pulp未安装，提供占位函数
+    def print_constraint_formal(*args, **kwargs):
+        raise ImportError("pulp库未安装，无法使用约束打印功能")
 

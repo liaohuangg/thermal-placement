@@ -1,0 +1,538 @@
+GLPSOL--GLPK LP/MIP Solver 5.0
+Parameter(s) specified in the command line:
+ --cpxlp /tmp/f4e3bab639614bdeb9e5a2fa36ce829a-pulp.lp -o /tmp/f4e3bab639614bdeb9e5a2fa36ce829a-pulp.out
+ -w /tmp/f4e3bab639614bdeb9e5a2fa36ce829a-pulp.sol --tmlim 300
+Reading problem data from '/tmp/f4e3bab639614bdeb9e5a2fa36ce829a-pulp.lp'...
+75 rows, 38 columns, 209 non-zeros
+15 integer variables, 11 of which are binary
+123 lines were read
+GLPK Integer Optimizer 5.0
+75 rows, 38 columns, 209 non-zeros
+15 integer variables, 11 of which are binary
+Preprocessing...
+22 constraint coefficient(s) were reduced
+43 rows, 27 columns, 97 non-zeros
+12 integer variables, 10 of which are binary
+Scaling...
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  2.659e-01  max|aij| =  3.761e+00  ratio =  1.414e+01
+EQ: min|aij| =  7.071e-02  max|aij| =  1.000e+00  ratio =  1.414e+01
+2N: min|aij| =  6.250e-02  max|aij| =  1.250e+00  ratio =  2.000e+01
+Constructing initial basis...
+Size of triangular part is 43
+Solving LP relaxation...
+GLPK Simplex Optimizer 5.0
+43 rows, 27 columns, 97 non-zeros
+      0: obj =   1.200000000e+00 inf =   7.641e+01 (10)
+      9: obj =   3.200000000e+00 inf =   0.000e+00 (0)
+*    10: obj =   2.000000000e+00 inf =   0.000e+00 (0)
+OPTIMAL LP SOLUTION FOUND
+Integer optimization begins...
+Long-step dual simplex will be used
++    10: mip =     not found yet >=              -inf        (1; 0)
++    20: >>>>>   1.530000000e+01 >=   2.000000000e+00  86.9% (6; 1)
++    20: >>>>>   1.280000000e+01 >=   1.200000000e+01   6.3% (4; 4)
++    20: mip =   1.280000000e+01 >=     tree is empty   0.0% (0; 13)
+INTEGER OPTIMAL SOLUTION FOUND
+Time used:   0.0 secs
+Memory used: 0.1 Mb (122061 bytes)
+Writing MIP solution to '/tmp/f4e3bab639614bdeb9e5a2fa36ce829a-pulp.out'...
+Writing MIP solution to '/tmp/f4e3bab639614bdeb9e5a2fa36ce829a-pulp.sol'...
+122 lines were written
+Ignoring fixed x limits to fulfill fixed data aspect with adjustable data limits.
+GLPSOL--GLPK LP/MIP Solver 5.0
+Parameter(s) specified in the command line:
+ --cpxlp /tmp/94a5c090201144e78d060366b2ef55b1-pulp.lp -o /tmp/94a5c090201144e78d060366b2ef55b1-pulp.out
+ -w /tmp/94a5c090201144e78d060366b2ef55b1-pulp.sol --tmlim 300
+Reading problem data from '/tmp/94a5c090201144e78d060366b2ef55b1-pulp.lp'...
+89 rows, 45 columns, 241 non-zeros
+17 integer variables, 13 of which are binary
+157 lines were read
+GLPK Integer Optimizer 5.0
+89 rows, 45 columns, 241 non-zeros
+17 integer variables, 13 of which are binary
+Preprocessing...
+22 constraint coefficient(s) were reduced
+51 rows, 32 columns, 114 non-zeros
+12 integer variables, 10 of which are binary
+Scaling...
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  2.659e-01  max|aij| =  3.761e+00  ratio =  1.414e+01
+EQ: min|aij| =  7.071e-02  max|aij| =  1.000e+00  ratio =  1.414e+01
+2N: min|aij| =  6.250e-02  max|aij| =  1.250e+00  ratio =  2.000e+01
+Constructing initial basis...
+Size of triangular part is 51
+Solving LP relaxation...
+GLPK Simplex Optimizer 5.0
+51 rows, 32 columns, 114 non-zeros
+      0: obj =   1.200000000e+00 inf =   1.234e+02 (13)
+     11: obj =   5.700000000e+00 inf =   0.000e+00 (0)
+*    13: obj =   2.000000000e+00 inf =   0.000e+00 (0)
+OPTIMAL LP SOLUTION FOUND
+Integer optimization begins...
+Long-step dual simplex will be used
++    13: mip =     not found yet >=              -inf        (1; 0)
++    22: >>>>>   1.280000000e+01 >=   1.200000000e+01   6.3% (5; 0)
++    22: mip =   1.280000000e+01 >=     tree is empty   0.0% (0; 9)
+INTEGER OPTIMAL SOLUTION FOUND
+Time used:   0.0 secs
+Memory used: 0.1 Mb (143506 bytes)
+Writing MIP solution to '/tmp/94a5c090201144e78d060366b2ef55b1-pulp.out'...
+Writing MIP solution to '/tmp/94a5c090201144e78d060366b2ef55b1-pulp.sol'...
+143 lines were written
+Ignoring fixed x limits to fulfill fixed data aspect with adjustable data limits.
+GLPSOL--GLPK LP/MIP Solver 5.0
+Parameter(s) specified in the command line:
+ --cpxlp /tmp/23bdd0457c994a91a820db02e4d5fc49-pulp.lp -o /tmp/23bdd0457c994a91a820db02e4d5fc49-pulp.out
+ -w /tmp/23bdd0457c994a91a820db02e4d5fc49-pulp.sol --tmlim 300
+Reading problem data from '/tmp/23bdd0457c994a91a820db02e4d5fc49-pulp.lp'...
+96 rows, 48 columns, 256 non-zeros
+18 integer variables, 14 of which are binary
+174 lines were read
+GLPK Integer Optimizer 5.0
+96 rows, 48 columns, 256 non-zeros
+18 integer variables, 14 of which are binary
+Preprocessing...
+22 constraint coefficient(s) were reduced
+54 rows, 34 columns, 120 non-zeros
+12 integer variables, 10 of which are binary
+Scaling...
+ A: min|aij| =  1.000e-01  max|aij| =  3.000e+01  ratio =  3.000e+02
+GM: min|aij| =  2.659e-01  max|aij| =  3.761e+00  ratio =  1.414e+01
+EQ: min|aij| =  7.071e-02  max|aij| =  1.000e+00  ratio =  1.414e+01
+2N: min|aij| =  6.250e-02  max|aij| =  1.250e+00  ratio =  2.000e+01
+Constructing initial basis...
+Size of triangular part is 54
+Solving LP relaxation...
+GLPK Simplex Optimizer 5.0
+54 rows, 34 columns, 120 non-zeros
+      0: obj =   1.200000000e+00 inf =   1.454e+02 (14)
+     11: obj =   5.700000000e+00 inf =   0.000e+00 (0)
+*    13: obj =   2.000000000e+00 inf =   0.000e+00 (0)
+OPTIMAL LP SOLUTION FOUND
+Integer optimization begins...
+Long-step dual simplex will be used
++    13: mip =     not found yet >=              -inf        (1; 0)
++    22: >>>>>   1.280000000e+01 >=   1.200000000e+01   6.3% (5; 0)
++    22: mip =   1.280000000e+01 >=     tree is empty   0.0% (0; 9)
+INTEGER OPTIMAL SOLUTION FOUND
+Time used:   0.0 secs
+Memory used: 0.1 Mb (145506 bytes)
+Writing MIP solution to '/tmp/23bdd0457c994a91a820db02e4d5fc49-pulp.out'...
+Writing MIP solution to '/tmp/23bdd0457c994a91a820db02e4d5fc49-pulp.sol'...
+153 lines were written
+网格化布局: grid_size=0.5, grid_w=90, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (22.50, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 38
+约束数量: 75
+使用求解器: GLPK
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 12.80
+
+================================================================================
+变量值详情
+================================================================================
+
+【坐标变量】
+  x[0] (A): 15.0
+  y[0] (A): 10.0
+  x[1] (B): 17.5
+  y[1] (B): 0.0
+
+【网格坐标变量】
+  x_grid[0] (A): 30
+  y_grid[0] (A): 20
+  x_grid[1] (B): 35
+  y_grid[1] (B): 0
+
+【旋转变量】
+  r[0] (A): 0 (旋转: 否)
+  r[1] (B): None (旋转: 否)
+
+【尺寸变量】
+  w[0] (A): 15.0
+  h[0] (A): 10.0
+  w[1] (B): 10.0
+  h[1] (B): 10.0
+
+【中心坐标变量】
+  cx[0] (A): 22.5
+  cy[0] (A): 15.0
+  cx[1] (B): 22.5
+  cy[1] (B): 5.0
+
+【相邻方式变量】
+  模块对 (A, B):
+    z1[0,1] (水平相邻): 0
+    z2[0,1] (垂直相邻): 1
+      z2D[0,1] (i在下): 0
+      z2U[0,1] (i在上): 1
+
+【非重叠约束变量】
+  模块对 (A, B):
+    p_left[0,1]: 0
+    p_right[0,1]: 0
+    p_down[0,1]: 0
+    p_up[0,1]: 1
+
+【边界框变量】
+  bbox_w: 15.0
+  bbox_h: 20.0
+
+【其他辅助变量】
+  bbox_area_proxy_t: 28.0
+  bbox_h: 20.0
+  bbox_max_x: 30.0
+  bbox_max_y: 20.0
+  bbox_min_x: 15.0
+  bbox_min_y: 0.0
+  bbox_w: 15.0
+  dx_abs_0_1: 0.0
+  dy_abs_0_1: 10.0
+  shared_x_0_1: 0.0999999999999943
+  shared_y_0_1: 0.0
+
+【排除解约束】
+  (第一次求解，无排除约束)
+
+=== 解 1 ===
+目标函数值: 12.8000
+
+Chiplet坐标（左下角）:
+  A: (15.00, 10.00)
+  B: (17.50, 0.00)
+
+Chiplet中心坐标:
+  A: (22.50, 15.00)
+  B: (22.50, 5.00)
+
+重叠检查:
+  ✓ 无重叠：所有chiplet之间都没有重叠
+
+Chiplet对之间的距离:
+  (A, B): 25.00
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(15.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(17.50, 0.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+
+布局图片已保存: /root/placement/thermal-placement/output/solution_1_layout.png
+网格化布局: grid_size=0.5, grid_w=90, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (22.50, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 45
+约束数量: 89
+使用求解器: GLPK
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 12.80
+
+================================================================================
+变量值详情
+================================================================================
+
+【坐标变量】
+  x[0] (A): 15.0
+  y[0] (A): 10.0
+  x[1] (B): 17.5
+  y[1] (B): 20.0
+
+【网格坐标变量】
+  x_grid[0] (A): 30
+  y_grid[0] (A): 20
+  x_grid[1] (B): 35
+  y_grid[1] (B): 40
+
+【旋转变量】
+  r[0] (A): 0 (旋转: 否)
+  r[1] (B): None (旋转: 否)
+
+【尺寸变量】
+  w[0] (A): 15.0
+  h[0] (A): 10.0
+  w[1] (B): 10.0
+  h[1] (B): 10.0
+
+【中心坐标变量】
+  cx[0] (A): 22.5
+  cy[0] (A): 15.0
+  cx[1] (B): 22.5
+  cy[1] (B): 25.0
+
+【相邻方式变量】
+  模块对 (A, B):
+    z1[0,1] (水平相邻): 0
+    z2[0,1] (垂直相邻): 1
+      z2D[0,1] (i在下): 1
+      z2U[0,1] (i在上): 0
+
+【非重叠约束变量】
+  模块对 (A, B):
+    p_left[0,1]: 0
+    p_right[0,1]: 0
+    p_down[0,1]: 1
+    p_up[0,1]: 0
+
+【边界框变量】
+  bbox_w: 15.0
+  bbox_h: 20.0
+
+【其他辅助变量】
+  bbox_area_proxy_t: 28.0
+  bbox_h: 20.0
+  bbox_max_x: 30.0
+  bbox_max_y: 30.0
+  bbox_min_x: 15.0
+  bbox_min_y: 10.0
+  bbox_w: 15.0
+  dx_abs_0_1: 0.0
+  dy_abs_0_1: 10.0
+  shared_x_0_1: 0.0999999999999943
+  shared_y_0_1: 0.0
+
+================================================================================
+排除解约束相关变量和约束
+================================================================================
+
+【排除约束变量】
+
+  dx_grid_abs_pair (chiplet对的x方向grid坐标距离绝对值):
+    dx_grid_abs_pair_c0_0_1: 5.0
+
+  dy_grid_abs_pair (chiplet对的y方向grid坐标距离绝对值):
+    dy_grid_abs_pair_c0_0_1: 20.0
+
+  dist_curr_pair (chiplet对的当前距离，grid单位):
+    dist_curr_pair_c0_0_1: 25.0
+
+  dist_diff_pair (chiplet对的距离差):
+    dist_diff_pair_c0_0_1_prev0: 0.0
+
+  dist_diff_abs_pair (chiplet对的距离差绝对值):
+    dist_diff_abs_pair_c0_0_1_prev0: 3.0
+
+  diff_dist_pair (chiplet对的距离是否与之前所有解都不同，二进制变量):
+    diff_dist_pair_c0_0_1: 1
+
+  same_dist_pair (chiplet对的距离是否与某个之前解相同，二进制变量):
+    模块对 (A, B) 与解 0:
+      same_dist_pair_c0_0_1_prev0: 0
+
+【排除约束】
+  共找到 14 个排除约束:
+    all_not_same_implies_diff_dist_pair_c0_0_1: diff_dist_pair_c0_0_1 + same_dist_pair_c0_0_1_prev0 >= 1.0
+    diff_dist_pair_implies_not_same_c0_0_1_prev0: diff_dist_pair_c0_0_1 + same_dist_pair_c0_0_1_prev0 <= 1
+    dist_curr_pair_def_c0_0_1: dist_curr_pair_c0_0_1 - dx_grid_abs_pair_c0_0_1 - dy_grid_abs_pair_c0_0_1 = 0
+    dist_diff_abs_pair_neg_c0_0_1_prev0: dist_diff_abs_pair_c0_0_1_prev0 + dist_diff_pair_c0_0_1_prev0 >= 0
+    dist_diff_abs_pair_pos_c0_0_1_prev0: dist_diff_abs_pair_c0_0_1_prev0 - dist_diff_pair_c0_0_1_prev0 >= 0
+    dist_diff_pair_def_c0_0_1_prev0: -dist_curr_pair_c0_0_1 + dist_diff_pair_c0_0_1_prev0 = -25
+    dx_grid_abs_pair_neg_c0_0_1: dx_grid_abs_pair_c0_0_1 + x_grid_0 - x_grid_1 >= 0
+    dx_grid_abs_pair_pos_c0_0_1: dx_grid_abs_pair_c0_0_1 - x_grid_0 + x_grid_1 >= 0
+    dy_grid_abs_pair_neg_c0_0_1: dy_grid_abs_pair_c0_0_1 + y_grid_0 - y_grid_1 >= 0
+    dy_grid_abs_pair_pos_c0_0_1: dy_grid_abs_pair_c0_0_1 - y_grid_0 + y_grid_1 >= 0
+    exclude_solution_dist_pair_c0: diff_dist_pair_c0_0_1 >= 1.0
+    not_same_implies_diff_dist_pair_c0_0_1_prev0: diff_dist_pair_c0_0_1 + same_dist_pair_c0_0_1_prev0 <= 1
+    same_dist_pair_lower_c0_0_1_prev0: dist_diff_abs_pair_c0_0_1_prev0 + 90.0*same_dist_pair_c0_0_1_prev0 >= 3.0
+    same_dist_pair_upper_c0_0_1_prev0: dist_diff_abs_pair_c0_0_1_prev0 + 90.0*same_dist_pair_c0_0_1_prev0 <= 92.97
+
+=== 解 2 ===
+目标函数值: 12.8000
+
+Chiplet坐标（左下角）:
+  A: (15.00, 10.00)
+  B: (17.50, 20.00)
+
+Chiplet中心坐标:
+  A: (22.50, 15.00)
+  B: (22.50, 25.00)
+
+重叠检查:
+  ✓ 无重叠：所有chiplet之间都没有重叠
+
+Chiplet对之间的距离:
+  (A, B): 25.00
+
+与上一解的变化:
+  位置变化的chiplet: B
+  距离变化的chiplet对: 无
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(15.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(17.50, 20.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+
+布局图片已保存: /root/placement/thermal-placement/output/solution_2_layout.png
+网格化布局: grid_size=0.5, grid_w=90, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (22.50, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 48
+约束数量: 96
+使用求解器: GLPK
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 12.80
+
+================================================================================
+变量值详情
+================================================================================
+
+【坐标变量】
+  x[0] (A): 15.0
+  y[0] (A): 10.0
+  x[1] (B): 17.5
+  y[1] (B): 20.0
+
+【网格坐标变量】
+  x_grid[0] (A): 30
+  y_grid[0] (A): 20
+  x_grid[1] (B): 35
+  y_grid[1] (B): 40
+
+【旋转变量】
+  r[0] (A): 0 (旋转: 否)
+  r[1] (B): None (旋转: 否)
+
+【尺寸变量】
+  w[0] (A): 15.0
+  h[0] (A): 10.0
+  w[1] (B): 10.0
+  h[1] (B): 10.0
+
+【中心坐标变量】
+  cx[0] (A): 22.5
+  cy[0] (A): 15.0
+  cx[1] (B): 22.5
+  cy[1] (B): 25.0
+
+【相邻方式变量】
+  模块对 (A, B):Ignoring fixed x limits to fulfill fixed data aspect with adjustable data limits.
+
+    z1[0,1] (水平相邻): 0
+    z2[0,1] (垂直相邻): 1
+      z2D[0,1] (i在下): 1
+      z2U[0,1] (i在上): 0
+
+【非重叠约束变量】
+  模块对 (A, B):
+    p_left[0,1]: 0
+    p_right[0,1]: 0
+    p_down[0,1]: 1
+    p_up[0,1]: 0
+
+【边界框变量】
+  bbox_w: 15.0
+  bbox_h: 20.0
+
+【其他辅助变量】
+  bbox_area_proxy_t: 28.0
+  bbox_h: 20.0
+  bbox_max_x: 30.0
+  bbox_max_y: 30.0
+  bbox_min_x: 15.0
+  bbox_min_y: 10.0
+  bbox_w: 15.0
+  dx_abs_0_1: 0.0
+  dy_abs_0_1: 10.0
+  shared_x_0_1: 0.0999999999999943
+  shared_y_0_1: 0.0
+
+================================================================================
+排除解约束相关变量和约束
+================================================================================
+
+【排除约束变量】
+
+  dx_grid_abs_pair (chiplet对的x方向grid坐标距离绝对值):
+    dx_grid_abs_pair_c1_0_1: 5.0
+
+  dy_grid_abs_pair (chiplet对的y方向grid坐标距离绝对值):
+    dy_grid_abs_pair_c1_0_1: 20.0
+
+  dist_curr_pair (chiplet对的当前距离，grid单位):
+    dist_curr_pair_c1_0_1: 25.0
+
+  dist_diff_pair (chiplet对的距离差):
+    dist_diff_pair_c1_0_1_prev0: 0.0
+    dist_diff_pair_c1_0_1_prev1: 0.0
+
+  dist_diff_abs_pair (chiplet对的距离差绝对值):
+    dist_diff_abs_pair_c1_0_1_prev0: 3.0
+    dist_diff_abs_pair_c1_0_1_prev1: 3.0
+
+  diff_dist_pair (chiplet对的距离是否与之前所有解都不同，二进制变量):
+    diff_dist_pair_c1_0_1: 1
+
+  same_dist_pair (chiplet对的距离是否与某个之前解相同，二进制变量):
+    模块对 (A, B) 与解 0:
+      same_dist_pair_c1_0_1_prev0: 0
+    模块对 (A, B) 与解 1:
+      same_dist_pair_c1_0_1_prev1: 0
+
+【排除约束】
+  共找到 21 个排除约束:
+    all_not_same_implies_diff_dist_pair_c1_0_1: diff_dist_pair_c1_0_1 + same_dist_pair_c1_0_1_prev0 + same_dist_pair_c1_0_1_prev1 >= 1.0
+    diff_dist_pair_implies_not_same_c1_0_1_prev0: diff_dist_pair_c1_0_1 + same_dist_pair_c1_0_1_prev0 <= 1
+    diff_dist_pair_implies_not_same_c1_0_1_prev1: diff_dist_pair_c1_0_1 + same_dist_pair_c1_0_1_prev1 <= 1
+    dist_curr_pair_def_c1_0_1: dist_curr_pair_c1_0_1 - dx_grid_abs_pair_c1_0_1 - dy_grid_abs_pair_c1_0_1 = 0
+    dist_diff_abs_pair_neg_c1_0_1_prev0: dist_diff_abs_pair_c1_0_1_prev0 + dist_diff_pair_c1_0_1_prev0 >= 0
+    dist_diff_abs_pair_neg_c1_0_1_prev1: dist_diff_abs_pair_c1_0_1_prev1 + dist_diff_pair_c1_0_1_prev1 >= 0
+    dist_diff_abs_pair_pos_c1_0_1_prev0: dist_diff_abs_pair_c1_0_1_prev0 - dist_diff_pair_c1_0_1_prev0 >= 0
+    dist_diff_abs_pair_pos_c1_0_1_prev1: dist_diff_abs_pair_c1_0_1_prev1 - dist_diff_pair_c1_0_1_prev1 >= 0
+    dist_diff_pair_def_c1_0_1_prev0: -dist_curr_pair_c1_0_1 + dist_diff_pair_c1_0_1_prev0 = -25
+    dist_diff_pair_def_c1_0_1_prev1: -dist_curr_pair_c1_0_1 + dist_diff_pair_c1_0_1_prev1 = -25
+    dx_grid_abs_pair_neg_c1_0_1: dx_grid_abs_pair_c1_0_1 + x_grid_0 - x_grid_1 >= 0
+    dx_grid_abs_pair_pos_c1_0_1: dx_grid_abs_pair_c1_0_1 - x_grid_0 + x_grid_1 >= 0
+    dy_grid_abs_pair_neg_c1_0_1: dy_grid_abs_pair_c1_0_1 + y_grid_0 - y_grid_1 >= 0
+    dy_grid_abs_pair_pos_c1_0_1: dy_grid_abs_pair_c1_0_1 - y_grid_0 + y_grid_1 >= 0
+    exclude_solution_dist_pair_c1: diff_dist_pair_c1_0_1 >= 1.0
+    not_same_implies_diff_dist_pair_c1_0_1_prev0: diff_dist_pair_c1_0_1 + same_dist_pair_c1_0_1_prev0 <= 1
+    not_same_implies_diff_dist_pair_c1_0_1_prev1: diff_dist_pair_c1_0_1 + same_dist_pair_c1_0_1_prev1 <= 1
+    same_dist_pair_lower_c1_0_1_prev0: dist_diff_abs_pair_c1_0_1_prev0 + 90.0*same_dist_pair_c1_0_1_prev0 >= 3.0
+    same_dist_pair_lower_c1_0_1_prev1: dist_diff_abs_pair_c1_0_1_prev1 + 90.0*same_dist_pair_c1_0_1_prev1 >= 3.0
+    same_dist_pair_upper_c1_0_1_prev0: dist_diff_abs_pair_c1_0_1_prev0 + 90.0*same_dist_pair_c1_0_1_prev0 <= 92.97
+    same_dist_pair_upper_c1_0_1_prev1: dist_diff_abs_pair_c1_0_1_prev1 + 90.0*same_dist_pair_c1_0_1_prev1 <= 92.97
+
+=== 解 3 ===
+目标函数值: 12.8000
+
+Chiplet坐标（左下角）:
+  A: (15.00, 10.00)
+  B: (17.50, 20.00)
+
+Chiplet中心坐标:
+  A: (22.50, 15.00)
+  B: (22.50, 25.00)
+
+重叠检查:
+  ✓ 无重叠：所有chiplet之间都没有重叠
+
+Chiplet对之间的距离:
+  (A, B): 25.00
+
+与上一解的变化:
+  位置变化的chiplet: 无
+  距离变化的chiplet对: 无
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(15.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(17.50, 20.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+
+布局图片已保存: /root/placement/thermal-placement/output/solution_3_layout.png
+
+共找到 3 个不同的解。
