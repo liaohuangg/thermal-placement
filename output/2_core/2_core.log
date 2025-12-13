@@ -1,111 +1,1142 @@
-2025-12-12 11:26:24 - INFO - ================================================================================
-2025-12-12 11:26:24 - INFO - 开始处理: 2core.json
-2025-12-12 11:26:24 - INFO - 核心名称: 2_core
-2025-12-12 11:26:24 - INFO - 输出目录: /root/placement/thermal-placement/output/2_core
-2025-12-12 11:26:24 - INFO - ================================================================================
-2025-12-12 11:26:24 - INFO - 调用 search_multiple_solutions...
-2025-12-12 11:26:24 - DEBUG - Loaded backend qtagg version 6.9.1.
-2025-12-12 11:26:25 - DEBUG - findfont: Matching sans\-serif:style=normal:variant=normal:weight=normal:stretch=normal:size=10.0.
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizTwoSymReg.ttf', name='STIXSizeTwoSym', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/cmex10.ttf', name='cmex10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizThreeSymBol.ttf', name='STIXSizeThreeSym', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizOneSymBol.ttf', name='STIXSizeOneSym', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansMono-Bold.ttf', name='DejaVu Sans Mono', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/cmss10.ttf', name='cmss10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerif-Italic.ttf', name='DejaVu Serif', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/cmb10.ttf', name='cmb10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizTwoSymBol.ttf', name='STIXSizeTwoSym', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans.ttf', name='DejaVu Sans', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 0.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXGeneralItalic.ttf', name='STIXGeneral', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerif-Bold.ttf', name='DejaVu Serif', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXNonUni.ttf', name='STIXNonUnicode', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansDisplay.ttf', name='DejaVu Sans Display', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizThreeSymReg.ttf', name='STIXSizeThreeSym', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizFiveSymReg.ttf', name='STIXSizeFiveSym', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXNonUniIta.ttf', name='STIXNonUnicode', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/cmsy10.ttf', name='cmsy10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/cmr10.ttf', name='cmr10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXGeneral.ttf', name='STIXGeneral', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXNonUniBol.ttf', name='STIXNonUnicode', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizFourSymBol.ttf', name='STIXSizeFourSym', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizOneSymReg.ttf', name='STIXSizeOneSym', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXGeneralBolIta.ttf', name='STIXGeneral', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerifDisplay.ttf', name='DejaVu Serif Display', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans-Bold.ttf', name='DejaVu Sans', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 0.33499999999999996
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/cmmi10.ttf', name='cmmi10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/cmtt10.ttf', name='cmtt10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerif-BoldItalic.ttf', name='DejaVu Serif', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansMono.ttf', name='DejaVu Sans Mono', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansMono-BoldOblique.ttf', name='DejaVu Sans Mono', style='oblique', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXGeneralBol.ttf', name='STIXGeneral', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerif.ttf', name='DejaVu Serif', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans-Oblique.ttf', name='DejaVu Sans', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 1.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans-BoldOblique.ttf', name='DejaVu Sans', style='oblique', variant='normal', weight=700, stretch='normal', size='scalable')) = 1.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansMono-Oblique.ttf', name='DejaVu Sans Mono', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXNonUniBolIta.ttf', name='STIXNonUnicode', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizFourSymReg.ttf', name='STIXSizeFourSym', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', name='DejaVu Sans', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 0.33499999999999996
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf', name='DejaVu Sans Mono', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf', name='DejaVu Serif', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', name='DejaVu Sans', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 0.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf', name='DejaVu Sans Mono', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf', name='DejaVu Serif', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
-2025-12-12 11:26:25 - DEBUG - findfont: Matching sans\-serif:style=normal:variant=normal:weight=normal:stretch=normal:size=10.0 to DejaVu Sans ('/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans.ttf') with score of 0.050000.
-2025-12-12 11:26:25 - WARNING - Ignoring fixed x limits to fulfill fixed data aspect with adjustable data limits.
-2025-12-12 11:26:25 - DEBUG - findfont: Matching sans\-serif:style=normal:variant=normal:weight=normal:stretch=normal:size=8.0.
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizTwoSymReg.ttf', name='STIXSizeTwoSym', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/cmex10.ttf', name='cmex10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizThreeSymBol.ttf', name='STIXSizeThreeSym', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizOneSymBol.ttf', name='STIXSizeOneSym', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansMono-Bold.ttf', name='DejaVu Sans Mono', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/cmss10.ttf', name='cmss10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerif-Italic.ttf', name='DejaVu Serif', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/cmb10.ttf', name='cmb10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizTwoSymBol.ttf', name='STIXSizeTwoSym', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans.ttf', name='DejaVu Sans', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 0.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXGeneralItalic.ttf', name='STIXGeneral', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerif-Bold.ttf', name='DejaVu Serif', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXNonUni.ttf', name='STIXNonUnicode', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansDisplay.ttf', name='DejaVu Sans Display', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizThreeSymReg.ttf', name='STIXSizeThreeSym', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizFiveSymReg.ttf', name='STIXSizeFiveSym', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXNonUniIta.ttf', name='STIXNonUnicode', style='italic', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/cmsy10.ttf', name='cmsy10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/cmr10.ttf', name='cmr10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXGeneral.ttf', name='STIXGeneral', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXNonUniBol.ttf', name='STIXNonUnicode', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizFourSymBol.ttf', name='STIXSizeFourSym', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizOneSymReg.ttf', name='STIXSizeOneSym', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXGeneralBolIta.ttf', name='STIXGeneral', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerifDisplay.ttf', name='DejaVu Serif Display', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans-Bold.ttf', name='DejaVu Sans', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 0.33499999999999996
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/cmmi10.ttf', name='cmmi10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/cmtt10.ttf', name='cmtt10', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerif-BoldItalic.ttf', name='DejaVu Serif', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansMono.ttf', name='DejaVu Sans Mono', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansMono-BoldOblique.ttf', name='DejaVu Sans Mono', style='oblique', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXGeneralBol.ttf', name='STIXGeneral', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerif.ttf', name='DejaVu Serif', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans-Oblique.ttf', name='DejaVu Sans', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 1.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans-BoldOblique.ttf', name='DejaVu Sans', style='oblique', variant='normal', weight=700, stretch='normal', size='scalable')) = 1.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansMono-Oblique.ttf', name='DejaVu Sans Mono', style='oblique', variant='normal', weight=400, stretch='normal', size='scalable')) = 11.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXNonUniBolIta.ttf', name='STIXNonUnicode', style='italic', variant='normal', weight=700, stretch='normal', size='scalable')) = 11.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/STIXSizFourSymReg.ttf', name='STIXSizeFourSym', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', name='DejaVu Sans', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 0.33499999999999996
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf', name='DejaVu Sans Mono', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf', name='DejaVu Serif', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', name='DejaVu Sans', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 0.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf', name='DejaVu Sans Mono', style='normal', variant='normal', weight=400, stretch='normal', size='scalable')) = 10.05
-2025-12-12 11:26:25 - DEBUG - findfont: score(FontEntry(fname='/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf', name='DejaVu Serif', style='normal', variant='normal', weight=700, stretch='normal', size='scalable')) = 10.335
-2025-12-12 11:26:25 - DEBUG - findfont: Matching sans\-serif:style=normal:variant=normal:weight=normal:stretch=normal:size=8.0 to DejaVu Sans ('/root/anaconda3/envs/pyside/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans.ttf') with score of 0.050000.
-2025-12-12 11:26:25 - WARNING - Ignoring fixed x limits to fulfill fixed data aspect with adjustable data limits.
-2025-12-12 11:26:25 - WARNING - Ignoring fixed x limits to fulfill fixed data aspect with adjustable data limits.
-2025-12-12 11:26:25 - WARNING - Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
-2025-12-12 11:26:25 - WARNING - Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
-2025-12-12 11:26:25 - WARNING - Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
-2025-12-12 11:26:25 - WARNING - Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
-2025-12-12 11:26:25 - WARNING - Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
-2025-12-12 11:26:25 - WARNING - Ignoring fixed x limits to fulfill fixed data aspect with adjustable data limits.
-2025-12-12 11:26:25 - WARNING - Ignoring fixed x limits to fulfill fixed data aspect with adjustable data limits.
-2025-12-12 11:26:25 - INFO - 
-共找到 10 个不同的解。
+网格化布局: grid_size=0.5, grid_w=90, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (22.50, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 42
+约束数量: 85
+使用求解器: GLPK
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 12.80
+
+=== 解 1 ===
+
+每对chiplet的相对距离（|x[i]-x[j]|, |y[i]-y[j]|）:
+  (0,1) [A, B]: x距离=2.500, y距离=10.000
+
+(第一个解，无历史解可比较)
+
+=== 解 1 ===
+目标函数值: 12.8000
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(15.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(17.50, 0.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+网格化布局: grid_size=0.5, grid_w=90, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (22.50, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 54
+约束数量: 113
+使用求解器: GLPK
+
+求解状态: Optimal
+求解时间: 0.02 秒
+目标函数值: 13.30
+
+=== 解 2 ===
+
+每对chiplet的相对距离（|x[i]-x[j]|, |y[i]-y[j]|）:
+  (0,1) [A, B]: x距离=3.000, y距离=10.000
+
+与之前解的距离比较（阈值=1.000）:
+
+  与解 1 比较:
+    不同的chiplet对: (0,1)
+
+=== 解 2 ===
+目标函数值: 13.3000
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(15.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(18.00, 0.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+网格化布局: grid_size=0.5, grid_w=90, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (22.50, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 58
+约束数量: 124
+使用求解器: GLPK
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 13.30
+
+=== 解 3 ===
+
+每对chiplet的相对距离（|x[i]-x[j]|, |y[i]-y[j]|）:
+  (0,1) [A, B]: x距离=2.000, y距离=10.000
+
+与之前解的距离比较（阈值=1.000）:
+
+  与解 1 比较:
+    不同的chiplet对: (0,1)
+
+  与解 2 比较:
+    不同的chiplet对: (0,1)
+
+=== 解 3 ===
+目标函数值: 13.3000
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(15.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(17.00, 20.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+网格化布局: grid_size=0.5, grid_w=90, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (22.50, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 62
+约束数量: 135
+使用求解器: GLPK
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 13.80
+
+=== 解 4 ===
+
+每对chiplet的相对距离（|x[i]-x[j]|, |y[i]-y[j]|）:
+  (0,1) [A, B]: x距离=3.500, y距离=10.000
+
+与之前解的距离比较（阈值=1.000）:
+
+  与解 1 比较:
+    不同的chiplet对: (0,1)
+
+  与解 2 比较:
+    不同的chiplet对: (0,1)
+
+  与解 3 比较:
+    不同的chiplet对: (0,1)
+
+=== 解 4 ===
+目标函数值: 13.8000
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(15.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(18.50, 0.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+网格化布局: grid_size=0.5, grid_w=90, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (22.50, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 66
+约束数量: 146
+使用求解器: GLPK
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 13.80
+
+=== 解 5 ===
+
+每对chiplet的相对距离（|x[i]-x[j]|, |y[i]-y[j]|）:
+  (0,1) [A, B]: x距离=1.500, y距离=10.000
+
+与之前解的距离比较（阈值=1.000）:
+
+  与解 1 比较:
+    不同的chiplet对: (0,1)
+
+  与解 2 比较:
+    不同的chiplet对: (0,1)
+
+  与解 3 比较:
+    不同的chiplet对: (0,1)
+
+  与解 4 比较:
+    不同的chiplet对: (0,1)
+
+=== 解 5 ===
+目标函数值: 13.8000
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(15.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(16.50, 0.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+网格化布局: grid_size=0.5, grid_w=90, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (22.50, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 70
+约束数量: 157
+使用求解器: GLPK
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 14.30
+
+=== 解 6 ===
+
+每对chiplet的相对距离（|x[i]-x[j]|, |y[i]-y[j]|）:
+  (0,1) [A, B]: x距离=4.000, y距离=10.000
+
+与之前解的距离比较（阈值=1.000）:
+
+  与解 1 比较:
+    不同的chiplet对: (0,1)
+
+  与解 2 比较:
+    不同的chiplet对: (0,1)
+
+  与解 3 比较:
+    不同的chiplet对: (0,1)
+
+  与解 4 比较:
+    不同的chiplet对: (0,1)
+
+  与解 5 比较:
+    不同的chiplet对: (0,1)
+
+=== 解 6 ===
+目标函数值: 14.3000
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(15.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(19.00, 0.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+网格化布局: grid_size=0.5, grid_w=90, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (22.50, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 74
+约束数量: 168
+使用求解器: GLPK
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 14.30
+
+=== 解 7 ===
+
+每对chiplet的相对距离（|x[i]-x[j]|, |y[i]-y[j]|）:
+  (0,1) [A, B]: x距离=1.000, y距离=10.000
+
+与之前解的距离比较（阈值=1.000）:
+
+  与解 1 比较:
+    不同的chiplet对: (0,1)
+
+  与解 2 比较:
+    不同的chiplet对: (0,1)
+
+  与解 3 比较:
+    不同的chiplet对: (0,1)
+
+  与解 4 比较:
+    不同的chiplet对: (0,1)
+
+  与解 5 比较:
+    不同的chiplet对: (0,1)
+
+  与解 6 比较:
+    不同的chiplet对: (0,1)
+
+=== 解 7 ===
+目标函数值: 14.3000
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(15.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(16.00, 20.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+网格化布局: grid_size=0.5, grid_w=90, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (22.50, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 78
+约束数量: 179
+使用求解器: GLPK
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 14.80
+
+=== 解 8 ===
+
+每对chiplet的相对距离（|x[i]-x[j]|, |y[i]-y[j]|）:
+  (0,1) [A, B]: x距离=4.500, y距离=10.000
+
+与之前解的距离比较（阈值=1.000）:
+
+  与解 1 比较:
+    不同的chiplet对: (0,1)
+
+  与解 2 比较:
+    不同的chiplet对: (0,1)
+
+  与解 3 比较:
+    不同的chiplet对: (0,1)
+
+  与解 4 比较:
+    不同的chiplet对: (0,1)
+
+  与解 5 比较:
+    不同的chiplet对: (0,1)
+
+  与解 6 比较:
+    不同的chiplet对: (0,1)
+
+  与解 7 比较:
+    不同的chiplet对: (0,1)
+
+=== 解 8 ===
+目标函数值: 14.8000
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(15.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(19.50, 0.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+网格化布局: grid_size=0.5, grid_w=90, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (22.50, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 82
+约束数量: 190
+使用求解器: GLPK
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 14.80
+
+=== 解 9 ===
+
+每对chiplet的相对距离（|x[i]-x[j]|, |y[i]-y[j]|）:
+  (0,1) [A, B]: x距离=0.500, y距离=10.000
+
+与之前解的距离比较（阈值=1.000）:
+
+  与解 1 比较:
+    不同的chiplet对: (0,1)
+
+  与解 2 比较:
+    不同的chiplet对: (0,1)
+
+  与解 3 比较:
+    不同的chiplet对: (0,1)
+
+  与解 4 比较:
+    不同的chiplet对: (0,1)
+
+  与解 5 比较:
+    不同的chiplet对: (0,1)
+
+  与解 6 比较:
+    不同的chiplet对: (0,1)
+
+  与解 7 比较:
+    不同的chiplet对: (0,1)
+
+  与解 8 比较:
+    不同的chiplet对: (0,1)
+
+=== 解 9 ===
+目标函数值: 14.8000
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(15.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(15.50, 0.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+网格化布局: grid_size=0.5, grid_w=90, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (22.50, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 86
+约束数量: 201
+使用求解器: GLPK
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 15.30
+
+=== 解 10 ===
+
+每对chiplet的相对距离（|x[i]-x[j]|, |y[i]-y[j]|）:
+  (0,1) [A, B]: x距离=5.000, y距离=10.000
+
+与之前解的距离比较（阈值=1.000）:
+
+  与解 1 比较:
+    不同的chiplet对: (0,1)
+
+  与解 2 比较:
+    不同的chiplet对: (0,1)
+
+  与解 3 比较:
+    不同的chiplet对: (0,1)
+
+  与解 4 比较:
+    不同的chiplet对: (0,1)
+
+  与解 5 比较:
+    不同的chiplet对: (0,1)
+
+  与解 6 比较:
+    不同的chiplet对: (0,1)
+
+  与解 7 比较:
+    不同的chiplet对: (0,1)
+
+  与解 8 比较:
+    不同的chiplet对: (0,1)
+
+  与解 9 比较:
+    不同的chiplet对: (0,1)
+
+=== 解 10 ===
+目标函数值: 15.3000
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(15.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(20.00, 0.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+网格化布局: grid_size=0.5, grid_w=90, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (22.50, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 90
+约束数量: 212
+使用求解器: GLPK
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 15.30
+
+=== 解 11 ===
+
+每对chiplet的相对距离（|x[i]-x[j]|, |y[i]-y[j]|）:
+  (0,1) [A, B]: x距离=0.000, y距离=10.000
+
+与之前解的距离比较（阈值=1.000）:
+
+  与解 1 比较:
+    不同的chiplet对: (0,1)
+
+  与解 2 比较:
+    不同的chiplet对: (0,1)
+
+  与解 3 比较:
+    不同的chiplet对: (0,1)
+
+  与解 4 比较:
+    不同的chiplet对: (0,1)
+
+  与解 5 比较:
+    不同的chiplet对: (0,1)
+
+  与解 6 比较:
+    不同的chiplet对: (0,1)
+
+  与解 7 比较:
+    不同的chiplet对: (0,1)
+
+  与解 8 比较:
+    不同的chiplet对: (0,1)
+
+  与解 9 比较:
+    不同的chiplet对: (0,1)
+
+  与解 10 比较:
+    不同的chiplet对: (0,1)
+
+=== 解 11 ===
+目标函数值: 15.3000
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(15.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(15.00, 0.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+网格化布局: grid_size=0.5, grid_w=90, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (22.50, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 94
+约束数量: 223
+使用求解器: GLPK
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 15.84
+
+=== 解 12 ===
+
+每对chiplet的相对距离（|x[i]-x[j]|, |y[i]-y[j]|）:
+  (0,1) [A, B]: x距离=15.000, y距离=0.500
+
+与之前解的距离比较（阈值=1.000）:
+
+  与解 1 比较:
+    不同的chiplet对: (0,1)
+
+  与解 2 比较:
+    不同的chiplet对: (0,1)
+
+  与解 3 比较:
+    不同的chiplet对: (0,1)
+
+  与解 4 比较:
+    不同的chiplet对: (0,1)
+
+  与解 5 比较:
+    不同的chiplet对: (0,1)
+
+  与解 6 比较:
+    不同的chiplet对: (0,1)
+
+  与解 7 比较:
+    不同的chiplet对: (0,1)
+
+  与解 8 比较:
+    不同的chiplet对: (0,1)
+
+  与解 9 比较:
+    不同的chiplet对: (0,1)
+
+  与解 10 比较:
+    不同的chiplet对: (0,1)
+
+  与解 11 比较:
+    不同的chiplet对: (0,1)
+
+=== 解 12 ===
+目标函数值: 15.8400
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(15.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(30.00, 10.50)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+网格化布局: grid_size=0.5, grid_w=90, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (22.50, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 98
+约束数量: 234
+使用求解器: GLPK
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 16.38
+
+=== 解 13 ===
+
+每对chiplet的相对距离（|x[i]-x[j]|, |y[i]-y[j]|）:
+  (0,1) [A, B]: x距离=15.000, y距离=1.000
+
+与之前解的距离比较（阈值=1.000）:
+
+  与解 1 比较:
+    不同的chiplet对: (0,1)
+
+  与解 2 比较:
+    不同的chiplet对: (0,1)
+
+  与解 3 比较:
+    不同的chiplet对: (0,1)
+
+  与解 4 比较:
+    不同的chiplet对: (0,1)
+
+  与解 5 比较:
+    不同的chiplet对: (0,1)
+
+  与解 6 比较:
+    不同的chiplet对: (0,1)
+
+  与解 7 比较:
+    不同的chiplet对: (0,1)
+
+  与解 8 比较:
+    不同的chiplet对: (0,1)
+
+  与解 9 比较:
+    不同的chiplet对: (0,1)
+
+  与解 10 比较:
+    不同的chiplet对: (0,1)
+
+  与解 11 比较:
+    不同的chiplet对: (0,1)
+
+  与解 12 比较:
+    不同的chiplet对: (0,1)
+
+=== 解 13 ===
+目标函数值: 16.3800
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(15.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(30.00, 11.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+网格化布局: grid_size=0.5, grid_w=90, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (22.50, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 102
+约束数量: 245
+使用求解器: GLPK
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 16.92
+
+=== 解 14 ===
+
+每对chiplet的相对距离（|x[i]-x[j]|, |y[i]-y[j]|）:
+  (0,1) [A, B]: x距离=15.500, y距离=1.000
+
+与之前解的距离比较（阈值=1.000）:
+
+  与解 1 比较:
+    不同的chiplet对: (0,1)
+
+  与解 2 比较:
+    不同的chiplet对: (0,1)
+
+  与解 3 比较:
+    不同的chiplet对: (0,1)
+
+  与解 4 比较:
+    不同的chiplet对: (0,1)
+
+  与解 5 比较:
+    不同的chiplet对: (0,1)
+
+  与解 6 比较:
+    不同的chiplet对: (0,1)
+
+  与解 7 比较:
+    不同的chiplet对: (0,1)
+
+  与解 8 比较:
+    不同的chiplet对: (0,1)
+
+  与解 9 比较:
+    不同的chiplet对: (0,1)
+
+  与解 10 比较:
+    不同的chiplet对: (0,1)
+
+  与解 11 比较:
+    不同的chiplet对: (0,1)
+
+  与解 12 比较:
+    不同的chiplet对: (0,1)
+
+  与解 13 比较:
+    不同的chiplet对: (0,1)
+
+=== 解 14 ===
+目标函数值: 16.9200
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(15.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(30.50, 9.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+网格化布局: grid_size=0.5, grid_w=90, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (22.50, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 106
+约束数量: 256
+使用求解器: GLPK
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 17.46
+
+=== 解 15 ===
+
+每对chiplet的相对距离（|x[i]-x[j]|, |y[i]-y[j]|）:
+  (0,1) [A, B]: x距离=15.500, y距离=1.500
+
+与之前解的距离比较（阈值=1.000）:
+
+  与解 1 比较:
+    不同的chiplet对: (0,1)
+
+  与解 2 比较:
+    不同的chiplet对: (0,1)
+
+  与解 3 比较:
+    不同的chiplet对: (0,1)
+
+  与解 4 比较:
+    不同的chiplet对: (0,1)
+
+  与解 5 比较:
+    不同的chiplet对: (0,1)
+
+  与解 6 比较:
+    不同的chiplet对: (0,1)
+
+  与解 7 比较:
+    不同的chiplet对: (0,1)
+
+  与解 8 比较:
+    不同的chiplet对: (0,1)
+
+  与解 9 比较:
+    不同的chiplet对: (0,1)
+
+  与解 10 比较:
+    不同的chiplet对: (0,1)
+
+  与解 11 比较:
+    不同的chiplet对: (0,1)
+
+  与解 12 比较:
+    不同的chiplet对: (0,1)
+
+  与解 13 比较:
+    不同的chiplet对: (0,1)
+
+  与解 14 比较:
+    不同的chiplet对: (0,1)
+
+=== 解 15 ===
+目标函数值: 17.4600
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(15.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(30.50, 8.50)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+网格化布局: grid_size=0.5, grid_w=90, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (22.50, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 110
+约束数量: 267
+使用求解器: GLPK
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 18.00
+
+=== 解 16 ===
+
+每对chiplet的相对距离（|x[i]-x[j]|, |y[i]-y[j]|）:
+  (0,1) [A, B]: x距离=15.500, y距离=2.000
+
+与之前解的距离比较（阈值=1.000）:
+
+  与解 1 比较:
+    不同的chiplet对: (0,1)
+
+  与解 2 比较:
+    不同的chiplet对: (0,1)
+
+  与解 3 比较:
+    不同的chiplet对: (0,1)
+
+  与解 4 比较:
+    不同的chiplet对: (0,1)
+
+  与解 5 比较:
+    不同的chiplet对: (0,1)
+
+  与解 6 比较:
+    不同的chiplet对: (0,1)
+
+  与解 7 比较:
+    不同的chiplet对: (0,1)
+
+  与解 8 比较:
+    不同的chiplet对: (0,1)
+
+  与解 9 比较:
+    不同的chiplet对: (0,1)
+
+  与解 10 比较:
+    不同的chiplet对: (0,1)
+
+  与解 11 比较:
+    不同的chiplet对: (0,1)
+
+  与解 12 比较:
+    不同的chiplet对: (0,1)
+
+  与解 13 比较:
+    不同的chiplet对: (0,1)
+
+  与解 14 比较:
+    不同的chiplet对: (0,1)
+
+  与解 15 比较:
+    不同的chiplet对: (0,1)
+
+=== 解 16 ===
+目标函数值: 18.0000
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(15.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(30.50, 8.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+网格化布局: grid_size=0.5, grid_w=90, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (22.50, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 114
+约束数量: 278
+使用求解器: GLPK
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 18.54
+
+=== 解 17 ===
+
+每对chiplet的相对距离（|x[i]-x[j]|, |y[i]-y[j]|）:
+  (0,1) [A, B]: x距离=15.000, y距离=3.000
+
+与之前解的距离比较（阈值=1.000）:
+
+  与解 1 比较:
+    不同的chiplet对: (0,1)
+
+  与解 2 比较:
+    不同的chiplet对: (0,1)
+
+  与解 3 比较:
+    不同的chiplet对: (0,1)
+
+  与解 4 比较:
+    不同的chiplet对: (0,1)
+
+  与解 5 比较:
+    不同的chiplet对: (0,1)
+
+  与解 6 比较:
+    不同的chiplet对: (0,1)
+
+  与解 7 比较:
+    不同的chiplet对: (0,1)
+
+  与解 8 比较:
+    不同的chiplet对: (0,1)
+
+  与解 9 比较:
+    不同的chiplet对: (0,1)
+
+  与解 10 比较:
+    不同的chiplet对: (0,1)
+
+  与解 11 比较:
+    不同的chiplet对: (0,1)
+
+  与解 12 比较:
+    不同的chiplet对: (0,1)
+
+  与解 13 比较:
+    不同的chiplet对: (0,1)
+
+  与解 14 比较:
+    不同的chiplet对: (0,1)
+
+  与解 15 比较:
+    不同的chiplet对: (0,1)
+
+  与解 16 比较:
+    不同的chiplet对: (0,1)
+
+=== 解 17 ===
+目标函数值: 18.5400
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(15.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(30.00, 7.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+网格化布局: grid_size=0.5, grid_w=90, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (22.50, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 118
+约束数量: 289
+使用求解器: GLPK
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 19.08
+
+=== 解 18 ===
+
+每对chiplet的相对距离（|x[i]-x[j]|, |y[i]-y[j]|）:
+  (0,1) [A, B]: x距离=15.000, y距离=3.500
+
+与之前解的距离比较（阈值=1.000）:
+
+  与解 1 比较:
+    不同的chiplet对: (0,1)
+
+  与解 2 比较:
+    不同的chiplet对: (0,1)
+
+  与解 3 比较:
+    不同的chiplet对: (0,1)
+
+  与解 4 比较:
+    不同的chiplet对: (0,1)
+
+  与解 5 比较:
+    不同的chiplet对: (0,1)
+
+  与解 6 比较:
+    不同的chiplet对: (0,1)
+
+  与解 7 比较:
+    不同的chiplet对: (0,1)
+
+  与解 8 比较:
+    不同的chiplet对: (0,1)
+
+  与解 9 比较:
+    不同的chiplet对: (0,1)
+
+  与解 10 比较:
+    不同的chiplet对: (0,1)
+
+  与解 11 比较:
+    不同的chiplet对: (0,1)
+
+  与解 12 比较:
+    不同的chiplet对: (0,1)
+
+  与解 13 比较:
+    不同的chiplet对: (0,1)
+
+  与解 14 比较:
+    不同的chiplet对: (0,1)
+
+  与解 15 比较:
+    不同的chiplet对: (0,1)
+
+  与解 16 比较:
+    不同的chiplet对: (0,1)
+
+  与解 17 比较:
+    不同的chiplet对: (0,1)
+
+=== 解 18 ===
+目标函数值: 19.0800
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(15.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(30.00, 6.50)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+网格化布局: grid_size=0.5, grid_w=90, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (22.50, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 122
+约束数量: 300
+使用求解器: GLPK
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 19.62
+
+=== 解 19 ===
+
+每对chiplet的相对距离（|x[i]-x[j]|, |y[i]-y[j]|）:
+  (0,1) [A, B]: x距离=15.000, y距离=4.000
+
+与之前解的距离比较（阈值=1.000）:
+
+  与解 1 比较:
+    不同的chiplet对: (0,1)
+
+  与解 2 比较:
+    不同的chiplet对: (0,1)
+
+  与解 3 比较:
+    不同的chiplet对: (0,1)
+
+  与解 4 比较:
+    不同的chiplet对: (0,1)
+
+  与解 5 比较:
+    不同的chiplet对: (0,1)
+
+  与解 6 比较:
+    不同的chiplet对: (0,1)
+
+  与解 7 比较:
+    不同的chiplet对: (0,1)
+
+  与解 8 比较:
+    不同的chiplet对: (0,1)
+
+  与解 9 比较:
+    不同的chiplet对: (0,1)
+
+  与解 10 比较:
+    不同的chiplet对: (0,1)
+
+  与解 11 比较:
+    不同的chiplet对: (0,1)
+
+  与解 12 比较:
+    不同的chiplet对: (0,1)
+
+  与解 13 比较:
+    不同的chiplet对: (0,1)
+
+  与解 14 比较:
+    不同的chiplet对: (0,1)
+
+  与解 15 比较:
+    不同的chiplet对: (0,1)
+
+  与解 16 比较:
+    不同的chiplet对: (0,1)
+
+  与解 17 比较:
+    不同的chiplet对: (0,1)
+
+  与解 18 比较:
+    不同的chiplet对: (0,1)
+
+=== 解 19 ===
+目标函数值: 19.6200
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(15.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(30.00, 6.00)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+网格化布局: grid_size=0.5, grid_w=90, grid_h=60
+问题规模: 2 个模块, 1 对有连接的模块对
+固定chiplet 0 的中心在方框中心 (22.50, 15.00)
+非重叠约束: 1 对模块对（所有模块对），M=200（基板尺寸最大值）
+目标函数: 1.0 * wirelength + 0.1 * area_proxy
+
+开始求解ILP问题...
+变量数量: 126
+约束数量: 311
+使用求解器: GLPK
+
+求解状态: Optimal
+求解时间: 0.01 秒
+目标函数值: 20.16
+
+=== 解 20 ===
+
+每对chiplet的相对距离（|x[i]-x[j]|, |y[i]-y[j]|）:
+  (0,1) [A, B]: x距离=15.000, y距离=4.500
+
+与之前解的距离比较（阈值=1.000）:
+
+  与解 1 比较:
+    不同的chiplet对: (0,1)
+
+  与解 2 比较:
+    不同的chiplet对: (0,1)
+
+  与解 3 比较:
+    不同的chiplet对: (0,1)
+
+  与解 4 比较:
+    不同的chiplet对: (0,1)
+
+  与解 5 比较:
+    不同的chiplet对: (0,1)
+
+  与解 6 比较:
+    不同的chiplet对: (0,1)
+
+  与解 7 比较:
+    不同的chiplet对: (0,1)
+
+  与解 8 比较:
+    不同的chiplet对: (0,1)
+
+  与解 9 比较:
+    不同的chiplet对: (0,1)
+
+  与解 10 比较:
+    不同的chiplet对: (0,1)
+
+  与解 11 比较:
+    相同的chiplet对: (0,1)
+
+  与解 12 比较:
+    不同的chiplet对: (0,1)
+
+  与解 13 比较:
+    不同的chiplet对: (0,1)
+
+  与解 14 比较:
+    不同的chiplet对: (0,1)
+
+  与解 15 比较:
+    不同的chiplet对: (0,1)
+
+  与解 16 比较:
+    不同的chiplet对: (0,1)
+
+  与解 17 比较:
+    不同的chiplet对: (0,1)
+
+  与解 18 比较:
+    不同的chiplet对: (0,1)
+
+  与解 19 比较:
+    不同的chiplet对: (0,1)
+
+=== 解 20 ===
+目标函数值: 20.1600
+[DEBUG 绘图] nodes数量: 2, layout中的chiplet数量: 2
+[DEBUG 绘图] 绘制 A: 位置=(15.00, 10.00)
+[DEBUG 绘图] 绘制 B: 位置=(30.00, 5.50)
+[DEBUG 绘图] 实际绘制了 2 个chiplet（共 2 个）
+  ✓ 成功：找到 20 个解
+fill fixed data aspect with adjustable data limits.
+2025-12-13 14:29:04 - WARNING - Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
+2025-12-13 14:29:04 - WARNING - Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
+2025-12-13 14:29:04 - WARNING - Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
+2025-12-13 14:29:05 - WARNING - Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
+2025-12-13 14:29:05 - WARNING - Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
+2025-12-13 14:29:05 - WARNING - Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
+2025-12-13 14:29:05 - WARNING - Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
+2025-12-13 14:29:05 - WARNING - Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
+2025-12-13 14:29:05 - INFO - 
+共找到 20 个不同的解。

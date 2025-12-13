@@ -125,9 +125,9 @@ non_overlap_up_rev_0_1: - h_1 - 200 p_up_0_1 + y_0 - y_1 <= 0
 not_same_implies_diff_dist_pair_c0_0_1_prev0: diff_dist_pair_c0_0_1
  + same_dist_pair_c0_0_1_prev0 <= 1
 same_dist_pair_lower_c0_0_1_prev0: dist_diff_abs_pair_c0_0_1_prev0
- + 90 same_dist_pair_c0_0_1_prev0 >= 3
+ + 90 same_dist_pair_c0_0_1_prev0 >= 1
 same_dist_pair_upper_c0_0_1_prev0: dist_diff_abs_pair_c0_0_1_prev0
- + 90 same_dist_pair_c0_0_1_prev0 <= 92.97
+ + 90 same_dist_pair_c0_0_1_prev0 <= 90.99
 shared_x_min_0_1: shared_x_0_1 - 200 z2_0_1 >= -199.9
 shared_x_ub1_0_1: shared_x_0_1 - w_0 - x_0 + x_1 + 200 z2_0_1 <= 200
 shared_x_ub2_0_1: shared_x_0_1 - w_1 + x_0 - x_1 + 200 z2_0_1 <= 200

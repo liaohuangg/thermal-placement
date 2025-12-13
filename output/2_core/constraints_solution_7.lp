@@ -161,15 +161,15 @@ dist_diff_abs_pair_c5_0_1_prev5_force_positive:
 dist_diff_pair_def_c5_0_1_prev0: - dist_curr_pair_c5_0_1
  + dist_diff_pair_c5_0_1_prev0 = -25
 dist_diff_pair_def_c5_0_1_prev1: - dist_curr_pair_c5_0_1
- + dist_diff_pair_c5_0_1_prev1 = -28
+ + dist_diff_pair_c5_0_1_prev1 = -26
 dist_diff_pair_def_c5_0_1_prev2: - dist_curr_pair_c5_0_1
- + dist_diff_pair_c5_0_1_prev2 = -22
+ + dist_diff_pair_c5_0_1_prev2 = -24
 dist_diff_pair_def_c5_0_1_prev3: - dist_curr_pair_c5_0_1
- + dist_diff_pair_c5_0_1_prev3 = -31
+ + dist_diff_pair_c5_0_1_prev3 = -27
 dist_diff_pair_def_c5_0_1_prev4: - dist_curr_pair_c5_0_1
- + dist_diff_pair_c5_0_1_prev4 = -34
+ + dist_diff_pair_c5_0_1_prev4 = -23
 dist_diff_pair_def_c5_0_1_prev5: - dist_curr_pair_c5_0_1
- + dist_diff_pair_c5_0_1_prev5 = -37
+ + dist_diff_pair_c5_0_1_prev5 = -28
 dx_abs_0_1_abs_ge_neg_orig: dx_abs_0_1 + 45 dx_abs_0_1_is_positive
  + dx_diff_0_1 >= 0
 dx_abs_0_1_abs_ge_orig: dx_abs_0_1 - 45 dx_abs_0_1_is_positive - dx_diff_0_1
@@ -257,29 +257,29 @@ not_same_implies_diff_dist_pair_c5_0_1_prev4: diff_dist_pair_c5_0_1
 not_same_implies_diff_dist_pair_c5_0_1_prev5: diff_dist_pair_c5_0_1
  + same_dist_pair_c5_0_1_prev5 <= 1
 same_dist_pair_lower_c5_0_1_prev0: dist_diff_abs_pair_c5_0_1_prev0
- + 90 same_dist_pair_c5_0_1_prev0 >= 3
+ + 90 same_dist_pair_c5_0_1_prev0 >= 1
 same_dist_pair_lower_c5_0_1_prev1: dist_diff_abs_pair_c5_0_1_prev1
- + 90 same_dist_pair_c5_0_1_prev1 >= 3
+ + 90 same_dist_pair_c5_0_1_prev1 >= 1
 same_dist_pair_lower_c5_0_1_prev2: dist_diff_abs_pair_c5_0_1_prev2
- + 90 same_dist_pair_c5_0_1_prev2 >= 3
+ + 90 same_dist_pair_c5_0_1_prev2 >= 1
 same_dist_pair_lower_c5_0_1_prev3: dist_diff_abs_pair_c5_0_1_prev3
- + 90 same_dist_pair_c5_0_1_prev3 >= 3
+ + 90 same_dist_pair_c5_0_1_prev3 >= 1
 same_dist_pair_lower_c5_0_1_prev4: dist_diff_abs_pair_c5_0_1_prev4
- + 90 same_dist_pair_c5_0_1_prev4 >= 3
+ + 90 same_dist_pair_c5_0_1_prev4 >= 1
 same_dist_pair_lower_c5_0_1_prev5: dist_diff_abs_pair_c5_0_1_prev5
- + 90 same_dist_pair_c5_0_1_prev5 >= 3
+ + 90 same_dist_pair_c5_0_1_prev5 >= 1
 same_dist_pair_upper_c5_0_1_prev0: dist_diff_abs_pair_c5_0_1_prev0
- + 90 same_dist_pair_c5_0_1_prev0 <= 92.97
+ + 90 same_dist_pair_c5_0_1_prev0 <= 90.99
 same_dist_pair_upper_c5_0_1_prev1: dist_diff_abs_pair_c5_0_1_prev1
- + 90 same_dist_pair_c5_0_1_prev1 <= 92.97
+ + 90 same_dist_pair_c5_0_1_prev1 <= 90.99
 same_dist_pair_upper_c5_0_1_prev2: dist_diff_abs_pair_c5_0_1_prev2
- + 90 same_dist_pair_c5_0_1_prev2 <= 92.97
+ + 90 same_dist_pair_c5_0_1_prev2 <= 90.99
 same_dist_pair_upper_c5_0_1_prev3: dist_diff_abs_pair_c5_0_1_prev3
- + 90 same_dist_pair_c5_0_1_prev3 <= 92.97
+ + 90 same_dist_pair_c5_0_1_prev3 <= 90.99
 same_dist_pair_upper_c5_0_1_prev4: dist_diff_abs_pair_c5_0_1_prev4
- + 90 same_dist_pair_c5_0_1_prev4 <= 92.97
+ + 90 same_dist_pair_c5_0_1_prev4 <= 90.99
 same_dist_pair_upper_c5_0_1_prev5: dist_diff_abs_pair_c5_0_1_prev5
- + 90 same_dist_pair_c5_0_1_prev5 <= 92.97
+ + 90 same_dist_pair_c5_0_1_prev5 <= 90.99
 shared_x_min_0_1: shared_x_0_1 - 200 z2_0_1 >= -199.9
 shared_x_ub1_0_1: shared_x_0_1 - w_0 - x_0 + x_1 + 200 z2_0_1 <= 200
 shared_x_ub2_0_1: shared_x_0_1 - w_1 + x_0 - x_1 + 200 z2_0_1 <= 200

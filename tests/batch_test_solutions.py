@@ -13,6 +13,8 @@
     python3 batch_test_solutions.py --num-solutions 4 --grid-size 0.5 --min-pair-dist-diff 3.0
     
     python batch_test_solutions.py --num-solutions 30 --grid-size 0.5 --min-pair-dist-diff 10.0 --files 5core.json
+
+    python batch_test_solutions.py --num-solutions 30 --grid-size 0.5 --min-pair-dist-diff 10.0 --files 2core.json
     # 只处理指定的文件
     python3 batch_test_solutions.py --files 5core.json 6core.json
     
@@ -247,6 +249,12 @@ def run_batch_tests(
         logger.info(f"开始处理: {json_file.name}")
         logger.info(f"核心名称: {core_name}")
         logger.info(f"输出目录: {output_dir}")
+        logger.info(f"参数配置:")
+        logger.info(f"  - num_solutions: {num_solutions}")
+        logger.info(f"  - min_shared_length: {min_shared_length}")
+        logger.info(f"  - grid_size: {grid_size}")
+        logger.info(f"  - fixed_chiplet_idx: {fixed_chiplet_idx}")
+        logger.info(f"  - min_pair_dist_diff: {min_pair_dist_diff}")
         logger.info(f"{'='*80}")
         
         try:

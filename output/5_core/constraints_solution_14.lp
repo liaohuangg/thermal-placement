@@ -3070,11 +3070,11 @@ dist_diff_pair_def_c12_0_1_prev0: - dist_curr_pair_c12_0_1
 dist_diff_pair_def_c12_0_1_prev1: - dist_curr_pair_c12_0_1
  + dist_diff_pair_c12_0_1_prev1 = -46
 dist_diff_pair_def_c12_0_1_prev10: - dist_curr_pair_c12_0_1
- + dist_diff_pair_c12_0_1_prev10 = -41
+ + dist_diff_pair_c12_0_1_prev10 = -38
 dist_diff_pair_def_c12_0_1_prev11: - dist_curr_pair_c12_0_1
- + dist_diff_pair_c12_0_1_prev11 = -46
+ + dist_diff_pair_c12_0_1_prev11 = -41
 dist_diff_pair_def_c12_0_1_prev12: - dist_curr_pair_c12_0_1
- + dist_diff_pair_c12_0_1_prev12 = -38
+ + dist_diff_pair_c12_0_1_prev12 = -33
 dist_diff_pair_def_c12_0_1_prev2: - dist_curr_pair_c12_0_1
  + dist_diff_pair_c12_0_1_prev2 = -38
 dist_diff_pair_def_c12_0_1_prev3: - dist_curr_pair_c12_0_1
@@ -3082,13 +3082,13 @@ dist_diff_pair_def_c12_0_1_prev3: - dist_curr_pair_c12_0_1
 dist_diff_pair_def_c12_0_1_prev4: - dist_curr_pair_c12_0_1
  + dist_diff_pair_c12_0_1_prev4 = -38
 dist_diff_pair_def_c12_0_1_prev5: - dist_curr_pair_c12_0_1
- + dist_diff_pair_c12_0_1_prev5 = -43
+ + dist_diff_pair_c12_0_1_prev5 = -46
 dist_diff_pair_def_c12_0_1_prev6: - dist_curr_pair_c12_0_1
- + dist_diff_pair_c12_0_1_prev6 = -37
+ + dist_diff_pair_c12_0_1_prev6 = -38
 dist_diff_pair_def_c12_0_1_prev7: - dist_curr_pair_c12_0_1
- + dist_diff_pair_c12_0_1_prev7 = -44
+ + dist_diff_pair_c12_0_1_prev7 = -49
 dist_diff_pair_def_c12_0_1_prev8: - dist_curr_pair_c12_0_1
- + dist_diff_pair_c12_0_1_prev8 = -48
+ + dist_diff_pair_c12_0_1_prev8 = -41
 dist_diff_pair_def_c12_0_1_prev9: - dist_curr_pair_c12_0_1
  + dist_diff_pair_c12_0_1_prev9 = -46
 dist_diff_pair_def_c12_0_2_prev0: - dist_curr_pair_c12_0_2
@@ -3096,11 +3096,11 @@ dist_diff_pair_def_c12_0_2_prev0: - dist_curr_pair_c12_0_2
 dist_diff_pair_def_c12_0_2_prev1: - dist_curr_pair_c12_0_2
  + dist_diff_pair_c12_0_2_prev1 = -74
 dist_diff_pair_def_c12_0_2_prev10: - dist_curr_pair_c12_0_2
- + dist_diff_pair_c12_0_2_prev10 = -81
+ + dist_diff_pair_c12_0_2_prev10 = -66
 dist_diff_pair_def_c12_0_2_prev11: - dist_curr_pair_c12_0_2
- + dist_diff_pair_c12_0_2_prev11 = -66
+ + dist_diff_pair_c12_0_2_prev11 = -79
 dist_diff_pair_def_c12_0_2_prev12: - dist_curr_pair_c12_0_2
- + dist_diff_pair_c12_0_2_prev12 = -58
+ + dist_diff_pair_c12_0_2_prev12 = -71
 dist_diff_pair_def_c12_0_2_prev2: - dist_curr_pair_c12_0_2
  + dist_diff_pair_c12_0_2_prev2 = -66
 dist_diff_pair_def_c12_0_2_prev3: - dist_curr_pair_c12_0_2
@@ -3108,13 +3108,13 @@ dist_diff_pair_def_c12_0_2_prev3: - dist_curr_pair_c12_0_2
 dist_diff_pair_def_c12_0_2_prev4: - dist_curr_pair_c12_0_2
  + dist_diff_pair_c12_0_2_prev4 = -70
 dist_diff_pair_def_c12_0_2_prev5: - dist_curr_pair_c12_0_2
- + dist_diff_pair_c12_0_2_prev5 = -81
+ + dist_diff_pair_c12_0_2_prev5 = -78
 dist_diff_pair_def_c12_0_2_prev6: - dist_curr_pair_c12_0_2
- + dist_diff_pair_c12_0_2_prev6 = -71
+ + dist_diff_pair_c12_0_2_prev6 = -70
 dist_diff_pair_def_c12_0_2_prev7: - dist_curr_pair_c12_0_2
- + dist_diff_pair_c12_0_2_prev7 = -60
+ + dist_diff_pair_c12_0_2_prev7 = -71
 dist_diff_pair_def_c12_0_2_prev8: - dist_curr_pair_c12_0_2
- + dist_diff_pair_c12_0_2_prev8 = -72
+ + dist_diff_pair_c12_0_2_prev8 = -63
 dist_diff_pair_def_c12_0_2_prev9: - dist_curr_pair_c12_0_2
  + dist_diff_pair_c12_0_2_prev9 = -74
 dist_diff_pair_def_c12_0_3_prev0: - dist_curr_pair_c12_0_3
@@ -3122,11 +3122,11 @@ dist_diff_pair_def_c12_0_3_prev0: - dist_curr_pair_c12_0_3
 dist_diff_pair_def_c12_0_3_prev1: - dist_curr_pair_c12_0_3
  + dist_diff_pair_c12_0_3_prev1 = -54
 dist_diff_pair_def_c12_0_3_prev10: - dist_curr_pair_c12_0_3
- + dist_diff_pair_c12_0_3_prev10 = -47
+ + dist_diff_pair_c12_0_3_prev10 = -58
 dist_diff_pair_def_c12_0_3_prev11: - dist_curr_pair_c12_0_3
- + dist_diff_pair_c12_0_3_prev11 = -54
+ + dist_diff_pair_c12_0_3_prev11 = -49
 dist_diff_pair_def_c12_0_3_prev12: - dist_curr_pair_c12_0_3
- + dist_diff_pair_c12_0_3_prev12 = -58
+ + dist_diff_pair_c12_0_3_prev12 = -53
 dist_diff_pair_def_c12_0_3_prev2: - dist_curr_pair_c12_0_3
  + dist_diff_pair_c12_0_3_prev2 = -58
 dist_diff_pair_def_c12_0_3_prev3: - dist_curr_pair_c12_0_3
@@ -3134,13 +3134,13 @@ dist_diff_pair_def_c12_0_3_prev3: - dist_curr_pair_c12_0_3
 dist_diff_pair_def_c12_0_3_prev4: - dist_curr_pair_c12_0_3
  + dist_diff_pair_c12_0_3_prev4 = -62
 dist_diff_pair_def_c12_0_3_prev5: - dist_curr_pair_c12_0_3
- + dist_diff_pair_c12_0_3_prev5 = -55
+ + dist_diff_pair_c12_0_3_prev5 = -58
 dist_diff_pair_def_c12_0_3_prev6: - dist_curr_pair_c12_0_3
- + dist_diff_pair_c12_0_3_prev6 = -61
+ + dist_diff_pair_c12_0_3_prev6 = -62
 dist_diff_pair_def_c12_0_3_prev7: - dist_curr_pair_c12_0_3
- + dist_diff_pair_c12_0_3_prev7 = -64
+ + dist_diff_pair_c12_0_3_prev7 = -57
 dist_diff_pair_def_c12_0_3_prev8: - dist_curr_pair_c12_0_3
- + dist_diff_pair_c12_0_3_prev8 = -56
+ + dist_diff_pair_c12_0_3_prev8 = -61
 dist_diff_pair_def_c12_0_3_prev9: - dist_curr_pair_c12_0_3
  + dist_diff_pair_c12_0_3_prev9 = -54
 dist_diff_pair_def_c12_0_4_prev0: - dist_curr_pair_c12_0_4
@@ -3148,27 +3148,27 @@ dist_diff_pair_def_c12_0_4_prev0: - dist_curr_pair_c12_0_4
 dist_diff_pair_def_c12_0_4_prev1: - dist_curr_pair_c12_0_4
  + dist_diff_pair_c12_0_4_prev1 = -18
 dist_diff_pair_def_c12_0_4_prev10: - dist_curr_pair_c12_0_4
- + dist_diff_pair_c12_0_4_prev10 = -25
+ + dist_diff_pair_c12_0_4_prev10 = -47
 dist_diff_pair_def_c12_0_4_prev11: - dist_curr_pair_c12_0_4
- + dist_diff_pair_c12_0_4_prev11 = -34
+ + dist_diff_pair_c12_0_4_prev11 = -23
 dist_diff_pair_def_c12_0_4_prev12: - dist_curr_pair_c12_0_4
- + dist_diff_pair_c12_0_4_prev12 = -58
+ + dist_diff_pair_c12_0_4_prev12 = -47
 dist_diff_pair_def_c12_0_4_prev2: - dist_curr_pair_c12_0_4
  + dist_diff_pair_c12_0_4_prev2 = -42
 dist_diff_pair_def_c12_0_4_prev3: - dist_curr_pair_c12_0_4
- + dist_diff_pair_c12_0_4_prev3 = -19
+ + dist_diff_pair_c12_0_4_prev3 = -21
 dist_diff_pair_def_c12_0_4_prev4: - dist_curr_pair_c12_0_4
- + dist_diff_pair_c12_0_4_prev4 = -43
+ + dist_diff_pair_c12_0_4_prev4 = -47
 dist_diff_pair_def_c12_0_4_prev5: - dist_curr_pair_c12_0_4
  + dist_diff_pair_c12_0_4_prev5 = -26
 dist_diff_pair_def_c12_0_4_prev6: - dist_curr_pair_c12_0_4
- + dist_diff_pair_c12_0_4_prev6 = -50
+ + dist_diff_pair_c12_0_4_prev6 = -42
 dist_diff_pair_def_c12_0_4_prev7: - dist_curr_pair_c12_0_4
- + dist_diff_pair_c12_0_4_prev7 = -35
+ + dist_diff_pair_c12_0_4_prev7 = -13
 dist_diff_pair_def_c12_0_4_prev8: - dist_curr_pair_c12_0_4
- + dist_diff_pair_c12_0_4_prev8 = -11
+ + dist_diff_pair_c12_0_4_prev8 = -37
 dist_diff_pair_def_c12_0_4_prev9: - dist_curr_pair_c12_0_4
- + dist_diff_pair_c12_0_4_prev9 = -25
+ + dist_diff_pair_c12_0_4_prev9 = -23
 dist_diff_pair_def_c12_1_2_prev0: - dist_curr_pair_c12_1_2
  + dist_diff_pair_c12_1_2_prev0 = -20
 dist_diff_pair_def_c12_1_2_prev1: - dist_curr_pair_c12_1_2
@@ -3176,9 +3176,9 @@ dist_diff_pair_def_c12_1_2_prev1: - dist_curr_pair_c12_1_2
 dist_diff_pair_def_c12_1_2_prev10: - dist_curr_pair_c12_1_2
  + dist_diff_pair_c12_1_2_prev10 = -40
 dist_diff_pair_def_c12_1_2_prev11: - dist_curr_pair_c12_1_2
- + dist_diff_pair_c12_1_2_prev11 = -20
+ + dist_diff_pair_c12_1_2_prev11 = -40
 dist_diff_pair_def_c12_1_2_prev12: - dist_curr_pair_c12_1_2
- + dist_diff_pair_c12_1_2_prev12 = -20
+ + dist_diff_pair_c12_1_2_prev12 = -40
 dist_diff_pair_def_c12_1_2_prev2: - dist_curr_pair_c12_1_2
  + dist_diff_pair_c12_1_2_prev2 = -40
 dist_diff_pair_def_c12_1_2_prev3: - dist_curr_pair_c12_1_2
@@ -3200,11 +3200,11 @@ dist_diff_pair_def_c12_1_3_prev0: - dist_curr_pair_c12_1_3
 dist_diff_pair_def_c12_1_3_prev1: - dist_curr_pair_c12_1_3
  + dist_diff_pair_c12_1_3_prev1 = -32
 dist_diff_pair_def_c12_1_3_prev10: - dist_curr_pair_c12_1_3
- + dist_diff_pair_c12_1_3_prev10 = -32
+ + dist_diff_pair_c12_1_3_prev10 = -20
 dist_diff_pair_def_c12_1_3_prev11: - dist_curr_pair_c12_1_3
- + dist_diff_pair_c12_1_3_prev11 = -44
+ + dist_diff_pair_c12_1_3_prev11 = -32
 dist_diff_pair_def_c12_1_3_prev12: - dist_curr_pair_c12_1_3
- + dist_diff_pair_c12_1_3_prev12 = -32
+ + dist_diff_pair_c12_1_3_prev12 = -20
 dist_diff_pair_def_c12_1_3_prev2: - dist_curr_pair_c12_1_3
  + dist_diff_pair_c12_1_3_prev2 = -20
 dist_diff_pair_def_c12_1_3_prev3: - dist_curr_pair_c12_1_3
@@ -3216,9 +3216,9 @@ dist_diff_pair_def_c12_1_3_prev5: - dist_curr_pair_c12_1_3
 dist_diff_pair_def_c12_1_3_prev6: - dist_curr_pair_c12_1_3
  + dist_diff_pair_c12_1_3_prev6 = -24
 dist_diff_pair_def_c12_1_3_prev7: - dist_curr_pair_c12_1_3
- + dist_diff_pair_c12_1_3_prev7 = -20
+ + dist_diff_pair_c12_1_3_prev7 = -32
 dist_diff_pair_def_c12_1_3_prev8: - dist_curr_pair_c12_1_3
- + dist_diff_pair_c12_1_3_prev8 = -32
+ + dist_diff_pair_c12_1_3_prev8 = -20
 dist_diff_pair_def_c12_1_3_prev9: - dist_curr_pair_c12_1_3
  + dist_diff_pair_c12_1_3_prev9 = -32
 dist_diff_pair_def_c12_1_4_prev0: - dist_curr_pair_c12_1_4
@@ -3226,37 +3226,37 @@ dist_diff_pair_def_c12_1_4_prev0: - dist_curr_pair_c12_1_4
 dist_diff_pair_def_c12_1_4_prev1: - dist_curr_pair_c12_1_4
  + dist_diff_pair_c12_1_4_prev1 = -64
 dist_diff_pair_def_c12_1_4_prev10: - dist_curr_pair_c12_1_4
- + dist_diff_pair_c12_1_4_prev10 = -64
+ + dist_diff_pair_c12_1_4_prev10 = -37
 dist_diff_pair_def_c12_1_4_prev11: - dist_curr_pair_c12_1_4
- + dist_diff_pair_c12_1_4_prev11 = -68
+ + dist_diff_pair_c12_1_4_prev11 = -64
 dist_diff_pair_def_c12_1_4_prev12: - dist_curr_pair_c12_1_4
- + dist_diff_pair_c12_1_4_prev12 = -36
+ + dist_diff_pair_c12_1_4_prev12 = -32
 dist_diff_pair_def_c12_1_4_prev2: - dist_curr_pair_c12_1_4
  + dist_diff_pair_c12_1_4_prev2 = -32
 dist_diff_pair_def_c12_1_4_prev3: - dist_curr_pair_c12_1_4
- + dist_diff_pair_c12_1_4_prev3 = -57
+ + dist_diff_pair_c12_1_4_prev3 = -59
 dist_diff_pair_def_c12_1_4_prev4: - dist_curr_pair_c12_1_4
- + dist_diff_pair_c12_1_4_prev4 = -25
+ + dist_diff_pair_c12_1_4_prev4 = -29
 dist_diff_pair_def_c12_1_4_prev5: - dist_curr_pair_c12_1_4
- + dist_diff_pair_c12_1_4_prev5 = -61
+ + dist_diff_pair_c12_1_4_prev5 = -64
 dist_diff_pair_def_c12_1_4_prev6: - dist_curr_pair_c12_1_4
- + dist_diff_pair_c12_1_4_prev6 = -31
+ + dist_diff_pair_c12_1_4_prev6 = -24
 dist_diff_pair_def_c12_1_4_prev7: - dist_curr_pair_c12_1_4
- + dist_diff_pair_c12_1_4_prev7 = -31
+ + dist_diff_pair_c12_1_4_prev7 = -62
 dist_diff_pair_def_c12_1_4_prev8: - dist_curr_pair_c12_1_4
- + dist_diff_pair_c12_1_4_prev8 = -59
+ + dist_diff_pair_c12_1_4_prev8 = -30
 dist_diff_pair_def_c12_1_4_prev9: - dist_curr_pair_c12_1_4
- + dist_diff_pair_c12_1_4_prev9 = -71
+ + dist_diff_pair_c12_1_4_prev9 = -69
 dist_diff_pair_def_c12_2_3_prev0: - dist_curr_pair_c12_2_3
  + dist_diff_pair_c12_2_3_prev0 = -52
 dist_diff_pair_def_c12_2_3_prev1: - dist_curr_pair_c12_2_3
  + dist_diff_pair_c12_2_3_prev1 = -72
 dist_diff_pair_def_c12_2_3_prev10: - dist_curr_pair_c12_2_3
- + dist_diff_pair_c12_2_3_prev10 = -72
+ + dist_diff_pair_c12_2_3_prev10 = -60
 dist_diff_pair_def_c12_2_3_prev11: - dist_curr_pair_c12_2_3
- + dist_diff_pair_c12_2_3_prev11 = -64
+ + dist_diff_pair_c12_2_3_prev11 = -72
 dist_diff_pair_def_c12_2_3_prev12: - dist_curr_pair_c12_2_3
- + dist_diff_pair_c12_2_3_prev12 = -52
+ + dist_diff_pair_c12_2_3_prev12 = -60
 dist_diff_pair_def_c12_2_3_prev2: - dist_curr_pair_c12_2_3
  + dist_diff_pair_c12_2_3_prev2 = -60
 dist_diff_pair_def_c12_2_3_prev3: - dist_curr_pair_c12_2_3
@@ -3268,9 +3268,9 @@ dist_diff_pair_def_c12_2_3_prev5: - dist_curr_pair_c12_2_3
 dist_diff_pair_def_c12_2_3_prev6: - dist_curr_pair_c12_2_3
  + dist_diff_pair_c12_2_3_prev6 = -60
 dist_diff_pair_def_c12_2_3_prev7: - dist_curr_pair_c12_2_3
- + dist_diff_pair_c12_2_3_prev7 = -60
+ + dist_diff_pair_c12_2_3_prev7 = -72
 dist_diff_pair_def_c12_2_3_prev8: - dist_curr_pair_c12_2_3
- + dist_diff_pair_c12_2_3_prev8 = -72
+ + dist_diff_pair_c12_2_3_prev8 = -60
 dist_diff_pair_def_c12_2_3_prev9: - dist_curr_pair_c12_2_3
  + dist_diff_pair_c12_2_3_prev9 = -72
 dist_diff_pair_def_c12_2_4_prev0: - dist_curr_pair_c12_2_4
@@ -3278,53 +3278,53 @@ dist_diff_pair_def_c12_2_4_prev0: - dist_curr_pair_c12_2_4
 dist_diff_pair_def_c12_2_4_prev1: - dist_curr_pair_c12_2_4
  + dist_diff_pair_c12_2_4_prev1 = -56
 dist_diff_pair_def_c12_2_4_prev10: - dist_curr_pair_c12_2_4
- + dist_diff_pair_c12_2_4_prev10 = -56
+ + dist_diff_pair_c12_2_4_prev10 = -19
 dist_diff_pair_def_c12_2_4_prev11: - dist_curr_pair_c12_2_4
- + dist_diff_pair_c12_2_4_prev11 = -48
+ + dist_diff_pair_c12_2_4_prev11 = -56
 dist_diff_pair_def_c12_2_4_prev12: - dist_curr_pair_c12_2_4
- + dist_diff_pair_c12_2_4_prev12 = -16
+ + dist_diff_pair_c12_2_4_prev12 = -24
 dist_diff_pair_def_c12_2_4_prev2: - dist_curr_pair_c12_2_4
  + dist_diff_pair_c12_2_4_prev2 = -24
 dist_diff_pair_def_c12_2_4_prev3: - dist_curr_pair_c12_2_4
- + dist_diff_pair_c12_2_4_prev3 = -59
+ + dist_diff_pair_c12_2_4_prev3 = -57
 dist_diff_pair_def_c12_2_4_prev4: - dist_curr_pair_c12_2_4
- + dist_diff_pair_c12_2_4_prev4 = -27
+ + dist_diff_pair_c12_2_4_prev4 = -23
 dist_diff_pair_def_c12_2_4_prev5: - dist_curr_pair_c12_2_4
- + dist_diff_pair_c12_2_4_prev5 = -55
+ + dist_diff_pair_c12_2_4_prev5 = -52
 dist_diff_pair_def_c12_2_4_prev6: - dist_curr_pair_c12_2_4
- + dist_diff_pair_c12_2_4_prev6 = -21
+ + dist_diff_pair_c12_2_4_prev6 = -28
 dist_diff_pair_def_c12_2_4_prev7: - dist_curr_pair_c12_2_4
- + dist_diff_pair_c12_2_4_prev7 = -25
+ + dist_diff_pair_c12_2_4_prev7 = -58
 dist_diff_pair_def_c12_2_4_prev8: - dist_curr_pair_c12_2_4
- + dist_diff_pair_c12_2_4_prev8 = -61
+ + dist_diff_pair_c12_2_4_prev8 = -26
 dist_diff_pair_def_c12_2_4_prev9: - dist_curr_pair_c12_2_4
- + dist_diff_pair_c12_2_4_prev9 = -49
+ + dist_diff_pair_c12_2_4_prev9 = -51
 dist_diff_pair_def_c12_3_4_prev0: - dist_curr_pair_c12_3_4
  + dist_diff_pair_c12_3_4_prev0 = -76
 dist_diff_pair_def_c12_3_4_prev1: - dist_curr_pair_c12_3_4
  + dist_diff_pair_c12_3_4_prev1 = -72
 dist_diff_pair_def_c12_3_4_prev10: - dist_curr_pair_c12_3_4
- + dist_diff_pair_c12_3_4_prev10 = -72
+ + dist_diff_pair_c12_3_4_prev10 = -57
 dist_diff_pair_def_c12_3_4_prev11: - dist_curr_pair_c12_3_4
- + dist_diff_pair_c12_3_4_prev11 = -88
+ + dist_diff_pair_c12_3_4_prev11 = -72
 dist_diff_pair_def_c12_3_4_prev12: - dist_curr_pair_c12_3_4
- + dist_diff_pair_c12_3_4_prev12 = -68
+ + dist_diff_pair_c12_3_4_prev12 = -52
 dist_diff_pair_def_c12_3_4_prev2: - dist_curr_pair_c12_3_4
  + dist_diff_pair_c12_3_4_prev2 = -52
 dist_diff_pair_def_c12_3_4_prev3: - dist_curr_pair_c12_3_4
- + dist_diff_pair_c12_3_4_prev3 = -69
+ + dist_diff_pair_c12_3_4_prev3 = -71
 dist_diff_pair_def_c12_3_4_prev4: - dist_curr_pair_c12_3_4
- + dist_diff_pair_c12_3_4_prev4 = -49
+ + dist_diff_pair_c12_3_4_prev4 = -53
 dist_diff_pair_def_c12_3_4_prev5: - dist_curr_pair_c12_3_4
- + dist_diff_pair_c12_3_4_prev5 = -73
+ + dist_diff_pair_c12_3_4_prev5 = -76
 dist_diff_pair_def_c12_3_4_prev6: - dist_curr_pair_c12_3_4
- + dist_diff_pair_c12_3_4_prev6 = -55
+ + dist_diff_pair_c12_3_4_prev6 = -48
 dist_diff_pair_def_c12_3_4_prev7: - dist_curr_pair_c12_3_4
- + dist_diff_pair_c12_3_4_prev7 = -51
+ + dist_diff_pair_c12_3_4_prev7 = -70
 dist_diff_pair_def_c12_3_4_prev8: - dist_curr_pair_c12_3_4
- + dist_diff_pair_c12_3_4_prev8 = -67
+ + dist_diff_pair_c12_3_4_prev8 = -50
 dist_diff_pair_def_c12_3_4_prev9: - dist_curr_pair_c12_3_4
- + dist_diff_pair_c12_3_4_prev9 = -79
+ + dist_diff_pair_c12_3_4_prev9 = -77
 dx_abs_0_1_abs_ge_neg_orig: dx_abs_0_1 + 60 dx_abs_0_1_is_positive
  + dx_diff_0_1 >= 0
 dx_abs_0_1_abs_ge_orig: dx_abs_0_1 - 60 dx_abs_0_1_is_positive - dx_diff_0_1
@@ -4078,525 +4078,525 @@ not_same_implies_diff_dist_pair_c12_3_4_prev8: diff_dist_pair_c12_3_4
 not_same_implies_diff_dist_pair_c12_3_4_prev9: diff_dist_pair_c12_3_4
  + same_dist_pair_c12_3_4_prev9 <= 1
 same_dist_pair_lower_c12_0_1_prev0: dist_diff_abs_pair_c12_0_1_prev0
- + 120 same_dist_pair_c12_0_1_prev0 >= 7
+ + 120 same_dist_pair_c12_0_1_prev0 >= 5
 same_dist_pair_lower_c12_0_1_prev1: dist_diff_abs_pair_c12_0_1_prev1
- + 120 same_dist_pair_c12_0_1_prev1 >= 7
+ + 120 same_dist_pair_c12_0_1_prev1 >= 5
 same_dist_pair_lower_c12_0_1_prev10: dist_diff_abs_pair_c12_0_1_prev10
- + 120 same_dist_pair_c12_0_1_prev10 >= 7
+ + 120 same_dist_pair_c12_0_1_prev10 >= 5
 same_dist_pair_lower_c12_0_1_prev11: dist_diff_abs_pair_c12_0_1_prev11
- + 120 same_dist_pair_c12_0_1_prev11 >= 7
+ + 120 same_dist_pair_c12_0_1_prev11 >= 5
 same_dist_pair_lower_c12_0_1_prev12: dist_diff_abs_pair_c12_0_1_prev12
- + 120 same_dist_pair_c12_0_1_prev12 >= 7
+ + 120 same_dist_pair_c12_0_1_prev12 >= 5
 same_dist_pair_lower_c12_0_1_prev2: dist_diff_abs_pair_c12_0_1_prev2
- + 120 same_dist_pair_c12_0_1_prev2 >= 7
+ + 120 same_dist_pair_c12_0_1_prev2 >= 5
 same_dist_pair_lower_c12_0_1_prev3: dist_diff_abs_pair_c12_0_1_prev3
- + 120 same_dist_pair_c12_0_1_prev3 >= 7
+ + 120 same_dist_pair_c12_0_1_prev3 >= 5
 same_dist_pair_lower_c12_0_1_prev4: dist_diff_abs_pair_c12_0_1_prev4
- + 120 same_dist_pair_c12_0_1_prev4 >= 7
+ + 120 same_dist_pair_c12_0_1_prev4 >= 5
 same_dist_pair_lower_c12_0_1_prev5: dist_diff_abs_pair_c12_0_1_prev5
- + 120 same_dist_pair_c12_0_1_prev5 >= 7
+ + 120 same_dist_pair_c12_0_1_prev5 >= 5
 same_dist_pair_lower_c12_0_1_prev6: dist_diff_abs_pair_c12_0_1_prev6
- + 120 same_dist_pair_c12_0_1_prev6 >= 7
+ + 120 same_dist_pair_c12_0_1_prev6 >= 5
 same_dist_pair_lower_c12_0_1_prev7: dist_diff_abs_pair_c12_0_1_prev7
- + 120 same_dist_pair_c12_0_1_prev7 >= 7
+ + 120 same_dist_pair_c12_0_1_prev7 >= 5
 same_dist_pair_lower_c12_0_1_prev8: dist_diff_abs_pair_c12_0_1_prev8
- + 120 same_dist_pair_c12_0_1_prev8 >= 7
+ + 120 same_dist_pair_c12_0_1_prev8 >= 5
 same_dist_pair_lower_c12_0_1_prev9: dist_diff_abs_pair_c12_0_1_prev9
- + 120 same_dist_pair_c12_0_1_prev9 >= 7
+ + 120 same_dist_pair_c12_0_1_prev9 >= 5
 same_dist_pair_lower_c12_0_2_prev0: dist_diff_abs_pair_c12_0_2_prev0
- + 120 same_dist_pair_c12_0_2_prev0 >= 7
+ + 120 same_dist_pair_c12_0_2_prev0 >= 5
 same_dist_pair_lower_c12_0_2_prev1: dist_diff_abs_pair_c12_0_2_prev1
- + 120 same_dist_pair_c12_0_2_prev1 >= 7
+ + 120 same_dist_pair_c12_0_2_prev1 >= 5
 same_dist_pair_lower_c12_0_2_prev10: dist_diff_abs_pair_c12_0_2_prev10
- + 120 same_dist_pair_c12_0_2_prev10 >= 7
+ + 120 same_dist_pair_c12_0_2_prev10 >= 5
 same_dist_pair_lower_c12_0_2_prev11: dist_diff_abs_pair_c12_0_2_prev11
- + 120 same_dist_pair_c12_0_2_prev11 >= 7
+ + 120 same_dist_pair_c12_0_2_prev11 >= 5
 same_dist_pair_lower_c12_0_2_prev12: dist_diff_abs_pair_c12_0_2_prev12
- + 120 same_dist_pair_c12_0_2_prev12 >= 7
+ + 120 same_dist_pair_c12_0_2_prev12 >= 5
 same_dist_pair_lower_c12_0_2_prev2: dist_diff_abs_pair_c12_0_2_prev2
- + 120 same_dist_pair_c12_0_2_prev2 >= 7
+ + 120 same_dist_pair_c12_0_2_prev2 >= 5
 same_dist_pair_lower_c12_0_2_prev3: dist_diff_abs_pair_c12_0_2_prev3
- + 120 same_dist_pair_c12_0_2_prev3 >= 7
+ + 120 same_dist_pair_c12_0_2_prev3 >= 5
 same_dist_pair_lower_c12_0_2_prev4: dist_diff_abs_pair_c12_0_2_prev4
- + 120 same_dist_pair_c12_0_2_prev4 >= 7
+ + 120 same_dist_pair_c12_0_2_prev4 >= 5
 same_dist_pair_lower_c12_0_2_prev5: dist_diff_abs_pair_c12_0_2_prev5
- + 120 same_dist_pair_c12_0_2_prev5 >= 7
+ + 120 same_dist_pair_c12_0_2_prev5 >= 5
 same_dist_pair_lower_c12_0_2_prev6: dist_diff_abs_pair_c12_0_2_prev6
- + 120 same_dist_pair_c12_0_2_prev6 >= 7
+ + 120 same_dist_pair_c12_0_2_prev6 >= 5
 same_dist_pair_lower_c12_0_2_prev7: dist_diff_abs_pair_c12_0_2_prev7
- + 120 same_dist_pair_c12_0_2_prev7 >= 7
+ + 120 same_dist_pair_c12_0_2_prev7 >= 5
 same_dist_pair_lower_c12_0_2_prev8: dist_diff_abs_pair_c12_0_2_prev8
- + 120 same_dist_pair_c12_0_2_prev8 >= 7
+ + 120 same_dist_pair_c12_0_2_prev8 >= 5
 same_dist_pair_lower_c12_0_2_prev9: dist_diff_abs_pair_c12_0_2_prev9
- + 120 same_dist_pair_c12_0_2_prev9 >= 7
+ + 120 same_dist_pair_c12_0_2_prev9 >= 5
 same_dist_pair_lower_c12_0_3_prev0: dist_diff_abs_pair_c12_0_3_prev0
- + 120 same_dist_pair_c12_0_3_prev0 >= 7
+ + 120 same_dist_pair_c12_0_3_prev0 >= 5
 same_dist_pair_lower_c12_0_3_prev1: dist_diff_abs_pair_c12_0_3_prev1
- + 120 same_dist_pair_c12_0_3_prev1 >= 7
+ + 120 same_dist_pair_c12_0_3_prev1 >= 5
 same_dist_pair_lower_c12_0_3_prev10: dist_diff_abs_pair_c12_0_3_prev10
- + 120 same_dist_pair_c12_0_3_prev10 >= 7
+ + 120 same_dist_pair_c12_0_3_prev10 >= 5
 same_dist_pair_lower_c12_0_3_prev11: dist_diff_abs_pair_c12_0_3_prev11
- + 120 same_dist_pair_c12_0_3_prev11 >= 7
+ + 120 same_dist_pair_c12_0_3_prev11 >= 5
 same_dist_pair_lower_c12_0_3_prev12: dist_diff_abs_pair_c12_0_3_prev12
- + 120 same_dist_pair_c12_0_3_prev12 >= 7
+ + 120 same_dist_pair_c12_0_3_prev12 >= 5
 same_dist_pair_lower_c12_0_3_prev2: dist_diff_abs_pair_c12_0_3_prev2
- + 120 same_dist_pair_c12_0_3_prev2 >= 7
+ + 120 same_dist_pair_c12_0_3_prev2 >= 5
 same_dist_pair_lower_c12_0_3_prev3: dist_diff_abs_pair_c12_0_3_prev3
- + 120 same_dist_pair_c12_0_3_prev3 >= 7
+ + 120 same_dist_pair_c12_0_3_prev3 >= 5
 same_dist_pair_lower_c12_0_3_prev4: dist_diff_abs_pair_c12_0_3_prev4
- + 120 same_dist_pair_c12_0_3_prev4 >= 7
+ + 120 same_dist_pair_c12_0_3_prev4 >= 5
 same_dist_pair_lower_c12_0_3_prev5: dist_diff_abs_pair_c12_0_3_prev5
- + 120 same_dist_pair_c12_0_3_prev5 >= 7
+ + 120 same_dist_pair_c12_0_3_prev5 >= 5
 same_dist_pair_lower_c12_0_3_prev6: dist_diff_abs_pair_c12_0_3_prev6
- + 120 same_dist_pair_c12_0_3_prev6 >= 7
+ + 120 same_dist_pair_c12_0_3_prev6 >= 5
 same_dist_pair_lower_c12_0_3_prev7: dist_diff_abs_pair_c12_0_3_prev7
- + 120 same_dist_pair_c12_0_3_prev7 >= 7
+ + 120 same_dist_pair_c12_0_3_prev7 >= 5
 same_dist_pair_lower_c12_0_3_prev8: dist_diff_abs_pair_c12_0_3_prev8
- + 120 same_dist_pair_c12_0_3_prev8 >= 7
+ + 120 same_dist_pair_c12_0_3_prev8 >= 5
 same_dist_pair_lower_c12_0_3_prev9: dist_diff_abs_pair_c12_0_3_prev9
- + 120 same_dist_pair_c12_0_3_prev9 >= 7
+ + 120 same_dist_pair_c12_0_3_prev9 >= 5
 same_dist_pair_lower_c12_0_4_prev0: dist_diff_abs_pair_c12_0_4_prev0
- + 120 same_dist_pair_c12_0_4_prev0 >= 7
+ + 120 same_dist_pair_c12_0_4_prev0 >= 5
 same_dist_pair_lower_c12_0_4_prev1: dist_diff_abs_pair_c12_0_4_prev1
- + 120 same_dist_pair_c12_0_4_prev1 >= 7
+ + 120 same_dist_pair_c12_0_4_prev1 >= 5
 same_dist_pair_lower_c12_0_4_prev10: dist_diff_abs_pair_c12_0_4_prev10
- + 120 same_dist_pair_c12_0_4_prev10 >= 7
+ + 120 same_dist_pair_c12_0_4_prev10 >= 5
 same_dist_pair_lower_c12_0_4_prev11: dist_diff_abs_pair_c12_0_4_prev11
- + 120 same_dist_pair_c12_0_4_prev11 >= 7
+ + 120 same_dist_pair_c12_0_4_prev11 >= 5
 same_dist_pair_lower_c12_0_4_prev12: dist_diff_abs_pair_c12_0_4_prev12
- + 120 same_dist_pair_c12_0_4_prev12 >= 7
+ + 120 same_dist_pair_c12_0_4_prev12 >= 5
 same_dist_pair_lower_c12_0_4_prev2: dist_diff_abs_pair_c12_0_4_prev2
- + 120 same_dist_pair_c12_0_4_prev2 >= 7
+ + 120 same_dist_pair_c12_0_4_prev2 >= 5
 same_dist_pair_lower_c12_0_4_prev3: dist_diff_abs_pair_c12_0_4_prev3
- + 120 same_dist_pair_c12_0_4_prev3 >= 7
+ + 120 same_dist_pair_c12_0_4_prev3 >= 5
 same_dist_pair_lower_c12_0_4_prev4: dist_diff_abs_pair_c12_0_4_prev4
- + 120 same_dist_pair_c12_0_4_prev4 >= 7
+ + 120 same_dist_pair_c12_0_4_prev4 >= 5
 same_dist_pair_lower_c12_0_4_prev5: dist_diff_abs_pair_c12_0_4_prev5
- + 120 same_dist_pair_c12_0_4_prev5 >= 7
+ + 120 same_dist_pair_c12_0_4_prev5 >= 5
 same_dist_pair_lower_c12_0_4_prev6: dist_diff_abs_pair_c12_0_4_prev6
- + 120 same_dist_pair_c12_0_4_prev6 >= 7
+ + 120 same_dist_pair_c12_0_4_prev6 >= 5
 same_dist_pair_lower_c12_0_4_prev7: dist_diff_abs_pair_c12_0_4_prev7
- + 120 same_dist_pair_c12_0_4_prev7 >= 7
+ + 120 same_dist_pair_c12_0_4_prev7 >= 5
 same_dist_pair_lower_c12_0_4_prev8: dist_diff_abs_pair_c12_0_4_prev8
- + 120 same_dist_pair_c12_0_4_prev8 >= 7
+ + 120 same_dist_pair_c12_0_4_prev8 >= 5
 same_dist_pair_lower_c12_0_4_prev9: dist_diff_abs_pair_c12_0_4_prev9
- + 120 same_dist_pair_c12_0_4_prev9 >= 7
+ + 120 same_dist_pair_c12_0_4_prev9 >= 5
 same_dist_pair_lower_c12_1_2_prev0: dist_diff_abs_pair_c12_1_2_prev0
- + 120 same_dist_pair_c12_1_2_prev0 >= 7
+ + 120 same_dist_pair_c12_1_2_prev0 >= 5
 same_dist_pair_lower_c12_1_2_prev1: dist_diff_abs_pair_c12_1_2_prev1
- + 120 same_dist_pair_c12_1_2_prev1 >= 7
+ + 120 same_dist_pair_c12_1_2_prev1 >= 5
 same_dist_pair_lower_c12_1_2_prev10: dist_diff_abs_pair_c12_1_2_prev10
- + 120 same_dist_pair_c12_1_2_prev10 >= 7
+ + 120 same_dist_pair_c12_1_2_prev10 >= 5
 same_dist_pair_lower_c12_1_2_prev11: dist_diff_abs_pair_c12_1_2_prev11
- + 120 same_dist_pair_c12_1_2_prev11 >= 7
+ + 120 same_dist_pair_c12_1_2_prev11 >= 5
 same_dist_pair_lower_c12_1_2_prev12: dist_diff_abs_pair_c12_1_2_prev12
- + 120 same_dist_pair_c12_1_2_prev12 >= 7
+ + 120 same_dist_pair_c12_1_2_prev12 >= 5
 same_dist_pair_lower_c12_1_2_prev2: dist_diff_abs_pair_c12_1_2_prev2
- + 120 same_dist_pair_c12_1_2_prev2 >= 7
+ + 120 same_dist_pair_c12_1_2_prev2 >= 5
 same_dist_pair_lower_c12_1_2_prev3: dist_diff_abs_pair_c12_1_2_prev3
- + 120 same_dist_pair_c12_1_2_prev3 >= 7
+ + 120 same_dist_pair_c12_1_2_prev3 >= 5
 same_dist_pair_lower_c12_1_2_prev4: dist_diff_abs_pair_c12_1_2_prev4
- + 120 same_dist_pair_c12_1_2_prev4 >= 7
+ + 120 same_dist_pair_c12_1_2_prev4 >= 5
 same_dist_pair_lower_c12_1_2_prev5: dist_diff_abs_pair_c12_1_2_prev5
- + 120 same_dist_pair_c12_1_2_prev5 >= 7
+ + 120 same_dist_pair_c12_1_2_prev5 >= 5
 same_dist_pair_lower_c12_1_2_prev6: dist_diff_abs_pair_c12_1_2_prev6
- + 120 same_dist_pair_c12_1_2_prev6 >= 7
+ + 120 same_dist_pair_c12_1_2_prev6 >= 5
 same_dist_pair_lower_c12_1_2_prev7: dist_diff_abs_pair_c12_1_2_prev7
- + 120 same_dist_pair_c12_1_2_prev7 >= 7
+ + 120 same_dist_pair_c12_1_2_prev7 >= 5
 same_dist_pair_lower_c12_1_2_prev8: dist_diff_abs_pair_c12_1_2_prev8
- + 120 same_dist_pair_c12_1_2_prev8 >= 7
+ + 120 same_dist_pair_c12_1_2_prev8 >= 5
 same_dist_pair_lower_c12_1_2_prev9: dist_diff_abs_pair_c12_1_2_prev9
- + 120 same_dist_pair_c12_1_2_prev9 >= 7
+ + 120 same_dist_pair_c12_1_2_prev9 >= 5
 same_dist_pair_lower_c12_1_3_prev0: dist_diff_abs_pair_c12_1_3_prev0
- + 120 same_dist_pair_c12_1_3_prev0 >= 7
+ + 120 same_dist_pair_c12_1_3_prev0 >= 5
 same_dist_pair_lower_c12_1_3_prev1: dist_diff_abs_pair_c12_1_3_prev1
- + 120 same_dist_pair_c12_1_3_prev1 >= 7
+ + 120 same_dist_pair_c12_1_3_prev1 >= 5
 same_dist_pair_lower_c12_1_3_prev10: dist_diff_abs_pair_c12_1_3_prev10
- + 120 same_dist_pair_c12_1_3_prev10 >= 7
+ + 120 same_dist_pair_c12_1_3_prev10 >= 5
 same_dist_pair_lower_c12_1_3_prev11: dist_diff_abs_pair_c12_1_3_prev11
- + 120 same_dist_pair_c12_1_3_prev11 >= 7
+ + 120 same_dist_pair_c12_1_3_prev11 >= 5
 same_dist_pair_lower_c12_1_3_prev12: dist_diff_abs_pair_c12_1_3_prev12
- + 120 same_dist_pair_c12_1_3_prev12 >= 7
+ + 120 same_dist_pair_c12_1_3_prev12 >= 5
 same_dist_pair_lower_c12_1_3_prev2: dist_diff_abs_pair_c12_1_3_prev2
- + 120 same_dist_pair_c12_1_3_prev2 >= 7
+ + 120 same_dist_pair_c12_1_3_prev2 >= 5
 same_dist_pair_lower_c12_1_3_prev3: dist_diff_abs_pair_c12_1_3_prev3
- + 120 same_dist_pair_c12_1_3_prev3 >= 7
+ + 120 same_dist_pair_c12_1_3_prev3 >= 5
 same_dist_pair_lower_c12_1_3_prev4: dist_diff_abs_pair_c12_1_3_prev4
- + 120 same_dist_pair_c12_1_3_prev4 >= 7
+ + 120 same_dist_pair_c12_1_3_prev4 >= 5
 same_dist_pair_lower_c12_1_3_prev5: dist_diff_abs_pair_c12_1_3_prev5
- + 120 same_dist_pair_c12_1_3_prev5 >= 7
+ + 120 same_dist_pair_c12_1_3_prev5 >= 5
 same_dist_pair_lower_c12_1_3_prev6: dist_diff_abs_pair_c12_1_3_prev6
- + 120 same_dist_pair_c12_1_3_prev6 >= 7
+ + 120 same_dist_pair_c12_1_3_prev6 >= 5
 same_dist_pair_lower_c12_1_3_prev7: dist_diff_abs_pair_c12_1_3_prev7
- + 120 same_dist_pair_c12_1_3_prev7 >= 7
+ + 120 same_dist_pair_c12_1_3_prev7 >= 5
 same_dist_pair_lower_c12_1_3_prev8: dist_diff_abs_pair_c12_1_3_prev8
- + 120 same_dist_pair_c12_1_3_prev8 >= 7
+ + 120 same_dist_pair_c12_1_3_prev8 >= 5
 same_dist_pair_lower_c12_1_3_prev9: dist_diff_abs_pair_c12_1_3_prev9
- + 120 same_dist_pair_c12_1_3_prev9 >= 7
+ + 120 same_dist_pair_c12_1_3_prev9 >= 5
 same_dist_pair_lower_c12_1_4_prev0: dist_diff_abs_pair_c12_1_4_prev0
- + 120 same_dist_pair_c12_1_4_prev0 >= 7
+ + 120 same_dist_pair_c12_1_4_prev0 >= 5
 same_dist_pair_lower_c12_1_4_prev1: dist_diff_abs_pair_c12_1_4_prev1
- + 120 same_dist_pair_c12_1_4_prev1 >= 7
+ + 120 same_dist_pair_c12_1_4_prev1 >= 5
 same_dist_pair_lower_c12_1_4_prev10: dist_diff_abs_pair_c12_1_4_prev10
- + 120 same_dist_pair_c12_1_4_prev10 >= 7
+ + 120 same_dist_pair_c12_1_4_prev10 >= 5
 same_dist_pair_lower_c12_1_4_prev11: dist_diff_abs_pair_c12_1_4_prev11
- + 120 same_dist_pair_c12_1_4_prev11 >= 7
+ + 120 same_dist_pair_c12_1_4_prev11 >= 5
 same_dist_pair_lower_c12_1_4_prev12: dist_diff_abs_pair_c12_1_4_prev12
- + 120 same_dist_pair_c12_1_4_prev12 >= 7
+ + 120 same_dist_pair_c12_1_4_prev12 >= 5
 same_dist_pair_lower_c12_1_4_prev2: dist_diff_abs_pair_c12_1_4_prev2
- + 120 same_dist_pair_c12_1_4_prev2 >= 7
+ + 120 same_dist_pair_c12_1_4_prev2 >= 5
 same_dist_pair_lower_c12_1_4_prev3: dist_diff_abs_pair_c12_1_4_prev3
- + 120 same_dist_pair_c12_1_4_prev3 >= 7
+ + 120 same_dist_pair_c12_1_4_prev3 >= 5
 same_dist_pair_lower_c12_1_4_prev4: dist_diff_abs_pair_c12_1_4_prev4
- + 120 same_dist_pair_c12_1_4_prev4 >= 7
+ + 120 same_dist_pair_c12_1_4_prev4 >= 5
 same_dist_pair_lower_c12_1_4_prev5: dist_diff_abs_pair_c12_1_4_prev5
- + 120 same_dist_pair_c12_1_4_prev5 >= 7
+ + 120 same_dist_pair_c12_1_4_prev5 >= 5
 same_dist_pair_lower_c12_1_4_prev6: dist_diff_abs_pair_c12_1_4_prev6
- + 120 same_dist_pair_c12_1_4_prev6 >= 7
+ + 120 same_dist_pair_c12_1_4_prev6 >= 5
 same_dist_pair_lower_c12_1_4_prev7: dist_diff_abs_pair_c12_1_4_prev7
- + 120 same_dist_pair_c12_1_4_prev7 >= 7
+ + 120 same_dist_pair_c12_1_4_prev7 >= 5
 same_dist_pair_lower_c12_1_4_prev8: dist_diff_abs_pair_c12_1_4_prev8
- + 120 same_dist_pair_c12_1_4_prev8 >= 7
+ + 120 same_dist_pair_c12_1_4_prev8 >= 5
 same_dist_pair_lower_c12_1_4_prev9: dist_diff_abs_pair_c12_1_4_prev9
- + 120 same_dist_pair_c12_1_4_prev9 >= 7
+ + 120 same_dist_pair_c12_1_4_prev9 >= 5
 same_dist_pair_lower_c12_2_3_prev0: dist_diff_abs_pair_c12_2_3_prev0
- + 120 same_dist_pair_c12_2_3_prev0 >= 7
+ + 120 same_dist_pair_c12_2_3_prev0 >= 5
 same_dist_pair_lower_c12_2_3_prev1: dist_diff_abs_pair_c12_2_3_prev1
- + 120 same_dist_pair_c12_2_3_prev1 >= 7
+ + 120 same_dist_pair_c12_2_3_prev1 >= 5
 same_dist_pair_lower_c12_2_3_prev10: dist_diff_abs_pair_c12_2_3_prev10
- + 120 same_dist_pair_c12_2_3_prev10 >= 7
+ + 120 same_dist_pair_c12_2_3_prev10 >= 5
 same_dist_pair_lower_c12_2_3_prev11: dist_diff_abs_pair_c12_2_3_prev11
- + 120 same_dist_pair_c12_2_3_prev11 >= 7
+ + 120 same_dist_pair_c12_2_3_prev11 >= 5
 same_dist_pair_lower_c12_2_3_prev12: dist_diff_abs_pair_c12_2_3_prev12
- + 120 same_dist_pair_c12_2_3_prev12 >= 7
+ + 120 same_dist_pair_c12_2_3_prev12 >= 5
 same_dist_pair_lower_c12_2_3_prev2: dist_diff_abs_pair_c12_2_3_prev2
- + 120 same_dist_pair_c12_2_3_prev2 >= 7
+ + 120 same_dist_pair_c12_2_3_prev2 >= 5
 same_dist_pair_lower_c12_2_3_prev3: dist_diff_abs_pair_c12_2_3_prev3
- + 120 same_dist_pair_c12_2_3_prev3 >= 7
+ + 120 same_dist_pair_c12_2_3_prev3 >= 5
 same_dist_pair_lower_c12_2_3_prev4: dist_diff_abs_pair_c12_2_3_prev4
- + 120 same_dist_pair_c12_2_3_prev4 >= 7
+ + 120 same_dist_pair_c12_2_3_prev4 >= 5
 same_dist_pair_lower_c12_2_3_prev5: dist_diff_abs_pair_c12_2_3_prev5
- + 120 same_dist_pair_c12_2_3_prev5 >= 7
+ + 120 same_dist_pair_c12_2_3_prev5 >= 5
 same_dist_pair_lower_c12_2_3_prev6: dist_diff_abs_pair_c12_2_3_prev6
- + 120 same_dist_pair_c12_2_3_prev6 >= 7
+ + 120 same_dist_pair_c12_2_3_prev6 >= 5
 same_dist_pair_lower_c12_2_3_prev7: dist_diff_abs_pair_c12_2_3_prev7
- + 120 same_dist_pair_c12_2_3_prev7 >= 7
+ + 120 same_dist_pair_c12_2_3_prev7 >= 5
 same_dist_pair_lower_c12_2_3_prev8: dist_diff_abs_pair_c12_2_3_prev8
- + 120 same_dist_pair_c12_2_3_prev8 >= 7
+ + 120 same_dist_pair_c12_2_3_prev8 >= 5
 same_dist_pair_lower_c12_2_3_prev9: dist_diff_abs_pair_c12_2_3_prev9
- + 120 same_dist_pair_c12_2_3_prev9 >= 7
+ + 120 same_dist_pair_c12_2_3_prev9 >= 5
 same_dist_pair_lower_c12_2_4_prev0: dist_diff_abs_pair_c12_2_4_prev0
- + 120 same_dist_pair_c12_2_4_prev0 >= 7
+ + 120 same_dist_pair_c12_2_4_prev0 >= 5
 same_dist_pair_lower_c12_2_4_prev1: dist_diff_abs_pair_c12_2_4_prev1
- + 120 same_dist_pair_c12_2_4_prev1 >= 7
+ + 120 same_dist_pair_c12_2_4_prev1 >= 5
 same_dist_pair_lower_c12_2_4_prev10: dist_diff_abs_pair_c12_2_4_prev10
- + 120 same_dist_pair_c12_2_4_prev10 >= 7
+ + 120 same_dist_pair_c12_2_4_prev10 >= 5
 same_dist_pair_lower_c12_2_4_prev11: dist_diff_abs_pair_c12_2_4_prev11
- + 120 same_dist_pair_c12_2_4_prev11 >= 7
+ + 120 same_dist_pair_c12_2_4_prev11 >= 5
 same_dist_pair_lower_c12_2_4_prev12: dist_diff_abs_pair_c12_2_4_prev12
- + 120 same_dist_pair_c12_2_4_prev12 >= 7
+ + 120 same_dist_pair_c12_2_4_prev12 >= 5
 same_dist_pair_lower_c12_2_4_prev2: dist_diff_abs_pair_c12_2_4_prev2
- + 120 same_dist_pair_c12_2_4_prev2 >= 7
+ + 120 same_dist_pair_c12_2_4_prev2 >= 5
 same_dist_pair_lower_c12_2_4_prev3: dist_diff_abs_pair_c12_2_4_prev3
- + 120 same_dist_pair_c12_2_4_prev3 >= 7
+ + 120 same_dist_pair_c12_2_4_prev3 >= 5
 same_dist_pair_lower_c12_2_4_prev4: dist_diff_abs_pair_c12_2_4_prev4
- + 120 same_dist_pair_c12_2_4_prev4 >= 7
+ + 120 same_dist_pair_c12_2_4_prev4 >= 5
 same_dist_pair_lower_c12_2_4_prev5: dist_diff_abs_pair_c12_2_4_prev5
- + 120 same_dist_pair_c12_2_4_prev5 >= 7
+ + 120 same_dist_pair_c12_2_4_prev5 >= 5
 same_dist_pair_lower_c12_2_4_prev6: dist_diff_abs_pair_c12_2_4_prev6
- + 120 same_dist_pair_c12_2_4_prev6 >= 7
+ + 120 same_dist_pair_c12_2_4_prev6 >= 5
 same_dist_pair_lower_c12_2_4_prev7: dist_diff_abs_pair_c12_2_4_prev7
- + 120 same_dist_pair_c12_2_4_prev7 >= 7
+ + 120 same_dist_pair_c12_2_4_prev7 >= 5
 same_dist_pair_lower_c12_2_4_prev8: dist_diff_abs_pair_c12_2_4_prev8
- + 120 same_dist_pair_c12_2_4_prev8 >= 7
+ + 120 same_dist_pair_c12_2_4_prev8 >= 5
 same_dist_pair_lower_c12_2_4_prev9: dist_diff_abs_pair_c12_2_4_prev9
- + 120 same_dist_pair_c12_2_4_prev9 >= 7
+ + 120 same_dist_pair_c12_2_4_prev9 >= 5
 same_dist_pair_lower_c12_3_4_prev0: dist_diff_abs_pair_c12_3_4_prev0
- + 120 same_dist_pair_c12_3_4_prev0 >= 7
+ + 120 same_dist_pair_c12_3_4_prev0 >= 5
 same_dist_pair_lower_c12_3_4_prev1: dist_diff_abs_pair_c12_3_4_prev1
- + 120 same_dist_pair_c12_3_4_prev1 >= 7
+ + 120 same_dist_pair_c12_3_4_prev1 >= 5
 same_dist_pair_lower_c12_3_4_prev10: dist_diff_abs_pair_c12_3_4_prev10
- + 120 same_dist_pair_c12_3_4_prev10 >= 7
+ + 120 same_dist_pair_c12_3_4_prev10 >= 5
 same_dist_pair_lower_c12_3_4_prev11: dist_diff_abs_pair_c12_3_4_prev11
- + 120 same_dist_pair_c12_3_4_prev11 >= 7
+ + 120 same_dist_pair_c12_3_4_prev11 >= 5
 same_dist_pair_lower_c12_3_4_prev12: dist_diff_abs_pair_c12_3_4_prev12
- + 120 same_dist_pair_c12_3_4_prev12 >= 7
+ + 120 same_dist_pair_c12_3_4_prev12 >= 5
 same_dist_pair_lower_c12_3_4_prev2: dist_diff_abs_pair_c12_3_4_prev2
- + 120 same_dist_pair_c12_3_4_prev2 >= 7
+ + 120 same_dist_pair_c12_3_4_prev2 >= 5
 same_dist_pair_lower_c12_3_4_prev3: dist_diff_abs_pair_c12_3_4_prev3
- + 120 same_dist_pair_c12_3_4_prev3 >= 7
+ + 120 same_dist_pair_c12_3_4_prev3 >= 5
 same_dist_pair_lower_c12_3_4_prev4: dist_diff_abs_pair_c12_3_4_prev4
- + 120 same_dist_pair_c12_3_4_prev4 >= 7
+ + 120 same_dist_pair_c12_3_4_prev4 >= 5
 same_dist_pair_lower_c12_3_4_prev5: dist_diff_abs_pair_c12_3_4_prev5
- + 120 same_dist_pair_c12_3_4_prev5 >= 7
+ + 120 same_dist_pair_c12_3_4_prev5 >= 5
 same_dist_pair_lower_c12_3_4_prev6: dist_diff_abs_pair_c12_3_4_prev6
- + 120 same_dist_pair_c12_3_4_prev6 >= 7
+ + 120 same_dist_pair_c12_3_4_prev6 >= 5
 same_dist_pair_lower_c12_3_4_prev7: dist_diff_abs_pair_c12_3_4_prev7
- + 120 same_dist_pair_c12_3_4_prev7 >= 7
+ + 120 same_dist_pair_c12_3_4_prev7 >= 5
 same_dist_pair_lower_c12_3_4_prev8: dist_diff_abs_pair_c12_3_4_prev8
- + 120 same_dist_pair_c12_3_4_prev8 >= 7
+ + 120 same_dist_pair_c12_3_4_prev8 >= 5
 same_dist_pair_lower_c12_3_4_prev9: dist_diff_abs_pair_c12_3_4_prev9
- + 120 same_dist_pair_c12_3_4_prev9 >= 7
+ + 120 same_dist_pair_c12_3_4_prev9 >= 5
 same_dist_pair_upper_c12_0_1_prev0: dist_diff_abs_pair_c12_0_1_prev0
- + 120 same_dist_pair_c12_0_1_prev0 <= 126.93
+ + 120 same_dist_pair_c12_0_1_prev0 <= 124.95
 same_dist_pair_upper_c12_0_1_prev1: dist_diff_abs_pair_c12_0_1_prev1
- + 120 same_dist_pair_c12_0_1_prev1 <= 126.93
+ + 120 same_dist_pair_c12_0_1_prev1 <= 124.95
 same_dist_pair_upper_c12_0_1_prev10: dist_diff_abs_pair_c12_0_1_prev10
- + 120 same_dist_pair_c12_0_1_prev10 <= 126.93
+ + 120 same_dist_pair_c12_0_1_prev10 <= 124.95
 same_dist_pair_upper_c12_0_1_prev11: dist_diff_abs_pair_c12_0_1_prev11
- + 120 same_dist_pair_c12_0_1_prev11 <= 126.93
+ + 120 same_dist_pair_c12_0_1_prev11 <= 124.95
 same_dist_pair_upper_c12_0_1_prev12: dist_diff_abs_pair_c12_0_1_prev12
- + 120 same_dist_pair_c12_0_1_prev12 <= 126.93
+ + 120 same_dist_pair_c12_0_1_prev12 <= 124.95
 same_dist_pair_upper_c12_0_1_prev2: dist_diff_abs_pair_c12_0_1_prev2
- + 120 same_dist_pair_c12_0_1_prev2 <= 126.93
+ + 120 same_dist_pair_c12_0_1_prev2 <= 124.95
 same_dist_pair_upper_c12_0_1_prev3: dist_diff_abs_pair_c12_0_1_prev3
- + 120 same_dist_pair_c12_0_1_prev3 <= 126.93
+ + 120 same_dist_pair_c12_0_1_prev3 <= 124.95
 same_dist_pair_upper_c12_0_1_prev4: dist_diff_abs_pair_c12_0_1_prev4
- + 120 same_dist_pair_c12_0_1_prev4 <= 126.93
+ + 120 same_dist_pair_c12_0_1_prev4 <= 124.95
 same_dist_pair_upper_c12_0_1_prev5: dist_diff_abs_pair_c12_0_1_prev5
- + 120 same_dist_pair_c12_0_1_prev5 <= 126.93
+ + 120 same_dist_pair_c12_0_1_prev5 <= 124.95
 same_dist_pair_upper_c12_0_1_prev6: dist_diff_abs_pair_c12_0_1_prev6
- + 120 same_dist_pair_c12_0_1_prev6 <= 126.93
+ + 120 same_dist_pair_c12_0_1_prev6 <= 124.95
 same_dist_pair_upper_c12_0_1_prev7: dist_diff_abs_pair_c12_0_1_prev7
- + 120 same_dist_pair_c12_0_1_prev7 <= 126.93
+ + 120 same_dist_pair_c12_0_1_prev7 <= 124.95
 same_dist_pair_upper_c12_0_1_prev8: dist_diff_abs_pair_c12_0_1_prev8
- + 120 same_dist_pair_c12_0_1_prev8 <= 126.93
+ + 120 same_dist_pair_c12_0_1_prev8 <= 124.95
 same_dist_pair_upper_c12_0_1_prev9: dist_diff_abs_pair_c12_0_1_prev9
- + 120 same_dist_pair_c12_0_1_prev9 <= 126.93
+ + 120 same_dist_pair_c12_0_1_prev9 <= 124.95
 same_dist_pair_upper_c12_0_2_prev0: dist_diff_abs_pair_c12_0_2_prev0
- + 120 same_dist_pair_c12_0_2_prev0 <= 126.93
+ + 120 same_dist_pair_c12_0_2_prev0 <= 124.95
 same_dist_pair_upper_c12_0_2_prev1: dist_diff_abs_pair_c12_0_2_prev1
- + 120 same_dist_pair_c12_0_2_prev1 <= 126.93
+ + 120 same_dist_pair_c12_0_2_prev1 <= 124.95
 same_dist_pair_upper_c12_0_2_prev10: dist_diff_abs_pair_c12_0_2_prev10
- + 120 same_dist_pair_c12_0_2_prev10 <= 126.93
+ + 120 same_dist_pair_c12_0_2_prev10 <= 124.95
 same_dist_pair_upper_c12_0_2_prev11: dist_diff_abs_pair_c12_0_2_prev11
- + 120 same_dist_pair_c12_0_2_prev11 <= 126.93
+ + 120 same_dist_pair_c12_0_2_prev11 <= 124.95
 same_dist_pair_upper_c12_0_2_prev12: dist_diff_abs_pair_c12_0_2_prev12
- + 120 same_dist_pair_c12_0_2_prev12 <= 126.93
+ + 120 same_dist_pair_c12_0_2_prev12 <= 124.95
 same_dist_pair_upper_c12_0_2_prev2: dist_diff_abs_pair_c12_0_2_prev2
- + 120 same_dist_pair_c12_0_2_prev2 <= 126.93
+ + 120 same_dist_pair_c12_0_2_prev2 <= 124.95
 same_dist_pair_upper_c12_0_2_prev3: dist_diff_abs_pair_c12_0_2_prev3
- + 120 same_dist_pair_c12_0_2_prev3 <= 126.93
+ + 120 same_dist_pair_c12_0_2_prev3 <= 124.95
 same_dist_pair_upper_c12_0_2_prev4: dist_diff_abs_pair_c12_0_2_prev4
- + 120 same_dist_pair_c12_0_2_prev4 <= 126.93
+ + 120 same_dist_pair_c12_0_2_prev4 <= 124.95
 same_dist_pair_upper_c12_0_2_prev5: dist_diff_abs_pair_c12_0_2_prev5
- + 120 same_dist_pair_c12_0_2_prev5 <= 126.93
+ + 120 same_dist_pair_c12_0_2_prev5 <= 124.95
 same_dist_pair_upper_c12_0_2_prev6: dist_diff_abs_pair_c12_0_2_prev6
- + 120 same_dist_pair_c12_0_2_prev6 <= 126.93
+ + 120 same_dist_pair_c12_0_2_prev6 <= 124.95
 same_dist_pair_upper_c12_0_2_prev7: dist_diff_abs_pair_c12_0_2_prev7
- + 120 same_dist_pair_c12_0_2_prev7 <= 126.93
+ + 120 same_dist_pair_c12_0_2_prev7 <= 124.95
 same_dist_pair_upper_c12_0_2_prev8: dist_diff_abs_pair_c12_0_2_prev8
- + 120 same_dist_pair_c12_0_2_prev8 <= 126.93
+ + 120 same_dist_pair_c12_0_2_prev8 <= 124.95
 same_dist_pair_upper_c12_0_2_prev9: dist_diff_abs_pair_c12_0_2_prev9
- + 120 same_dist_pair_c12_0_2_prev9 <= 126.93
+ + 120 same_dist_pair_c12_0_2_prev9 <= 124.95
 same_dist_pair_upper_c12_0_3_prev0: dist_diff_abs_pair_c12_0_3_prev0
- + 120 same_dist_pair_c12_0_3_prev0 <= 126.93
+ + 120 same_dist_pair_c12_0_3_prev0 <= 124.95
 same_dist_pair_upper_c12_0_3_prev1: dist_diff_abs_pair_c12_0_3_prev1
- + 120 same_dist_pair_c12_0_3_prev1 <= 126.93
+ + 120 same_dist_pair_c12_0_3_prev1 <= 124.95
 same_dist_pair_upper_c12_0_3_prev10: dist_diff_abs_pair_c12_0_3_prev10
- + 120 same_dist_pair_c12_0_3_prev10 <= 126.93
+ + 120 same_dist_pair_c12_0_3_prev10 <= 124.95
 same_dist_pair_upper_c12_0_3_prev11: dist_diff_abs_pair_c12_0_3_prev11
- + 120 same_dist_pair_c12_0_3_prev11 <= 126.93
+ + 120 same_dist_pair_c12_0_3_prev11 <= 124.95
 same_dist_pair_upper_c12_0_3_prev12: dist_diff_abs_pair_c12_0_3_prev12
- + 120 same_dist_pair_c12_0_3_prev12 <= 126.93
+ + 120 same_dist_pair_c12_0_3_prev12 <= 124.95
 same_dist_pair_upper_c12_0_3_prev2: dist_diff_abs_pair_c12_0_3_prev2
- + 120 same_dist_pair_c12_0_3_prev2 <= 126.93
+ + 120 same_dist_pair_c12_0_3_prev2 <= 124.95
 same_dist_pair_upper_c12_0_3_prev3: dist_diff_abs_pair_c12_0_3_prev3
- + 120 same_dist_pair_c12_0_3_prev3 <= 126.93
+ + 120 same_dist_pair_c12_0_3_prev3 <= 124.95
 same_dist_pair_upper_c12_0_3_prev4: dist_diff_abs_pair_c12_0_3_prev4
- + 120 same_dist_pair_c12_0_3_prev4 <= 126.93
+ + 120 same_dist_pair_c12_0_3_prev4 <= 124.95
 same_dist_pair_upper_c12_0_3_prev5: dist_diff_abs_pair_c12_0_3_prev5
- + 120 same_dist_pair_c12_0_3_prev5 <= 126.93
+ + 120 same_dist_pair_c12_0_3_prev5 <= 124.95
 same_dist_pair_upper_c12_0_3_prev6: dist_diff_abs_pair_c12_0_3_prev6
- + 120 same_dist_pair_c12_0_3_prev6 <= 126.93
+ + 120 same_dist_pair_c12_0_3_prev6 <= 124.95
 same_dist_pair_upper_c12_0_3_prev7: dist_diff_abs_pair_c12_0_3_prev7
- + 120 same_dist_pair_c12_0_3_prev7 <= 126.93
+ + 120 same_dist_pair_c12_0_3_prev7 <= 124.95
 same_dist_pair_upper_c12_0_3_prev8: dist_diff_abs_pair_c12_0_3_prev8
- + 120 same_dist_pair_c12_0_3_prev8 <= 126.93
+ + 120 same_dist_pair_c12_0_3_prev8 <= 124.95
 same_dist_pair_upper_c12_0_3_prev9: dist_diff_abs_pair_c12_0_3_prev9
- + 120 same_dist_pair_c12_0_3_prev9 <= 126.93
+ + 120 same_dist_pair_c12_0_3_prev9 <= 124.95
 same_dist_pair_upper_c12_0_4_prev0: dist_diff_abs_pair_c12_0_4_prev0
- + 120 same_dist_pair_c12_0_4_prev0 <= 126.93
+ + 120 same_dist_pair_c12_0_4_prev0 <= 124.95
 same_dist_pair_upper_c12_0_4_prev1: dist_diff_abs_pair_c12_0_4_prev1
- + 120 same_dist_pair_c12_0_4_prev1 <= 126.93
+ + 120 same_dist_pair_c12_0_4_prev1 <= 124.95
 same_dist_pair_upper_c12_0_4_prev10: dist_diff_abs_pair_c12_0_4_prev10
- + 120 same_dist_pair_c12_0_4_prev10 <= 126.93
+ + 120 same_dist_pair_c12_0_4_prev10 <= 124.95
 same_dist_pair_upper_c12_0_4_prev11: dist_diff_abs_pair_c12_0_4_prev11
- + 120 same_dist_pair_c12_0_4_prev11 <= 126.93
+ + 120 same_dist_pair_c12_0_4_prev11 <= 124.95
 same_dist_pair_upper_c12_0_4_prev12: dist_diff_abs_pair_c12_0_4_prev12
- + 120 same_dist_pair_c12_0_4_prev12 <= 126.93
+ + 120 same_dist_pair_c12_0_4_prev12 <= 124.95
 same_dist_pair_upper_c12_0_4_prev2: dist_diff_abs_pair_c12_0_4_prev2
- + 120 same_dist_pair_c12_0_4_prev2 <= 126.93
+ + 120 same_dist_pair_c12_0_4_prev2 <= 124.95
 same_dist_pair_upper_c12_0_4_prev3: dist_diff_abs_pair_c12_0_4_prev3
- + 120 same_dist_pair_c12_0_4_prev3 <= 126.93
+ + 120 same_dist_pair_c12_0_4_prev3 <= 124.95
 same_dist_pair_upper_c12_0_4_prev4: dist_diff_abs_pair_c12_0_4_prev4
- + 120 same_dist_pair_c12_0_4_prev4 <= 126.93
+ + 120 same_dist_pair_c12_0_4_prev4 <= 124.95
 same_dist_pair_upper_c12_0_4_prev5: dist_diff_abs_pair_c12_0_4_prev5
- + 120 same_dist_pair_c12_0_4_prev5 <= 126.93
+ + 120 same_dist_pair_c12_0_4_prev5 <= 124.95
 same_dist_pair_upper_c12_0_4_prev6: dist_diff_abs_pair_c12_0_4_prev6
- + 120 same_dist_pair_c12_0_4_prev6 <= 126.93
+ + 120 same_dist_pair_c12_0_4_prev6 <= 124.95
 same_dist_pair_upper_c12_0_4_prev7: dist_diff_abs_pair_c12_0_4_prev7
- + 120 same_dist_pair_c12_0_4_prev7 <= 126.93
+ + 120 same_dist_pair_c12_0_4_prev7 <= 124.95
 same_dist_pair_upper_c12_0_4_prev8: dist_diff_abs_pair_c12_0_4_prev8
- + 120 same_dist_pair_c12_0_4_prev8 <= 126.93
+ + 120 same_dist_pair_c12_0_4_prev8 <= 124.95
 same_dist_pair_upper_c12_0_4_prev9: dist_diff_abs_pair_c12_0_4_prev9
- + 120 same_dist_pair_c12_0_4_prev9 <= 126.93
+ + 120 same_dist_pair_c12_0_4_prev9 <= 124.95
 same_dist_pair_upper_c12_1_2_prev0: dist_diff_abs_pair_c12_1_2_prev0
- + 120 same_dist_pair_c12_1_2_prev0 <= 126.93
+ + 120 same_dist_pair_c12_1_2_prev0 <= 124.95
 same_dist_pair_upper_c12_1_2_prev1: dist_diff_abs_pair_c12_1_2_prev1
- + 120 same_dist_pair_c12_1_2_prev1 <= 126.93
+ + 120 same_dist_pair_c12_1_2_prev1 <= 124.95
 same_dist_pair_upper_c12_1_2_prev10: dist_diff_abs_pair_c12_1_2_prev10
- + 120 same_dist_pair_c12_1_2_prev10 <= 126.93
+ + 120 same_dist_pair_c12_1_2_prev10 <= 124.95
 same_dist_pair_upper_c12_1_2_prev11: dist_diff_abs_pair_c12_1_2_prev11
- + 120 same_dist_pair_c12_1_2_prev11 <= 126.93
+ + 120 same_dist_pair_c12_1_2_prev11 <= 124.95
 same_dist_pair_upper_c12_1_2_prev12: dist_diff_abs_pair_c12_1_2_prev12
- + 120 same_dist_pair_c12_1_2_prev12 <= 126.93
+ + 120 same_dist_pair_c12_1_2_prev12 <= 124.95
 same_dist_pair_upper_c12_1_2_prev2: dist_diff_abs_pair_c12_1_2_prev2
- + 120 same_dist_pair_c12_1_2_prev2 <= 126.93
+ + 120 same_dist_pair_c12_1_2_prev2 <= 124.95
 same_dist_pair_upper_c12_1_2_prev3: dist_diff_abs_pair_c12_1_2_prev3
- + 120 same_dist_pair_c12_1_2_prev3 <= 126.93
+ + 120 same_dist_pair_c12_1_2_prev3 <= 124.95
 same_dist_pair_upper_c12_1_2_prev4: dist_diff_abs_pair_c12_1_2_prev4
- + 120 same_dist_pair_c12_1_2_prev4 <= 126.93
+ + 120 same_dist_pair_c12_1_2_prev4 <= 124.95
 same_dist_pair_upper_c12_1_2_prev5: dist_diff_abs_pair_c12_1_2_prev5
- + 120 same_dist_pair_c12_1_2_prev5 <= 126.93
+ + 120 same_dist_pair_c12_1_2_prev5 <= 124.95
 same_dist_pair_upper_c12_1_2_prev6: dist_diff_abs_pair_c12_1_2_prev6
- + 120 same_dist_pair_c12_1_2_prev6 <= 126.93
+ + 120 same_dist_pair_c12_1_2_prev6 <= 124.95
 same_dist_pair_upper_c12_1_2_prev7: dist_diff_abs_pair_c12_1_2_prev7
- + 120 same_dist_pair_c12_1_2_prev7 <= 126.93
+ + 120 same_dist_pair_c12_1_2_prev7 <= 124.95
 same_dist_pair_upper_c12_1_2_prev8: dist_diff_abs_pair_c12_1_2_prev8
- + 120 same_dist_pair_c12_1_2_prev8 <= 126.93
+ + 120 same_dist_pair_c12_1_2_prev8 <= 124.95
 same_dist_pair_upper_c12_1_2_prev9: dist_diff_abs_pair_c12_1_2_prev9
- + 120 same_dist_pair_c12_1_2_prev9 <= 126.93
+ + 120 same_dist_pair_c12_1_2_prev9 <= 124.95
 same_dist_pair_upper_c12_1_3_prev0: dist_diff_abs_pair_c12_1_3_prev0
- + 120 same_dist_pair_c12_1_3_prev0 <= 126.93
+ + 120 same_dist_pair_c12_1_3_prev0 <= 124.95
 same_dist_pair_upper_c12_1_3_prev1: dist_diff_abs_pair_c12_1_3_prev1
- + 120 same_dist_pair_c12_1_3_prev1 <= 126.93
+ + 120 same_dist_pair_c12_1_3_prev1 <= 124.95
 same_dist_pair_upper_c12_1_3_prev10: dist_diff_abs_pair_c12_1_3_prev10
- + 120 same_dist_pair_c12_1_3_prev10 <= 126.93
+ + 120 same_dist_pair_c12_1_3_prev10 <= 124.95
 same_dist_pair_upper_c12_1_3_prev11: dist_diff_abs_pair_c12_1_3_prev11
- + 120 same_dist_pair_c12_1_3_prev11 <= 126.93
+ + 120 same_dist_pair_c12_1_3_prev11 <= 124.95
 same_dist_pair_upper_c12_1_3_prev12: dist_diff_abs_pair_c12_1_3_prev12
- + 120 same_dist_pair_c12_1_3_prev12 <= 126.93
+ + 120 same_dist_pair_c12_1_3_prev12 <= 124.95
 same_dist_pair_upper_c12_1_3_prev2: dist_diff_abs_pair_c12_1_3_prev2
- + 120 same_dist_pair_c12_1_3_prev2 <= 126.93
+ + 120 same_dist_pair_c12_1_3_prev2 <= 124.95
 same_dist_pair_upper_c12_1_3_prev3: dist_diff_abs_pair_c12_1_3_prev3
- + 120 same_dist_pair_c12_1_3_prev3 <= 126.93
+ + 120 same_dist_pair_c12_1_3_prev3 <= 124.95
 same_dist_pair_upper_c12_1_3_prev4: dist_diff_abs_pair_c12_1_3_prev4
- + 120 same_dist_pair_c12_1_3_prev4 <= 126.93
+ + 120 same_dist_pair_c12_1_3_prev4 <= 124.95
 same_dist_pair_upper_c12_1_3_prev5: dist_diff_abs_pair_c12_1_3_prev5
- + 120 same_dist_pair_c12_1_3_prev5 <= 126.93
+ + 120 same_dist_pair_c12_1_3_prev5 <= 124.95
 same_dist_pair_upper_c12_1_3_prev6: dist_diff_abs_pair_c12_1_3_prev6
- + 120 same_dist_pair_c12_1_3_prev6 <= 126.93
+ + 120 same_dist_pair_c12_1_3_prev6 <= 124.95
 same_dist_pair_upper_c12_1_3_prev7: dist_diff_abs_pair_c12_1_3_prev7
- + 120 same_dist_pair_c12_1_3_prev7 <= 126.93
+ + 120 same_dist_pair_c12_1_3_prev7 <= 124.95
 same_dist_pair_upper_c12_1_3_prev8: dist_diff_abs_pair_c12_1_3_prev8
- + 120 same_dist_pair_c12_1_3_prev8 <= 126.93
+ + 120 same_dist_pair_c12_1_3_prev8 <= 124.95
 same_dist_pair_upper_c12_1_3_prev9: dist_diff_abs_pair_c12_1_3_prev9
- + 120 same_dist_pair_c12_1_3_prev9 <= 126.93
+ + 120 same_dist_pair_c12_1_3_prev9 <= 124.95
 same_dist_pair_upper_c12_1_4_prev0: dist_diff_abs_pair_c12_1_4_prev0
- + 120 same_dist_pair_c12_1_4_prev0 <= 126.93
+ + 120 same_dist_pair_c12_1_4_prev0 <= 124.95
 same_dist_pair_upper_c12_1_4_prev1: dist_diff_abs_pair_c12_1_4_prev1
- + 120 same_dist_pair_c12_1_4_prev1 <= 126.93
+ + 120 same_dist_pair_c12_1_4_prev1 <= 124.95
 same_dist_pair_upper_c12_1_4_prev10: dist_diff_abs_pair_c12_1_4_prev10
- + 120 same_dist_pair_c12_1_4_prev10 <= 126.93
+ + 120 same_dist_pair_c12_1_4_prev10 <= 124.95
 same_dist_pair_upper_c12_1_4_prev11: dist_diff_abs_pair_c12_1_4_prev11
- + 120 same_dist_pair_c12_1_4_prev11 <= 126.93
+ + 120 same_dist_pair_c12_1_4_prev11 <= 124.95
 same_dist_pair_upper_c12_1_4_prev12: dist_diff_abs_pair_c12_1_4_prev12
- + 120 same_dist_pair_c12_1_4_prev12 <= 126.93
+ + 120 same_dist_pair_c12_1_4_prev12 <= 124.95
 same_dist_pair_upper_c12_1_4_prev2: dist_diff_abs_pair_c12_1_4_prev2
- + 120 same_dist_pair_c12_1_4_prev2 <= 126.93
+ + 120 same_dist_pair_c12_1_4_prev2 <= 124.95
 same_dist_pair_upper_c12_1_4_prev3: dist_diff_abs_pair_c12_1_4_prev3
- + 120 same_dist_pair_c12_1_4_prev3 <= 126.93
+ + 120 same_dist_pair_c12_1_4_prev3 <= 124.95
 same_dist_pair_upper_c12_1_4_prev4: dist_diff_abs_pair_c12_1_4_prev4
- + 120 same_dist_pair_c12_1_4_prev4 <= 126.93
+ + 120 same_dist_pair_c12_1_4_prev4 <= 124.95
 same_dist_pair_upper_c12_1_4_prev5: dist_diff_abs_pair_c12_1_4_prev5
- + 120 same_dist_pair_c12_1_4_prev5 <= 126.93
+ + 120 same_dist_pair_c12_1_4_prev5 <= 124.95
 same_dist_pair_upper_c12_1_4_prev6: dist_diff_abs_pair_c12_1_4_prev6
- + 120 same_dist_pair_c12_1_4_prev6 <= 126.93
+ + 120 same_dist_pair_c12_1_4_prev6 <= 124.95
 same_dist_pair_upper_c12_1_4_prev7: dist_diff_abs_pair_c12_1_4_prev7
- + 120 same_dist_pair_c12_1_4_prev7 <= 126.93
+ + 120 same_dist_pair_c12_1_4_prev7 <= 124.95
 same_dist_pair_upper_c12_1_4_prev8: dist_diff_abs_pair_c12_1_4_prev8
- + 120 same_dist_pair_c12_1_4_prev8 <= 126.93
+ + 120 same_dist_pair_c12_1_4_prev8 <= 124.95
 same_dist_pair_upper_c12_1_4_prev9: dist_diff_abs_pair_c12_1_4_prev9
- + 120 same_dist_pair_c12_1_4_prev9 <= 126.93
+ + 120 same_dist_pair_c12_1_4_prev9 <= 124.95
 same_dist_pair_upper_c12_2_3_prev0: dist_diff_abs_pair_c12_2_3_prev0
- + 120 same_dist_pair_c12_2_3_prev0 <= 126.93
+ + 120 same_dist_pair_c12_2_3_prev0 <= 124.95
 same_dist_pair_upper_c12_2_3_prev1: dist_diff_abs_pair_c12_2_3_prev1
- + 120 same_dist_pair_c12_2_3_prev1 <= 126.93
+ + 120 same_dist_pair_c12_2_3_prev1 <= 124.95
 same_dist_pair_upper_c12_2_3_prev10: dist_diff_abs_pair_c12_2_3_prev10
- + 120 same_dist_pair_c12_2_3_prev10 <= 126.93
+ + 120 same_dist_pair_c12_2_3_prev10 <= 124.95
 same_dist_pair_upper_c12_2_3_prev11: dist_diff_abs_pair_c12_2_3_prev11
- + 120 same_dist_pair_c12_2_3_prev11 <= 126.93
+ + 120 same_dist_pair_c12_2_3_prev11 <= 124.95
 same_dist_pair_upper_c12_2_3_prev12: dist_diff_abs_pair_c12_2_3_prev12
- + 120 same_dist_pair_c12_2_3_prev12 <= 126.93
+ + 120 same_dist_pair_c12_2_3_prev12 <= 124.95
 same_dist_pair_upper_c12_2_3_prev2: dist_diff_abs_pair_c12_2_3_prev2
- + 120 same_dist_pair_c12_2_3_prev2 <= 126.93
+ + 120 same_dist_pair_c12_2_3_prev2 <= 124.95
 same_dist_pair_upper_c12_2_3_prev3: dist_diff_abs_pair_c12_2_3_prev3
- + 120 same_dist_pair_c12_2_3_prev3 <= 126.93
+ + 120 same_dist_pair_c12_2_3_prev3 <= 124.95
 same_dist_pair_upper_c12_2_3_prev4: dist_diff_abs_pair_c12_2_3_prev4
- + 120 same_dist_pair_c12_2_3_prev4 <= 126.93
+ + 120 same_dist_pair_c12_2_3_prev4 <= 124.95
 same_dist_pair_upper_c12_2_3_prev5: dist_diff_abs_pair_c12_2_3_prev5
- + 120 same_dist_pair_c12_2_3_prev5 <= 126.93
+ + 120 same_dist_pair_c12_2_3_prev5 <= 124.95
 same_dist_pair_upper_c12_2_3_prev6: dist_diff_abs_pair_c12_2_3_prev6
- + 120 same_dist_pair_c12_2_3_prev6 <= 126.93
+ + 120 same_dist_pair_c12_2_3_prev6 <= 124.95
 same_dist_pair_upper_c12_2_3_prev7: dist_diff_abs_pair_c12_2_3_prev7
- + 120 same_dist_pair_c12_2_3_prev7 <= 126.93
+ + 120 same_dist_pair_c12_2_3_prev7 <= 124.95
 same_dist_pair_upper_c12_2_3_prev8: dist_diff_abs_pair_c12_2_3_prev8
- + 120 same_dist_pair_c12_2_3_prev8 <= 126.93
+ + 120 same_dist_pair_c12_2_3_prev8 <= 124.95
 same_dist_pair_upper_c12_2_3_prev9: dist_diff_abs_pair_c12_2_3_prev9
- + 120 same_dist_pair_c12_2_3_prev9 <= 126.93
+ + 120 same_dist_pair_c12_2_3_prev9 <= 124.95
 same_dist_pair_upper_c12_2_4_prev0: dist_diff_abs_pair_c12_2_4_prev0
- + 120 same_dist_pair_c12_2_4_prev0 <= 126.93
+ + 120 same_dist_pair_c12_2_4_prev0 <= 124.95
 same_dist_pair_upper_c12_2_4_prev1: dist_diff_abs_pair_c12_2_4_prev1
- + 120 same_dist_pair_c12_2_4_prev1 <= 126.93
+ + 120 same_dist_pair_c12_2_4_prev1 <= 124.95
 same_dist_pair_upper_c12_2_4_prev10: dist_diff_abs_pair_c12_2_4_prev10
- + 120 same_dist_pair_c12_2_4_prev10 <= 126.93
+ + 120 same_dist_pair_c12_2_4_prev10 <= 124.95
 same_dist_pair_upper_c12_2_4_prev11: dist_diff_abs_pair_c12_2_4_prev11
- + 120 same_dist_pair_c12_2_4_prev11 <= 126.93
+ + 120 same_dist_pair_c12_2_4_prev11 <= 124.95
 same_dist_pair_upper_c12_2_4_prev12: dist_diff_abs_pair_c12_2_4_prev12
- + 120 same_dist_pair_c12_2_4_prev12 <= 126.93
+ + 120 same_dist_pair_c12_2_4_prev12 <= 124.95
 same_dist_pair_upper_c12_2_4_prev2: dist_diff_abs_pair_c12_2_4_prev2
- + 120 same_dist_pair_c12_2_4_prev2 <= 126.93
+ + 120 same_dist_pair_c12_2_4_prev2 <= 124.95
 same_dist_pair_upper_c12_2_4_prev3: dist_diff_abs_pair_c12_2_4_prev3
- + 120 same_dist_pair_c12_2_4_prev3 <= 126.93
+ + 120 same_dist_pair_c12_2_4_prev3 <= 124.95
 same_dist_pair_upper_c12_2_4_prev4: dist_diff_abs_pair_c12_2_4_prev4
- + 120 same_dist_pair_c12_2_4_prev4 <= 126.93
+ + 120 same_dist_pair_c12_2_4_prev4 <= 124.95
 same_dist_pair_upper_c12_2_4_prev5: dist_diff_abs_pair_c12_2_4_prev5
- + 120 same_dist_pair_c12_2_4_prev5 <= 126.93
+ + 120 same_dist_pair_c12_2_4_prev5 <= 124.95
 same_dist_pair_upper_c12_2_4_prev6: dist_diff_abs_pair_c12_2_4_prev6
- + 120 same_dist_pair_c12_2_4_prev6 <= 126.93
+ + 120 same_dist_pair_c12_2_4_prev6 <= 124.95
 same_dist_pair_upper_c12_2_4_prev7: dist_diff_abs_pair_c12_2_4_prev7
- + 120 same_dist_pair_c12_2_4_prev7 <= 126.93
+ + 120 same_dist_pair_c12_2_4_prev7 <= 124.95
 same_dist_pair_upper_c12_2_4_prev8: dist_diff_abs_pair_c12_2_4_prev8
- + 120 same_dist_pair_c12_2_4_prev8 <= 126.93
+ + 120 same_dist_pair_c12_2_4_prev8 <= 124.95
 same_dist_pair_upper_c12_2_4_prev9: dist_diff_abs_pair_c12_2_4_prev9
- + 120 same_dist_pair_c12_2_4_prev9 <= 126.93
+ + 120 same_dist_pair_c12_2_4_prev9 <= 124.95
 same_dist_pair_upper_c12_3_4_prev0: dist_diff_abs_pair_c12_3_4_prev0
- + 120 same_dist_pair_c12_3_4_prev0 <= 126.93
+ + 120 same_dist_pair_c12_3_4_prev0 <= 124.95
 same_dist_pair_upper_c12_3_4_prev1: dist_diff_abs_pair_c12_3_4_prev1
- + 120 same_dist_pair_c12_3_4_prev1 <= 126.93
+ + 120 same_dist_pair_c12_3_4_prev1 <= 124.95
 same_dist_pair_upper_c12_3_4_prev10: dist_diff_abs_pair_c12_3_4_prev10
- + 120 same_dist_pair_c12_3_4_prev10 <= 126.93
+ + 120 same_dist_pair_c12_3_4_prev10 <= 124.95
 same_dist_pair_upper_c12_3_4_prev11: dist_diff_abs_pair_c12_3_4_prev11
- + 120 same_dist_pair_c12_3_4_prev11 <= 126.93
+ + 120 same_dist_pair_c12_3_4_prev11 <= 124.95
 same_dist_pair_upper_c12_3_4_prev12: dist_diff_abs_pair_c12_3_4_prev12
- + 120 same_dist_pair_c12_3_4_prev12 <= 126.93
+ + 120 same_dist_pair_c12_3_4_prev12 <= 124.95
 same_dist_pair_upper_c12_3_4_prev2: dist_diff_abs_pair_c12_3_4_prev2
- + 120 same_dist_pair_c12_3_4_prev2 <= 126.93
+ + 120 same_dist_pair_c12_3_4_prev2 <= 124.95
 same_dist_pair_upper_c12_3_4_prev3: dist_diff_abs_pair_c12_3_4_prev3
- + 120 same_dist_pair_c12_3_4_prev3 <= 126.93
+ + 120 same_dist_pair_c12_3_4_prev3 <= 124.95
 same_dist_pair_upper_c12_3_4_prev4: dist_diff_abs_pair_c12_3_4_prev4
- + 120 same_dist_pair_c12_3_4_prev4 <= 126.93
+ + 120 same_dist_pair_c12_3_4_prev4 <= 124.95
 same_dist_pair_upper_c12_3_4_prev5: dist_diff_abs_pair_c12_3_4_prev5
- + 120 same_dist_pair_c12_3_4_prev5 <= 126.93
+ + 120 same_dist_pair_c12_3_4_prev5 <= 124.95
 same_dist_pair_upper_c12_3_4_prev6: dist_diff_abs_pair_c12_3_4_prev6
- + 120 same_dist_pair_c12_3_4_prev6 <= 126.93
+ + 120 same_dist_pair_c12_3_4_prev6 <= 124.95
 same_dist_pair_upper_c12_3_4_prev7: dist_diff_abs_pair_c12_3_4_prev7
- + 120 same_dist_pair_c12_3_4_prev7 <= 126.93
+ + 120 same_dist_pair_c12_3_4_prev7 <= 124.95
 same_dist_pair_upper_c12_3_4_prev8: dist_diff_abs_pair_c12_3_4_prev8
- + 120 same_dist_pair_c12_3_4_prev8 <= 126.93
+ + 120 same_dist_pair_c12_3_4_prev8 <= 124.95
 same_dist_pair_upper_c12_3_4_prev9: dist_diff_abs_pair_c12_3_4_prev9
- + 120 same_dist_pair_c12_3_4_prev9 <= 126.93
+ + 120 same_dist_pair_c12_3_4_prev9 <= 124.95
 shared_x_min_0_1: shared_x_0_1 - 200 z2_0_1 >= -199.9
 shared_x_min_1_2: shared_x_1_2 - 200 z2_1_2 >= -199.9
 shared_x_min_1_3: shared_x_1_3 - 200 z2_1_3 >= -199.9
