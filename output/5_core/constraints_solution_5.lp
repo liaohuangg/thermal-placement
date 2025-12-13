@@ -982,7 +982,7 @@ dist_diff_pair_def_c3_0_1_prev1: - dist_curr_pair_c3_0_1
 dist_diff_pair_def_c3_0_1_prev2: - dist_curr_pair_c3_0_1
  + dist_diff_pair_c3_0_1_prev2 = -38
 dist_diff_pair_def_c3_0_1_prev3: - dist_curr_pair_c3_0_1
- + dist_diff_pair_c3_0_1_prev3 = -46
+ + dist_diff_pair_c3_0_1_prev3 = -38
 dist_diff_pair_def_c3_0_2_prev0: - dist_curr_pair_c3_0_2
  + dist_diff_pair_c3_0_2_prev0 = -58
 dist_diff_pair_def_c3_0_2_prev1: - dist_curr_pair_c3_0_2
@@ -990,7 +990,7 @@ dist_diff_pair_def_c3_0_2_prev1: - dist_curr_pair_c3_0_2
 dist_diff_pair_def_c3_0_2_prev2: - dist_curr_pair_c3_0_2
  + dist_diff_pair_c3_0_2_prev2 = -66
 dist_diff_pair_def_c3_0_2_prev3: - dist_curr_pair_c3_0_2
- + dist_diff_pair_c3_0_2_prev3 = -78
+ + dist_diff_pair_c3_0_2_prev3 = -70
 dist_diff_pair_def_c3_0_3_prev0: - dist_curr_pair_c3_0_3
  + dist_diff_pair_c3_0_3_prev0 = -58
 dist_diff_pair_def_c3_0_3_prev1: - dist_curr_pair_c3_0_3
@@ -998,7 +998,7 @@ dist_diff_pair_def_c3_0_3_prev1: - dist_curr_pair_c3_0_3
 dist_diff_pair_def_c3_0_3_prev2: - dist_curr_pair_c3_0_3
  + dist_diff_pair_c3_0_3_prev2 = -58
 dist_diff_pair_def_c3_0_3_prev3: - dist_curr_pair_c3_0_3
- + dist_diff_pair_c3_0_3_prev3 = -58
+ + dist_diff_pair_c3_0_3_prev3 = -62
 dist_diff_pair_def_c3_0_4_prev0: - dist_curr_pair_c3_0_4
  + dist_diff_pair_c3_0_4_prev0 = -66
 dist_diff_pair_def_c3_0_4_prev1: - dist_curr_pair_c3_0_4
@@ -1006,7 +1006,7 @@ dist_diff_pair_def_c3_0_4_prev1: - dist_curr_pair_c3_0_4
 dist_diff_pair_def_c3_0_4_prev2: - dist_curr_pair_c3_0_4
  + dist_diff_pair_c3_0_4_prev2 = -42
 dist_diff_pair_def_c3_0_4_prev3: - dist_curr_pair_c3_0_4
- + dist_diff_pair_c3_0_4_prev3 = -21
+ + dist_diff_pair_c3_0_4_prev3 = -40
 dist_diff_pair_def_c3_1_2_prev0: - dist_curr_pair_c3_1_2
  + dist_diff_pair_c3_1_2_prev0 = -20
 dist_diff_pair_def_c3_1_2_prev1: - dist_curr_pair_c3_1_2
@@ -1022,7 +1022,7 @@ dist_diff_pair_def_c3_1_3_prev1: - dist_curr_pair_c3_1_3
 dist_diff_pair_def_c3_1_3_prev2: - dist_curr_pair_c3_1_3
  + dist_diff_pair_c3_1_3_prev2 = -20
 dist_diff_pair_def_c3_1_3_prev3: - dist_curr_pair_c3_1_3
- + dist_diff_pair_c3_1_3_prev3 = -28
+ + dist_diff_pair_c3_1_3_prev3 = -24
 dist_diff_pair_def_c3_1_4_prev0: - dist_curr_pair_c3_1_4
  + dist_diff_pair_c3_1_4_prev0 = -44
 dist_diff_pair_def_c3_1_4_prev1: - dist_curr_pair_c3_1_4
@@ -1030,7 +1030,7 @@ dist_diff_pair_def_c3_1_4_prev1: - dist_curr_pair_c3_1_4
 dist_diff_pair_def_c3_1_4_prev2: - dist_curr_pair_c3_1_4
  + dist_diff_pair_c3_1_4_prev2 = -32
 dist_diff_pair_def_c3_1_4_prev3: - dist_curr_pair_c3_1_4
- + dist_diff_pair_c3_1_4_prev3 = -59
+ + dist_diff_pair_c3_1_4_prev3 = -22
 dist_diff_pair_def_c3_2_3_prev0: - dist_curr_pair_c3_2_3
  + dist_diff_pair_c3_2_3_prev0 = -52
 dist_diff_pair_def_c3_2_3_prev1: - dist_curr_pair_c3_2_3
@@ -1038,7 +1038,7 @@ dist_diff_pair_def_c3_2_3_prev1: - dist_curr_pair_c3_2_3
 dist_diff_pair_def_c3_2_3_prev2: - dist_curr_pair_c3_2_3
  + dist_diff_pair_c3_2_3_prev2 = -60
 dist_diff_pair_def_c3_2_3_prev3: - dist_curr_pair_c3_2_3
- + dist_diff_pair_c3_2_3_prev3 = -72
+ + dist_diff_pair_c3_2_3_prev3 = -60
 dist_diff_pair_def_c3_2_4_prev0: - dist_curr_pair_c3_2_4
  + dist_diff_pair_c3_2_4_prev0 = -24
 dist_diff_pair_def_c3_2_4_prev1: - dist_curr_pair_c3_2_4
@@ -1046,7 +1046,7 @@ dist_diff_pair_def_c3_2_4_prev1: - dist_curr_pair_c3_2_4
 dist_diff_pair_def_c3_2_4_prev2: - dist_curr_pair_c3_2_4
  + dist_diff_pair_c3_2_4_prev2 = -24
 dist_diff_pair_def_c3_2_4_prev3: - dist_curr_pair_c3_2_4
- + dist_diff_pair_c3_2_4_prev3 = -57
+ + dist_diff_pair_c3_2_4_prev3 = -30
 dist_diff_pair_def_c3_3_4_prev0: - dist_curr_pair_c3_3_4
  + dist_diff_pair_c3_3_4_prev0 = -76
 dist_diff_pair_def_c3_3_4_prev1: - dist_curr_pair_c3_3_4
@@ -1054,7 +1054,7 @@ dist_diff_pair_def_c3_3_4_prev1: - dist_curr_pair_c3_3_4
 dist_diff_pair_def_c3_3_4_prev2: - dist_curr_pair_c3_3_4
  + dist_diff_pair_c3_3_4_prev2 = -52
 dist_diff_pair_def_c3_3_4_prev3: - dist_curr_pair_c3_3_4
- + dist_diff_pair_c3_3_4_prev3 = -71
+ + dist_diff_pair_c3_3_4_prev3 = -46
 dx_abs_0_1_abs_ge_neg_orig: dx_abs_0_1 + 60 dx_abs_0_1_is_positive
  + dx_diff_0_1 >= 0
 dx_abs_0_1_abs_ge_orig: dx_abs_0_1 - 60 dx_abs_0_1_is_positive - dx_diff_0_1
@@ -1627,165 +1627,165 @@ not_same_implies_diff_dist_pair_c3_3_4_prev2: diff_dist_pair_c3_3_4
 not_same_implies_diff_dist_pair_c3_3_4_prev3: diff_dist_pair_c3_3_4
  + same_dist_pair_c3_3_4_prev3 <= 1
 same_dist_pair_lower_c3_0_1_prev0: dist_diff_abs_pair_c3_0_1_prev0
- + 120 same_dist_pair_c3_0_1_prev0 >= 5
+ + 120 same_dist_pair_c3_0_1_prev0 >= 10
 same_dist_pair_lower_c3_0_1_prev1: dist_diff_abs_pair_c3_0_1_prev1
- + 120 same_dist_pair_c3_0_1_prev1 >= 5
+ + 120 same_dist_pair_c3_0_1_prev1 >= 10
 same_dist_pair_lower_c3_0_1_prev2: dist_diff_abs_pair_c3_0_1_prev2
- + 120 same_dist_pair_c3_0_1_prev2 >= 5
+ + 120 same_dist_pair_c3_0_1_prev2 >= 10
 same_dist_pair_lower_c3_0_1_prev3: dist_diff_abs_pair_c3_0_1_prev3
- + 120 same_dist_pair_c3_0_1_prev3 >= 5
+ + 120 same_dist_pair_c3_0_1_prev3 >= 10
 same_dist_pair_lower_c3_0_2_prev0: dist_diff_abs_pair_c3_0_2_prev0
- + 120 same_dist_pair_c3_0_2_prev0 >= 5
+ + 120 same_dist_pair_c3_0_2_prev0 >= 10
 same_dist_pair_lower_c3_0_2_prev1: dist_diff_abs_pair_c3_0_2_prev1
- + 120 same_dist_pair_c3_0_2_prev1 >= 5
+ + 120 same_dist_pair_c3_0_2_prev1 >= 10
 same_dist_pair_lower_c3_0_2_prev2: dist_diff_abs_pair_c3_0_2_prev2
- + 120 same_dist_pair_c3_0_2_prev2 >= 5
+ + 120 same_dist_pair_c3_0_2_prev2 >= 10
 same_dist_pair_lower_c3_0_2_prev3: dist_diff_abs_pair_c3_0_2_prev3
- + 120 same_dist_pair_c3_0_2_prev3 >= 5
+ + 120 same_dist_pair_c3_0_2_prev3 >= 10
 same_dist_pair_lower_c3_0_3_prev0: dist_diff_abs_pair_c3_0_3_prev0
- + 120 same_dist_pair_c3_0_3_prev0 >= 5
+ + 120 same_dist_pair_c3_0_3_prev0 >= 10
 same_dist_pair_lower_c3_0_3_prev1: dist_diff_abs_pair_c3_0_3_prev1
- + 120 same_dist_pair_c3_0_3_prev1 >= 5
+ + 120 same_dist_pair_c3_0_3_prev1 >= 10
 same_dist_pair_lower_c3_0_3_prev2: dist_diff_abs_pair_c3_0_3_prev2
- + 120 same_dist_pair_c3_0_3_prev2 >= 5
+ + 120 same_dist_pair_c3_0_3_prev2 >= 10
 same_dist_pair_lower_c3_0_3_prev3: dist_diff_abs_pair_c3_0_3_prev3
- + 120 same_dist_pair_c3_0_3_prev3 >= 5
+ + 120 same_dist_pair_c3_0_3_prev3 >= 10
 same_dist_pair_lower_c3_0_4_prev0: dist_diff_abs_pair_c3_0_4_prev0
- + 120 same_dist_pair_c3_0_4_prev0 >= 5
+ + 120 same_dist_pair_c3_0_4_prev0 >= 10
 same_dist_pair_lower_c3_0_4_prev1: dist_diff_abs_pair_c3_0_4_prev1
- + 120 same_dist_pair_c3_0_4_prev1 >= 5
+ + 120 same_dist_pair_c3_0_4_prev1 >= 10
 same_dist_pair_lower_c3_0_4_prev2: dist_diff_abs_pair_c3_0_4_prev2
- + 120 same_dist_pair_c3_0_4_prev2 >= 5
+ + 120 same_dist_pair_c3_0_4_prev2 >= 10
 same_dist_pair_lower_c3_0_4_prev3: dist_diff_abs_pair_c3_0_4_prev3
- + 120 same_dist_pair_c3_0_4_prev3 >= 5
+ + 120 same_dist_pair_c3_0_4_prev3 >= 10
 same_dist_pair_lower_c3_1_2_prev0: dist_diff_abs_pair_c3_1_2_prev0
- + 120 same_dist_pair_c3_1_2_prev0 >= 5
+ + 120 same_dist_pair_c3_1_2_prev0 >= 10
 same_dist_pair_lower_c3_1_2_prev1: dist_diff_abs_pair_c3_1_2_prev1
- + 120 same_dist_pair_c3_1_2_prev1 >= 5
+ + 120 same_dist_pair_c3_1_2_prev1 >= 10
 same_dist_pair_lower_c3_1_2_prev2: dist_diff_abs_pair_c3_1_2_prev2
- + 120 same_dist_pair_c3_1_2_prev2 >= 5
+ + 120 same_dist_pair_c3_1_2_prev2 >= 10
 same_dist_pair_lower_c3_1_2_prev3: dist_diff_abs_pair_c3_1_2_prev3
- + 120 same_dist_pair_c3_1_2_prev3 >= 5
+ + 120 same_dist_pair_c3_1_2_prev3 >= 10
 same_dist_pair_lower_c3_1_3_prev0: dist_diff_abs_pair_c3_1_3_prev0
- + 120 same_dist_pair_c3_1_3_prev0 >= 5
+ + 120 same_dist_pair_c3_1_3_prev0 >= 10
 same_dist_pair_lower_c3_1_3_prev1: dist_diff_abs_pair_c3_1_3_prev1
- + 120 same_dist_pair_c3_1_3_prev1 >= 5
+ + 120 same_dist_pair_c3_1_3_prev1 >= 10
 same_dist_pair_lower_c3_1_3_prev2: dist_diff_abs_pair_c3_1_3_prev2
- + 120 same_dist_pair_c3_1_3_prev2 >= 5
+ + 120 same_dist_pair_c3_1_3_prev2 >= 10
 same_dist_pair_lower_c3_1_3_prev3: dist_diff_abs_pair_c3_1_3_prev3
- + 120 same_dist_pair_c3_1_3_prev3 >= 5
+ + 120 same_dist_pair_c3_1_3_prev3 >= 10
 same_dist_pair_lower_c3_1_4_prev0: dist_diff_abs_pair_c3_1_4_prev0
- + 120 same_dist_pair_c3_1_4_prev0 >= 5
+ + 120 same_dist_pair_c3_1_4_prev0 >= 10
 same_dist_pair_lower_c3_1_4_prev1: dist_diff_abs_pair_c3_1_4_prev1
- + 120 same_dist_pair_c3_1_4_prev1 >= 5
+ + 120 same_dist_pair_c3_1_4_prev1 >= 10
 same_dist_pair_lower_c3_1_4_prev2: dist_diff_abs_pair_c3_1_4_prev2
- + 120 same_dist_pair_c3_1_4_prev2 >= 5
+ + 120 same_dist_pair_c3_1_4_prev2 >= 10
 same_dist_pair_lower_c3_1_4_prev3: dist_diff_abs_pair_c3_1_4_prev3
- + 120 same_dist_pair_c3_1_4_prev3 >= 5
+ + 120 same_dist_pair_c3_1_4_prev3 >= 10
 same_dist_pair_lower_c3_2_3_prev0: dist_diff_abs_pair_c3_2_3_prev0
- + 120 same_dist_pair_c3_2_3_prev0 >= 5
+ + 120 same_dist_pair_c3_2_3_prev0 >= 10
 same_dist_pair_lower_c3_2_3_prev1: dist_diff_abs_pair_c3_2_3_prev1
- + 120 same_dist_pair_c3_2_3_prev1 >= 5
+ + 120 same_dist_pair_c3_2_3_prev1 >= 10
 same_dist_pair_lower_c3_2_3_prev2: dist_diff_abs_pair_c3_2_3_prev2
- + 120 same_dist_pair_c3_2_3_prev2 >= 5
+ + 120 same_dist_pair_c3_2_3_prev2 >= 10
 same_dist_pair_lower_c3_2_3_prev3: dist_diff_abs_pair_c3_2_3_prev3
- + 120 same_dist_pair_c3_2_3_prev3 >= 5
+ + 120 same_dist_pair_c3_2_3_prev3 >= 10
 same_dist_pair_lower_c3_2_4_prev0: dist_diff_abs_pair_c3_2_4_prev0
- + 120 same_dist_pair_c3_2_4_prev0 >= 5
+ + 120 same_dist_pair_c3_2_4_prev0 >= 10
 same_dist_pair_lower_c3_2_4_prev1: dist_diff_abs_pair_c3_2_4_prev1
- + 120 same_dist_pair_c3_2_4_prev1 >= 5
+ + 120 same_dist_pair_c3_2_4_prev1 >= 10
 same_dist_pair_lower_c3_2_4_prev2: dist_diff_abs_pair_c3_2_4_prev2
- + 120 same_dist_pair_c3_2_4_prev2 >= 5
+ + 120 same_dist_pair_c3_2_4_prev2 >= 10
 same_dist_pair_lower_c3_2_4_prev3: dist_diff_abs_pair_c3_2_4_prev3
- + 120 same_dist_pair_c3_2_4_prev3 >= 5
+ + 120 same_dist_pair_c3_2_4_prev3 >= 10
 same_dist_pair_lower_c3_3_4_prev0: dist_diff_abs_pair_c3_3_4_prev0
- + 120 same_dist_pair_c3_3_4_prev0 >= 5
+ + 120 same_dist_pair_c3_3_4_prev0 >= 10
 same_dist_pair_lower_c3_3_4_prev1: dist_diff_abs_pair_c3_3_4_prev1
- + 120 same_dist_pair_c3_3_4_prev1 >= 5
+ + 120 same_dist_pair_c3_3_4_prev1 >= 10
 same_dist_pair_lower_c3_3_4_prev2: dist_diff_abs_pair_c3_3_4_prev2
- + 120 same_dist_pair_c3_3_4_prev2 >= 5
+ + 120 same_dist_pair_c3_3_4_prev2 >= 10
 same_dist_pair_lower_c3_3_4_prev3: dist_diff_abs_pair_c3_3_4_prev3
- + 120 same_dist_pair_c3_3_4_prev3 >= 5
+ + 120 same_dist_pair_c3_3_4_prev3 >= 10
 same_dist_pair_upper_c3_0_1_prev0: dist_diff_abs_pair_c3_0_1_prev0
- + 120 same_dist_pair_c3_0_1_prev0 <= 124.95
+ + 120 same_dist_pair_c3_0_1_prev0 <= 129.9
 same_dist_pair_upper_c3_0_1_prev1: dist_diff_abs_pair_c3_0_1_prev1
- + 120 same_dist_pair_c3_0_1_prev1 <= 124.95
+ + 120 same_dist_pair_c3_0_1_prev1 <= 129.9
 same_dist_pair_upper_c3_0_1_prev2: dist_diff_abs_pair_c3_0_1_prev2
- + 120 same_dist_pair_c3_0_1_prev2 <= 124.95
+ + 120 same_dist_pair_c3_0_1_prev2 <= 129.9
 same_dist_pair_upper_c3_0_1_prev3: dist_diff_abs_pair_c3_0_1_prev3
- + 120 same_dist_pair_c3_0_1_prev3 <= 124.95
+ + 120 same_dist_pair_c3_0_1_prev3 <= 129.9
 same_dist_pair_upper_c3_0_2_prev0: dist_diff_abs_pair_c3_0_2_prev0
- + 120 same_dist_pair_c3_0_2_prev0 <= 124.95
+ + 120 same_dist_pair_c3_0_2_prev0 <= 129.9
 same_dist_pair_upper_c3_0_2_prev1: dist_diff_abs_pair_c3_0_2_prev1
- + 120 same_dist_pair_c3_0_2_prev1 <= 124.95
+ + 120 same_dist_pair_c3_0_2_prev1 <= 129.9
 same_dist_pair_upper_c3_0_2_prev2: dist_diff_abs_pair_c3_0_2_prev2
- + 120 same_dist_pair_c3_0_2_prev2 <= 124.95
+ + 120 same_dist_pair_c3_0_2_prev2 <= 129.9
 same_dist_pair_upper_c3_0_2_prev3: dist_diff_abs_pair_c3_0_2_prev3
- + 120 same_dist_pair_c3_0_2_prev3 <= 124.95
+ + 120 same_dist_pair_c3_0_2_prev3 <= 129.9
 same_dist_pair_upper_c3_0_3_prev0: dist_diff_abs_pair_c3_0_3_prev0
- + 120 same_dist_pair_c3_0_3_prev0 <= 124.95
+ + 120 same_dist_pair_c3_0_3_prev0 <= 129.9
 same_dist_pair_upper_c3_0_3_prev1: dist_diff_abs_pair_c3_0_3_prev1
- + 120 same_dist_pair_c3_0_3_prev1 <= 124.95
+ + 120 same_dist_pair_c3_0_3_prev1 <= 129.9
 same_dist_pair_upper_c3_0_3_prev2: dist_diff_abs_pair_c3_0_3_prev2
- + 120 same_dist_pair_c3_0_3_prev2 <= 124.95
+ + 120 same_dist_pair_c3_0_3_prev2 <= 129.9
 same_dist_pair_upper_c3_0_3_prev3: dist_diff_abs_pair_c3_0_3_prev3
- + 120 same_dist_pair_c3_0_3_prev3 <= 124.95
+ + 120 same_dist_pair_c3_0_3_prev3 <= 129.9
 same_dist_pair_upper_c3_0_4_prev0: dist_diff_abs_pair_c3_0_4_prev0
- + 120 same_dist_pair_c3_0_4_prev0 <= 124.95
+ + 120 same_dist_pair_c3_0_4_prev0 <= 129.9
 same_dist_pair_upper_c3_0_4_prev1: dist_diff_abs_pair_c3_0_4_prev1
- + 120 same_dist_pair_c3_0_4_prev1 <= 124.95
+ + 120 same_dist_pair_c3_0_4_prev1 <= 129.9
 same_dist_pair_upper_c3_0_4_prev2: dist_diff_abs_pair_c3_0_4_prev2
- + 120 same_dist_pair_c3_0_4_prev2 <= 124.95
+ + 120 same_dist_pair_c3_0_4_prev2 <= 129.9
 same_dist_pair_upper_c3_0_4_prev3: dist_diff_abs_pair_c3_0_4_prev3
- + 120 same_dist_pair_c3_0_4_prev3 <= 124.95
+ + 120 same_dist_pair_c3_0_4_prev3 <= 129.9
 same_dist_pair_upper_c3_1_2_prev0: dist_diff_abs_pair_c3_1_2_prev0
- + 120 same_dist_pair_c3_1_2_prev0 <= 124.95
+ + 120 same_dist_pair_c3_1_2_prev0 <= 129.9
 same_dist_pair_upper_c3_1_2_prev1: dist_diff_abs_pair_c3_1_2_prev1
- + 120 same_dist_pair_c3_1_2_prev1 <= 124.95
+ + 120 same_dist_pair_c3_1_2_prev1 <= 129.9
 same_dist_pair_upper_c3_1_2_prev2: dist_diff_abs_pair_c3_1_2_prev2
- + 120 same_dist_pair_c3_1_2_prev2 <= 124.95
+ + 120 same_dist_pair_c3_1_2_prev2 <= 129.9
 same_dist_pair_upper_c3_1_2_prev3: dist_diff_abs_pair_c3_1_2_prev3
- + 120 same_dist_pair_c3_1_2_prev3 <= 124.95
+ + 120 same_dist_pair_c3_1_2_prev3 <= 129.9
 same_dist_pair_upper_c3_1_3_prev0: dist_diff_abs_pair_c3_1_3_prev0
- + 120 same_dist_pair_c3_1_3_prev0 <= 124.95
+ + 120 same_dist_pair_c3_1_3_prev0 <= 129.9
 same_dist_pair_upper_c3_1_3_prev1: dist_diff_abs_pair_c3_1_3_prev1
- + 120 same_dist_pair_c3_1_3_prev1 <= 124.95
+ + 120 same_dist_pair_c3_1_3_prev1 <= 129.9
 same_dist_pair_upper_c3_1_3_prev2: dist_diff_abs_pair_c3_1_3_prev2
- + 120 same_dist_pair_c3_1_3_prev2 <= 124.95
+ + 120 same_dist_pair_c3_1_3_prev2 <= 129.9
 same_dist_pair_upper_c3_1_3_prev3: dist_diff_abs_pair_c3_1_3_prev3
- + 120 same_dist_pair_c3_1_3_prev3 <= 124.95
+ + 120 same_dist_pair_c3_1_3_prev3 <= 129.9
 same_dist_pair_upper_c3_1_4_prev0: dist_diff_abs_pair_c3_1_4_prev0
- + 120 same_dist_pair_c3_1_4_prev0 <= 124.95
+ + 120 same_dist_pair_c3_1_4_prev0 <= 129.9
 same_dist_pair_upper_c3_1_4_prev1: dist_diff_abs_pair_c3_1_4_prev1
- + 120 same_dist_pair_c3_1_4_prev1 <= 124.95
+ + 120 same_dist_pair_c3_1_4_prev1 <= 129.9
 same_dist_pair_upper_c3_1_4_prev2: dist_diff_abs_pair_c3_1_4_prev2
- + 120 same_dist_pair_c3_1_4_prev2 <= 124.95
+ + 120 same_dist_pair_c3_1_4_prev2 <= 129.9
 same_dist_pair_upper_c3_1_4_prev3: dist_diff_abs_pair_c3_1_4_prev3
- + 120 same_dist_pair_c3_1_4_prev3 <= 124.95
+ + 120 same_dist_pair_c3_1_4_prev3 <= 129.9
 same_dist_pair_upper_c3_2_3_prev0: dist_diff_abs_pair_c3_2_3_prev0
- + 120 same_dist_pair_c3_2_3_prev0 <= 124.95
+ + 120 same_dist_pair_c3_2_3_prev0 <= 129.9
 same_dist_pair_upper_c3_2_3_prev1: dist_diff_abs_pair_c3_2_3_prev1
- + 120 same_dist_pair_c3_2_3_prev1 <= 124.95
+ + 120 same_dist_pair_c3_2_3_prev1 <= 129.9
 same_dist_pair_upper_c3_2_3_prev2: dist_diff_abs_pair_c3_2_3_prev2
- + 120 same_dist_pair_c3_2_3_prev2 <= 124.95
+ + 120 same_dist_pair_c3_2_3_prev2 <= 129.9
 same_dist_pair_upper_c3_2_3_prev3: dist_diff_abs_pair_c3_2_3_prev3
- + 120 same_dist_pair_c3_2_3_prev3 <= 124.95
+ + 120 same_dist_pair_c3_2_3_prev3 <= 129.9
 same_dist_pair_upper_c3_2_4_prev0: dist_diff_abs_pair_c3_2_4_prev0
- + 120 same_dist_pair_c3_2_4_prev0 <= 124.95
+ + 120 same_dist_pair_c3_2_4_prev0 <= 129.9
 same_dist_pair_upper_c3_2_4_prev1: dist_diff_abs_pair_c3_2_4_prev1
- + 120 same_dist_pair_c3_2_4_prev1 <= 124.95
+ + 120 same_dist_pair_c3_2_4_prev1 <= 129.9
 same_dist_pair_upper_c3_2_4_prev2: dist_diff_abs_pair_c3_2_4_prev2
- + 120 same_dist_pair_c3_2_4_prev2 <= 124.95
+ + 120 same_dist_pair_c3_2_4_prev2 <= 129.9
 same_dist_pair_upper_c3_2_4_prev3: dist_diff_abs_pair_c3_2_4_prev3
- + 120 same_dist_pair_c3_2_4_prev3 <= 124.95
+ + 120 same_dist_pair_c3_2_4_prev3 <= 129.9
 same_dist_pair_upper_c3_3_4_prev0: dist_diff_abs_pair_c3_3_4_prev0
- + 120 same_dist_pair_c3_3_4_prev0 <= 124.95
+ + 120 same_dist_pair_c3_3_4_prev0 <= 129.9
 same_dist_pair_upper_c3_3_4_prev1: dist_diff_abs_pair_c3_3_4_prev1
- + 120 same_dist_pair_c3_3_4_prev1 <= 124.95
+ + 120 same_dist_pair_c3_3_4_prev1 <= 129.9
 same_dist_pair_upper_c3_3_4_prev2: dist_diff_abs_pair_c3_3_4_prev2
- + 120 same_dist_pair_c3_3_4_prev2 <= 124.95
+ + 120 same_dist_pair_c3_3_4_prev2 <= 129.9
 same_dist_pair_upper_c3_3_4_prev3: dist_diff_abs_pair_c3_3_4_prev3
- + 120 same_dist_pair_c3_3_4_prev3 <= 124.95
+ + 120 same_dist_pair_c3_3_4_prev3 <= 129.9
 shared_x_min_0_1: shared_x_0_1 - 200 z2_0_1 >= -199.9
 shared_x_min_1_2: shared_x_1_2 - 200 z2_1_2 >= -199.9
 shared_x_min_1_3: shared_x_1_3 - 200 z2_1_3 >= -199.9

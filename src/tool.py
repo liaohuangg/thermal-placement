@@ -642,28 +642,44 @@ def print_pair_distances_only(
         for prev_idx, prev_distances in enumerate(prev_pair_distances_list):
             print(f"\n  与解 {prev_idx + 1} 比较:")
             same_pairs = []
-            diff_pairs = []
+            diff_pairs_with_info = []  # 存储不同对及其距离差信息
             
             for i, j in sorted(chiplet_pairs):
                 if (i, j) in curr_pair_distances and (i, j) in prev_distances:
                     curr_x_dist, curr_y_dist = curr_pair_distances[(i, j)]
                     prev_dist = prev_distances[(i, j)]  # 这是曼哈顿距离
                     
-                    # 计算距离差（需要获取之前解的x和y距离）
-                    # 由于prev_distances只保存了曼哈顿距离，我们需要重新计算
-                    # 这里简化处理：如果曼哈顿距离差小于阈值，认为相同
-                    dist_diff = abs(curr_x_dist + curr_y_dist - prev_dist)
+                    # 计算当前解的曼哈顿距离
+                    curr_dist = curr_x_dist + curr_y_dist
+                    
+                    # 计算距离差（绝对值）
+                    dist_diff = abs(curr_dist - prev_dist)
                     
                     if dist_diff < min_pair_dist_diff:
                         same_pairs.append((i, j))
                     else:
-                        diff_pairs.append((i, j))
+                        # 只有当距离差 >= min_pair_dist_diff 时，才认为不同
+                        # 在else分支中，dist_diff >= min_pair_dist_diff 总是成立
+                        diff_pairs_with_info.append((i, j, curr_dist, prev_dist, dist_diff))
             
             if same_pairs:
-                print(f"    相同的chiplet对: {', '.join([f'({p[0]},{p[1]})' for p in same_pairs])}")
-            if diff_pairs:
-                print(f"    不同的chiplet对: {', '.join([f'({p[0]},{p[1]})' for p in diff_pairs])}")
-            if not same_pairs and not diff_pairs:
+                print(f"    相同的chiplet对（距离差 < 阈值 {min_pair_dist_diff:.3f}）:")
+                for i, j in same_pairs:
+                    if (i, j) in curr_pair_distances and (i, j) in prev_distances:
+                        curr_x_dist, curr_y_dist = curr_pair_distances[(i, j)]
+                        curr_dist = curr_x_dist + curr_y_dist
+                        prev_dist = prev_distances[(i, j)]
+                        dist_diff = abs(curr_dist - prev_dist)
+                        name_i = nodes[i].name if hasattr(nodes[i], 'name') else f"Chiplet_{i}"
+                        name_j = nodes[j].name if hasattr(nodes[j], 'name') else f"Chiplet_{j}"
+                        print(f"      ({i},{j}) [{name_i}, {name_j}]: 当前距离={curr_dist:.3f}, 之前距离={prev_dist:.3f}, 距离差={dist_diff:.3f} (< {min_pair_dist_diff:.3f})")
+            if diff_pairs_with_info:
+                print(f"    不同的chiplet对（距离差 >= 阈值 {min_pair_dist_diff:.3f}）:")
+                for i, j, curr_dist, prev_dist, dist_diff in diff_pairs_with_info:
+                    name_i = nodes[i].name if hasattr(nodes[i], 'name') else f"Chiplet_{i}"
+                    name_j = nodes[j].name if hasattr(nodes[j], 'name') else f"Chiplet_{j}"
+                    print(f"      ({i},{j}) [{name_i}, {name_j}]: 当前距离={curr_dist:.3f}, 之前距离={prev_dist:.3f}, 距离差={dist_diff:.3f} (>= {min_pair_dist_diff:.3f}, 满足阈值)")
+            if not same_pairs and not diff_pairs_with_info:
                 print(f"    (无数据)")
     else:
         print(f"\n(第一个解，无历史解可比较)")

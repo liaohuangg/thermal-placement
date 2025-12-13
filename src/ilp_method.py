@@ -59,7 +59,7 @@ class ILPModelContext:
     - `bbox_w, bbox_h` : 外接方框宽和高对应的变量
     - `W, H`  : 外接边界框的上界尺寸（建模阶段确定）
     - `grid_size` : 网格大小（如果使用网格化，否则为None）
-    - `fixed_chiplet_idx` : 固定位置的chiplet索引（如果使用固定中心约束，否则为None）
+    - `fixed_chiplet_idx` : 已废弃，不再使用固定芯粒约束（保留此字段以保持接口兼容性）
     """
 
     prob: pulp.LpProblem
@@ -267,7 +267,7 @@ def build_placement_ilp_model_grid(
     minimize_bbox_area: bool = True,
     distance_weight: float = 1.0,
     area_weight: float = 0.1,
-    fixed_chiplet_idx: Optional[int] = None,  # 固定位置的chiplet索引（中心固定在方框中心）
+    fixed_chiplet_idx: Optional[int] = None,  # 已废弃，不再使用固定芯粒约束
 ) -> ILPModelContext:
     """
     使用网格化ILP求解chiplet布局。
@@ -276,14 +276,13 @@ def build_placement_ilp_model_grid(
     1. 坐标变量为整数（grid索引）
     2. 有链接关系的chiplet之间距离不能超过一个grid
     3. 共享边长不超过一个grid的共享范围，且不能小于min_shared_length
-    4. 可以固定一个chiplet的中心位置在方框的中心点
     
     参数
     ----
     grid_size: float
         网格大小（实际单位）
     fixed_chiplet_idx: Optional[int]
-        固定位置的chiplet索引，如果提供，则该chiplet的中心固定在方框中心
+        已废弃，不再使用固定芯粒约束（保留此参数以保持接口兼容性）
     其他参数同build_placement_ilp_model
     """
     import math
@@ -403,13 +402,6 @@ def build_placement_ilp_model_grid(
     for k in range(n):
         prob += cx[k] == x[k] + w[k] / 2.0, f"cx_def_{k}"
         prob += cy[k] == y[k] + h[k] / 2.0, f"cy_def_{k}"
-    
-    # 4.3 固定chiplet中心在方框中心
-    if fixed_chiplet_idx is not None and 0 <= fixed_chiplet_idx < n:
-        prob += cx[fixed_chiplet_idx] == W / 2.0, f"fix_center_x_{fixed_chiplet_idx}"
-        prob += cy[fixed_chiplet_idx] == H / 2.0, f"fix_center_y_{fixed_chiplet_idx}"
-        if verbose:
-            print(f"固定chiplet {fixed_chiplet_idx} 的中心在方框中心 ({W/2:.2f}, {H/2:.2f})")
     
     # 约束Chiplet宽高为grid_size的整数倍（对齐网格）
     for k in range(n):
@@ -688,7 +680,7 @@ def main():
     grid_size = 1.0
     time_limit = 300
     min_shared_length = 0.1
-    fixed_chiplet_idx = 0  # 固定第一个chiplet在中心
+    fixed_chiplet_idx = None  # 不再使用固定芯粒约束
     
     # 输出目录
     output_dir = Path(__file__).parent.parent / "output"

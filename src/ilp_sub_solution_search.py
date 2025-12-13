@@ -81,6 +81,9 @@ def _add_exclude_dist_constraint(
     """
     添加距离排除约束：至少有一对chiplet的距离与之前所有解对应chiplet对之间的距离不同。
     
+    注意：只有当当前解的chiplet对之间的距离与之前所有解的对应chiplet对之间的距离，
+    全部都相差至少min_pair_dist_diff阈值时，才能说当前chiplet的距离与之前所有解对应chiplet对之间的距离不同。
+    
     参数:
         ctx: ILP模型上下文
         solution_index_suffix: 用于生成唯一约束名称的后缀
@@ -247,6 +250,8 @@ def _add_exclude_dist_constraint(
             )
             
             # 约束逻辑：same_dist_pair_prev[((i,j), prev_idx)] = 1 当且仅当 dist_diff_abs_ij < min_pair_dist_diff
+            # 即：same = 1 表示当前解的距离与之前解prev_idx的距离相差 < min_pair_dist_diff（距离相同或相近）
+            #     same = 0 表示当前解的距离与之前解prev_idx的距离相差 >= min_pair_dist_diff（距离不同）
             # 如果 same_dist_pair_prev = 1，则 dist_diff_abs_ij < min_pair_dist_diff
             constraint_name = f"same_dist_pair_upper_{solution_index_suffix}_{i}_{j}_prev{prev_idx}"
             prob += dist_diff_abs_ij <= min_pair_dist_diff - epsilon + M * (1 - same_dist_pair_prev[((i, j), prev_idx)]), constraint_name
@@ -257,8 +262,10 @@ def _add_exclude_dist_constraint(
             prob += dist_diff_abs_ij >= min_pair_dist_diff - M * same_dist_pair_prev[((i, j), prev_idx)], constraint_name
             print_constraint_formal(prob.constraints[constraint_name])
         
-        # 约束：如果 diff_dist_pair[(i,j)] = 1，则对于所有之前解，same_dist_pair_prev = 0
-        # 即：diff_dist_pair[(i,j)] = 1 当且仅当对于所有之前解，same_dist_pair_prev = 0
+        # 约束：diff_dist_pair[(i,j)] = 1 当且仅当对于所有之前解，same_dist_pair_prev = 0
+        # 即：diff_dist_pair[(i,j)] = 1 表示当前解的距离与所有之前解的距离都相差 >= min_pair_dist_diff
+        # 注意：只有当当前解的chiplet对之间的距离与之前所有解的对应chiplet对之间的距离，
+        #      全部都相差至少min_pair_dist_diff阈值时，diff_dist_pair = 1
         for prev_idx in range(len(prev_pair_distances_list)):
             # 如果 diff_dist_pair = 1，则 same_dist_pair_prev = 0
             constraint_name = f"diff_dist_pair_implies_not_same_{solution_index_suffix}_{i}_{j}_prev{prev_idx}"
@@ -276,6 +283,7 @@ def _add_exclude_dist_constraint(
         print_constraint_formal(prob.constraints[constraint_name])
     
     # 顶层约束：至少有一对chiplet的距离与之前所有解都不同
+    # 即：至少存在一对chiplet，使得当前解的距离与所有之前解的距离都相差 >= min_pair_dist_diff
     if len(diff_dist_pair) > 0:
         constraint_name = f"exclude_solution_dist_pair_{solution_index_suffix}"
         prob += pulp.lpSum([diff_dist_pair[pair] for pair in diff_dist_pair.keys()]) >= 1, constraint_name
