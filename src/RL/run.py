@@ -258,8 +258,8 @@ def main():
                         help="随机种子，用于复现结果（默认每次运行使用不同种子）")
     parser.add_argument("--output_dir", type=str, default="results",
                         help="输出目录 (默认: results)")
-    parser.add_argument("--grid_resolution", type=int, default=50,
-                        help="网格分辨率 (默认: 50)")
+    parser.add_argument("--grid_resolution", type=int, default=100,
+                        help="网格分辨率 (默认: 100)")
     parser.add_argument("--max_width", type=float, default=100.0,
                         help="最大宽度 (默认: 100.0)")
     parser.add_argument("--max_height", type=float, default=100.0,
@@ -287,8 +287,11 @@ def main():
         max_width=args.max_width,
         max_height=args.max_height,
         min_overlap=0.5,
-        placement_reward=10.0,
-        adjacency_reward=10.0
+        placement_reward=1.0,
+        adjacency_reward=1.0,
+        extra_adjacency_reward=100,
+        compact=10.0,
+        min_wirelength_reward_scale=0
     )
     
     print(f"\n环境信息:")
@@ -307,20 +310,37 @@ def main():
     best_reward = float('-inf')
     best_metrics = None
     success_count = 0
+    max_utilization = 0.0
     
     for run in range(args.num_runs):
-        # 为每次运行设置不同的种子（除非指定了固定种子）
-        run_seed = args.seed + run if args.seed is not None else run
+        # 为每次运行设置不同的种子：
+        # - 如果用户提供了 --seed，则使用 args.seed + run（可复现多次运行）
+        # - 如果未提供 --seed，则不设置种子（使用系统随机，每次运行有不同结果）
+        if args.seed is not None:
+            run_seed = args.seed + run
+        else:
+            run_seed = None
+
         layout, reward, success = run_inference(model, env, args.deterministic, seed=run_seed)
+         
         
         if success:
             success_count += 1
             metrics = calculate_metrics(layout, env.problem)
             
+ 
             print(f"运行 {run+1}/{args.num_runs}: "
                   f"奖励={reward:.2f}, "
                   f"利用率={metrics['utilization']*100:.1f}%, "
                   f"邻接={metrics['satisfied_adjacency']}/{metrics['total_adjacency']}")
+            
+        
+            # if metrics['utilization'] > max_utilization:
+            #     max_utilization = metrics['utilization']
+            #     best_layout = layout
+            #     best_reward = reward
+            #     best_metrics = metrics
+
             
             if reward > best_reward:
                 best_reward = reward

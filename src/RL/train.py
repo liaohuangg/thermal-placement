@@ -96,6 +96,7 @@ class PPOTrainer:
         entropy_coef: float = 0.2,
         max_grad_norm: float = 0.5,
         hidden_dim: int = 256,
+        load_optimizer: bool = True
     ):
         """
         初始化PPO训练器
@@ -190,7 +191,7 @@ class PPOTrainer:
         
         return torch.FloatTensor(returns)
     
-    def update(self, epochs: int = 4):
+    def update(self, epochs: int = 6):
         """
         PPO更新
         
@@ -313,21 +314,29 @@ class PPOTrainer:
             }
         }, path)
         print(f"模型已保存到 {path}")
-    
-    def load(self, path: str):
-        """加载模型"""
-        checkpoint = torch.load(path)
-        self.model.load_state_dict(checkpoint['model_state_dict'])
-        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        print(f"模型已从 {path} 加载")
 
+
+    def load(self, path: str, load_optimizer: bool = False):
+         checkpoint = torch.load(path)
+         self.model.load_state_dict(checkpoint['model_state_dict'])
+         if load_optimizer and 'optimizer_state_dict' in checkpoint:
+          self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+         else:
+        # 重新初始化optimizer，确保使用当前trainer.lr（可自适配）
+          self.optimizer = optim.Adam(self.model.parameters(), lr=self.optimizer.param_groups[0]['lr'])
+       
+         print(f"模型已从 {path} 加载")    
+    
+ 
 
 def train(
     json_path: str,
     num_episodes: int = 1000,
     save_interval: int = 100,
     log_interval: int = 10,
+    trainer: PPOTrainer = None,
     **env_kwargs
+    
 ):
     """
     训练函数
@@ -337,22 +346,33 @@ def train(
         num_episodes: 训练episode数
         save_interval: 保存间隔
         log_interval: 日志间隔
+        trainer: 预训练的trainer（可选，用于迁移学习）
         **env_kwargs: 环境参数
     """
     print("=" * 70)
     print("PPO训练 - 芯片布局优化")
     print("=" * 70)
     
-    # 创建环境
-    env = create_env_from_json(json_path, **env_kwargs)
-    print(f"\n环境信息:")
-    print(f"  芯片数量: {env.num_chiplets}")
-    print(f"  放置顺序: {env.placement_order}")
-    print(f"  观察维度: {env.observation_dim}")
-    print(f"  动作维度: {env.action_dim}")
-    
-    # 创建训练器
-    trainer = PPOTrainer(env)
+    # 如果没有提供trainer，创建新的
+    if trainer is None:
+        # 创建环境
+        env = create_env_from_json(json_path, **env_kwargs)
+        print(f"\n环境信息:")
+        print(f"  芯片数量: {env.num_chiplets}")
+        print(f"  放置顺序: {env.placement_order}")
+        print(f"  观察维度: {env.observation_dim}")
+        print(f"  动作维度: {env.action_dim}")
+        
+        # 创建训练器
+        trainer = PPOTrainer(env)
+    else:
+        # 使用提供的trainer，显示其环境信息
+        env = trainer.env
+        print(f"\n环境信息 (迁移学习):")
+        print(f"  芯片数量: {env.num_chiplets}")
+        print(f"  放置顺序: {env.placement_order}")
+        print(f"  观察维度: {env.observation_dim}")
+        print(f"  动作维度: {env.action_dim}")
     
     # 训练统计
     episode_rewards = []
@@ -360,7 +380,7 @@ def train(
     best_avg_reward = float('-inf')
     best_model_path = None
     patience_counter = 0
-    max_patience = 5  # 连续5次保存间隔性能下降就警告
+    max_patience = 20  # 连续5次保存间隔性能下降就警告
     
     print(f"\n开始训练...")
     print("-" * 70)
@@ -443,15 +463,17 @@ if __name__ == "__main__":
         num_episodes=5000,
         save_interval=100,
         log_interval=100,
-        grid_resolution=50,
+        grid_resolution=100,
         max_width=100.0,
         max_height=100.0,
         min_overlap=0.5,
-        # 优化目标：只关注利用率
-        placement_reward=10,  # 降低放置奖励
-        adjacency_reward=10,   # 降低邻接奖励
-        compact = 80,
-        min_wirelength_reward_scale =20   
+        placement_reward=15,  # 放置奖励
+        adjacency_reward=20,   # 邻接奖励
+        compact = 10,
+        min_wirelength_reward_scale =0,
+        extra_adjacency_reward=20
+
+        
     )
     
     print(f"\n✓ 模型已保存到 checkpoints/ppo_model.pt")

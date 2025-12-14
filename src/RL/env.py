@@ -79,7 +79,8 @@ class ChipletPlacementEnv:
         adjacency_reward: float = 100.0,  # 满足相邻约束的奖励
         placement_reward: float = 50.0,
         compact: float = 30.0,# 利用率奖励权重
-        min_wirelength_reward_scale: float = 0.0  # 最短线长奖励权重，负数越短越好
+        min_wirelength_reward_scale: float = 0.0,  # 最短线长奖励权重，负数越短越好
+        extra_adjacency_reward: float = 10.0
     ):
         """
         初始化环境
@@ -103,6 +104,7 @@ class ChipletPlacementEnv:
         self.placement_reward = placement_reward
         self.compact = compact
         self.min_wirelength_reward_scale = min_wirelength_reward_scale
+        self.extra_adjacency_reward = extra_adjacency_reward
         
         # 初始化芯片
         self.chiplets: Dict[str, Chiplet] = {
@@ -610,6 +612,18 @@ class ChipletPlacementEnv:
         
         # 计算奖励
         reward = self.placement_reward# 放置奖励
+        #对当前放置的chiplet计算额外邻接奖励(奖励不要求connection的的芯片对) 
+        neighbors = self.problem.get_neighbors(current_chip_id)
+        for placed_chip_id, placed_chip in self.state.layout.items():
+            if placed_chip_id != current_chip_id:  # 排除自己
+                # 如果不是必须连接的邻接，但实际邻接，则给予额外奖励
+                if placed_chip_id not in neighbors:
+                    is_adj, overlap_len, _ = get_adjacency_info(new_chiplet, placed_chip)
+                    if is_adj and overlap_len >= self.min_overlap:
+                        reward += self.extra_adjacency_reward*overlap_len
+
+
+
         
         # 利用率奖励（每步计算）
         if len(self.state.layout) > 1:
@@ -655,7 +669,7 @@ class ChipletPlacementEnv:
                 # # 注意：由于交集逻辑保证所有邻接约束满足，else分支不应触发
         
         # 检查完成
-        done = self.state.current_step >= self.num_chiplets
+        done = self.state.current_step >= self.num_chiplets# 所有芯片已放置
         
         if done:
       
@@ -673,6 +687,8 @@ class ChipletPlacementEnv:
                     total_dist += dist
                 # 线长越短越好，奖励为负线长乘以权重
                 reward += -total_dist * self.min_wirelength_reward_scale
+
+
         
         info = {
             "chip_id": current_chip_id,
@@ -683,6 +699,7 @@ class ChipletPlacementEnv:
         }
         
         return self.get_observation(), reward, done, info
+    
     
     
     def render(self, mode: str = 'human') -> Optional[str]:
