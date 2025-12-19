@@ -22,15 +22,58 @@ try:
 except ImportError:
     pulp = None
 
+try:
+    import gurobipy as gp
+except ImportError:
+    gp = None
+
 from input_process import build_chiplet_table, load_chiplets_json
 
 # 导入ILP相关的类型（如果可用）
 try:
     from ilp_method import ILPModelContext, ILPPlacementResult
 except ImportError:
-    # 如果ilp_method不可用，定义占位类型
-    ILPModelContext = None
-    ILPPlacementResult = None
+    try:
+        from ilp_method_gurobi import ILPModelContext, ILPPlacementResult
+    except ImportError:
+        # 如果ilp_method不可用，定义占位类型
+        ILPModelContext = None
+        ILPPlacementResult = None
+
+
+def get_var_value(var):
+    """
+    统一获取变量值的辅助函数，支持 PuLP 和 Gurobi 变量。
+    
+    参数:
+        var: PuLP 或 Gurobi 变量对象，或 None
+    
+    返回:
+        变量的值，如果变量为 None 则返回 None
+    """
+    if var is None:
+        return None
+    
+    # 检查是否是 Gurobi 变量
+    if gp is not None and isinstance(var, gp.Var):
+        try:
+            return var.X
+        except AttributeError:
+            return None
+    
+    # 检查是否是 PuLP 变量
+    if pulp is not None:
+        try:
+            # 检查是否有 value 方法（PuLP 变量）
+            if hasattr(var, 'value'):
+                return pulp.value(var)
+            # 或者直接调用 value() 方法
+            elif callable(getattr(var, 'value', None)):
+                return var.value()
+        except (AttributeError, TypeError):
+            return None
+    
+    return None
 
 
 # ---------------------------------------------------------------------------
@@ -594,9 +637,6 @@ def print_pair_distances_only(
         prev_pair_distances_list: 可选，之前所有解的chiplet对距离列表
         min_pair_dist_diff: 判断距离是否相同的最小差异阈值
     """
-    if pulp is None:
-        raise ImportError("pulp库未安装，无法使用打印功能")
-    
     if result.status != "Optimal":
         return
     
@@ -607,8 +647,8 @@ def print_pair_distances_only(
     x_curr = {}
     y_curr = {}
     for k in range(n):
-        x_val = pulp.value(ctx.x[k]) if ctx.x[k] is not None else None
-        y_val = pulp.value(ctx.y[k]) if ctx.y[k] is not None else None
+        x_val = get_var_value(ctx.x[k])
+        y_val = get_var_value(ctx.y[k])
         if x_val is not None and y_val is not None:
             x_curr[k] = float(x_val)
             y_curr[k] = float(y_val)
@@ -711,8 +751,8 @@ def print_all_variables(
     # 1. 坐标变量 (x, y)
     print("\n【坐标变量】")
     for k in range(n):
-        x_val = pulp.value(ctx.x[k]) if ctx.x[k] is not None else None
-        y_val = pulp.value(ctx.y[k]) if ctx.y[k] is not None else None
+        x_val = get_var_value(ctx.x[k])
+        y_val = get_var_value(ctx.y[k])
         node_name = nodes[k].name if hasattr(nodes[k], 'name') else f"Chiplet_{k}"
         print(f"  x[{k}] ({node_name}): {x_val}")
         print(f"  y[{k}] ({node_name}): {y_val}")
@@ -720,10 +760,20 @@ def print_all_variables(
     # 2. 网格坐标变量 (x_grid, y_grid)
     print("\n【网格坐标变量】")
     for k in range(n):
-        x_grid_var = ctx.prob.variablesDict().get(f"x_grid_{k}")
-        y_grid_var = ctx.prob.variablesDict().get(f"y_grid_{k}")
-        x_grid_val = pulp.value(x_grid_var) if x_grid_var is not None else None
-        y_grid_val = pulp.value(y_grid_var) if y_grid_var is not None else None
+        # 兼容 PuLP 和 Gurobi 的变量获取方式
+        if hasattr(ctx.prob, 'variablesDict'):
+            # PuLP
+            x_grid_var = ctx.prob.variablesDict().get(f"x_grid_{k}")
+            y_grid_var = ctx.prob.variablesDict().get(f"y_grid_{k}")
+        elif hasattr(ctx.prob, 'getVarByName'):
+            # Gurobi
+            x_grid_var = ctx.prob.getVarByName(f"x_grid_{k}")
+            y_grid_var = ctx.prob.getVarByName(f"y_grid_{k}")
+        else:
+            x_grid_var = None
+            y_grid_var = None
+        x_grid_val = get_var_value(x_grid_var)
+        y_grid_val = get_var_value(y_grid_var)
         node_name = nodes[k].name if hasattr(nodes[k], 'name') else f"Chiplet_{k}"
         print(f"  x_grid[{k}] ({node_name}): {x_grid_val}")
         print(f"  y_grid[{k}] ({node_name}): {y_grid_val}")
@@ -731,7 +781,7 @@ def print_all_variables(
     # 3. 旋转变量 (r)
     print("\n【旋转变量】")
     for k in range(n):
-        r_val = pulp.value(ctx.r[k]) if ctx.r[k] is not None else None
+        r_val = get_var_value(ctx.r[k])
         rotated_str = "是" if (r_val is not None and r_val > 0.5) else "否"
         node_name = nodes[k].name if hasattr(nodes[k], 'name') else f"Chiplet_{k}"
         print(f"  r[{k}] ({node_name}): {r_val} (旋转: {rotated_str})")
@@ -739,10 +789,20 @@ def print_all_variables(
     # 4. 宽度和高度变量 (w, h)
     print("\n【尺寸变量】")
     for k in range(n):
-        w_var = ctx.prob.variablesDict().get(f"w_{k}")
-        h_var = ctx.prob.variablesDict().get(f"h_{k}")
-        w_val = pulp.value(w_var) if w_var is not None else None
-        h_val = pulp.value(h_var) if h_var is not None else None
+        # 兼容 PuLP 和 Gurobi 的变量获取方式
+        if hasattr(ctx.prob, 'variablesDict'):
+            # PuLP
+            w_var = ctx.prob.variablesDict().get(f"w_{k}")
+            h_var = ctx.prob.variablesDict().get(f"h_{k}")
+        elif hasattr(ctx.prob, 'getVarByName'):
+            # Gurobi
+            w_var = ctx.prob.getVarByName(f"w_{k}")
+            h_var = ctx.prob.getVarByName(f"h_{k}")
+        else:
+            w_var = None
+            h_var = None
+        w_val = get_var_value(w_var)
+        h_val = get_var_value(h_var)
         node_name = nodes[k].name if hasattr(nodes[k], 'name') else f"Chiplet_{k}"
         print(f"  w[{k}] ({node_name}): {w_val}")
         print(f"  h[{k}] ({node_name}): {h_val}")
@@ -751,8 +811,8 @@ def print_all_variables(
     if hasattr(ctx, 'cx') and ctx.cx is not None:
         print("\n【中心坐标变量】")
         for k in range(n):
-            cx_val = pulp.value(ctx.cx[k]) if ctx.cx[k] is not None else None
-            cy_val = pulp.value(ctx.cy[k]) if ctx.cy[k] is not None else None
+            cx_val = get_var_value(ctx.cx[k])
+            cy_val = get_var_value(ctx.cy[k])
             node_name = nodes[k].name if hasattr(nodes[k], 'name') else f"Chiplet_{k}"
             print(f"  cx[{k}] ({node_name}): {cx_val}")
             print(f"  cy[{k}] ({node_name}): {cy_val}")
@@ -763,12 +823,12 @@ def print_all_variables(
         for i, j in ctx.connected_pairs:
             name_i = nodes[i].name if hasattr(nodes[i], 'name') else f"Chiplet_{i}"
             name_j = nodes[j].name if hasattr(nodes[j], 'name') else f"Chiplet_{j}"
-            z1_val = pulp.value(ctx.z1[(i, j)]) if (i, j) in ctx.z1 else None
-            z2_val = pulp.value(ctx.z2[(i, j)]) if (i, j) in ctx.z2 else None
-            z1L_val = pulp.value(ctx.z1L[(i, j)]) if (i, j) in ctx.z1L else None
-            z1R_val = pulp.value(ctx.z1R[(i, j)]) if (i, j) in ctx.z1R else None
-            z2D_val = pulp.value(ctx.z2D[(i, j)]) if (i, j) in ctx.z2D else None
-            z2U_val = pulp.value(ctx.z2U[(i, j)]) if (i, j) in ctx.z2U else None
+            z1_val = get_var_value(ctx.z1.get((i, j))) if (i, j) in ctx.z1 else None
+            z2_val = get_var_value(ctx.z2.get((i, j))) if (i, j) in ctx.z2 else None
+            z1L_val = get_var_value(ctx.z1L.get((i, j))) if (i, j) in ctx.z1L else None
+            z1R_val = get_var_value(ctx.z1R.get((i, j))) if (i, j) in ctx.z1R else None
+            z2D_val = get_var_value(ctx.z2D.get((i, j))) if (i, j) in ctx.z2D else None
+            z2U_val = get_var_value(ctx.z2U.get((i, j))) if (i, j) in ctx.z2U else None
             print(f"  模块对 ({name_i}, {name_j}):")
             print(f"    z1[{i},{j}] (水平相邻): {z1_val}")
             print(f"    z2[{i},{j}] (垂直相邻): {z2_val}")
@@ -788,15 +848,26 @@ def print_all_variables(
     for i, j in all_pairs:
         name_i = nodes[i].name if hasattr(nodes[i], 'name') else f"Chiplet_{i}"
         name_j = nodes[j].name if hasattr(nodes[j], 'name') else f"Chiplet_{j}"
-        p_left_var = ctx.prob.variablesDict().get(f"p_left_{i}_{j}")
-        p_right_var = ctx.prob.variablesDict().get(f"p_right_{i}_{j}")
-        p_down_var = ctx.prob.variablesDict().get(f"p_down_{i}_{j}")
-        p_up_var = ctx.prob.variablesDict().get(f"p_up_{i}_{j}")
+        # 兼容 PuLP 和 Gurobi 的变量获取方式
+        if hasattr(ctx.prob, 'variablesDict'):
+            # PuLP
+            p_left_var = ctx.prob.variablesDict().get(f"p_left_{i}_{j}")
+            p_right_var = ctx.prob.variablesDict().get(f"p_right_{i}_{j}")
+            p_down_var = ctx.prob.variablesDict().get(f"p_down_{i}_{j}")
+            p_up_var = ctx.prob.variablesDict().get(f"p_up_{i}_{j}")
+        elif hasattr(ctx.prob, 'getVarByName'):
+            # Gurobi
+            p_left_var = ctx.prob.getVarByName(f"p_left_{i}_{j}")
+            p_right_var = ctx.prob.getVarByName(f"p_right_{i}_{j}")
+            p_down_var = ctx.prob.getVarByName(f"p_down_{i}_{j}")
+            p_up_var = ctx.prob.getVarByName(f"p_up_{i}_{j}")
+        else:
+            p_left_var = p_right_var = p_down_var = p_up_var = None
         
-        p_left_val = pulp.value(p_left_var) if p_left_var is not None else None
-        p_right_val = pulp.value(p_right_var) if p_right_var is not None else None
-        p_down_val = pulp.value(p_down_var) if p_down_var is not None else None
-        p_up_val = pulp.value(p_up_var) if p_up_var is not None else None
+        p_left_val = get_var_value(p_left_var)
+        p_right_val = get_var_value(p_right_var)
+        p_down_val = get_var_value(p_down_var)
+        p_up_val = get_var_value(p_up_var)
         
         print(f"  模块对 ({name_i}, {name_j}):")
         print(f"    p_left[{i},{j}]: {p_left_val}")
@@ -806,22 +877,32 @@ def print_all_variables(
     
     # 8. 边界框变量
     print("\n【边界框变量】")
-    bbox_w_val = pulp.value(ctx.bbox_w) if ctx.bbox_w is not None else None
-    bbox_h_val = pulp.value(ctx.bbox_h) if ctx.bbox_h is not None else None
+    bbox_w_val = get_var_value(ctx.bbox_w)
+    bbox_h_val = get_var_value(ctx.bbox_h)
     print(f"  bbox_w: {bbox_w_val}")
     print(f"  bbox_h: {bbox_h_val}")
     
     # 9. 其他辅助变量（shared_x, shared_y, dx_abs, dy_abs, bbox_min/max等）
     print("\n【其他辅助变量】")
     other_vars = []
-    for var_name, var in ctx.prob.variablesDict().items():
+    # 兼容 PuLP 和 Gurobi 的变量获取方式
+    if hasattr(ctx.prob, 'variablesDict'):
+        # PuLP
+        var_dict = ctx.prob.variablesDict()
+    elif hasattr(ctx.prob, 'getVars'):
+        # Gurobi
+        var_dict = {var.VarName: var for var in ctx.prob.getVars()}
+    else:
+        var_dict = {}
+    
+    for var_name, var in var_dict.items():
         if var_name.startswith("shared_") or var_name.startswith("dx_abs_") or \
            var_name.startswith("dy_abs_") or var_name.startswith("bbox_") or \
            var_name.startswith("bbox_area_proxy"):
             # 排除排除约束相关的变量（这些会在后面单独打印）
             if not (var_name.startswith("dx_abs_pair_") or var_name.startswith("dy_abs_pair_") or \
                     var_name.startswith("dx_grid_abs_pair_") or var_name.startswith("dy_grid_abs_pair_")):
-                val = pulp.value(var) if var is not None else None
+                val = get_var_value(var)
                 if val is not None:
                     other_vars.append((var_name, val))
     
@@ -834,7 +915,17 @@ def print_all_variables(
     # 10. 排除解约束相关变量和约束（仅在第二次及以后的求解中打印）
     exclude_vars = []
     # 收集所有排除解约束相关的变量，包括所有可能的变量名模式
-    for var_name, var in ctx.prob.variablesDict().items():
+    # 兼容 PuLP 和 Gurobi 的变量获取方式
+    if hasattr(ctx.prob, 'variablesDict'):
+        # PuLP
+        var_dict = ctx.prob.variablesDict()
+    elif hasattr(ctx.prob, 'getVars'):
+        # Gurobi
+        var_dict = {var.VarName: var for var in ctx.prob.getVars()}
+    else:
+        var_dict = {}
+    
+    for var_name, var in var_dict.items():
         # 检查是否是排除解约束相关的变量
         is_exclude_var = (
             var_name.startswith("dx_abs_pair_") or 
@@ -848,7 +939,7 @@ def print_all_variables(
             var_name.startswith("same_dist_pair_")
         )
         if is_exclude_var:
-            val = pulp.value(var) if var is not None else None
+            val = get_var_value(var)
             # 即使值为None也记录，以便调试
             exclude_vars.append((var_name, val))
     
