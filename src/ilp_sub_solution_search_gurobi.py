@@ -120,21 +120,48 @@ def _add_exclude_dist_constraint(
     grid_size = ctx.grid_size
     
     if grid_size is None:
+        print(f"[WARNING] grid_size为None，跳过排除约束")
         return
     
     if len(prev_pair_distances_list) == 0:
+        print(f"[WARNING] prev_pair_distances_list为空，跳过排除约束")
+        return
+    
+    print(f"[DEBUG] 开始添加排除约束，之前解数量: {len(prev_pair_distances_list)}, min_pair_dist_diff: {min_pair_dist_diff}")
+    
+    # 将min_pair_dist_diff从实际坐标单位转换为grid坐标单位
+    # 因为约束中使用的是grid坐标距离，所以阈值也需要是grid坐标单位
+    min_pair_dist_diff_grid = min_pair_dist_diff / grid_size
+    print(f"[DEBUG] min_pair_dist_diff (实际坐标): {min_pair_dist_diff}, 转换为grid坐标: {min_pair_dist_diff_grid}")
+    
+    # 更新模型以确保变量名称可用
+    try:
+        model.update()
+    except Exception as e:
+        print(f"[WARNING] 模型更新失败: {e}")
         return
     
     # 获取x_grid和y_grid变量
+    # 使用 getVars() 遍历所有变量，通过 VarName 查找，避免 getVarByName() 的错误
     x_grid = {}
     y_grid = {}
+    all_vars_dict = {v.VarName: v for v in model.getVars()}
+    
     for k in range(n):
-        x_grid_var = model.getVarByName(f"x_grid_{k}")
-        y_grid_var = model.getVarByName(f"y_grid_{k}")
+        var_name_x = f"x_grid_{k}"
+        var_name_y = f"y_grid_{k}"
+        x_grid_var = all_vars_dict.get(var_name_x)
+        y_grid_var = all_vars_dict.get(var_name_y)
         if x_grid_var is None or y_grid_var is None:
+            print(f"[WARNING] 无法找到变量 {var_name_x} 或 {var_name_y}，跳过排除约束")
+            # 列出所有变量名以便调试
+            all_var_names = list(all_vars_dict.keys())[:20]
+            print(f"[DEBUG] 前20个变量名: {all_var_names}")
             return  # 如果没有grid变量，说明不是网格化模型
         x_grid[k] = x_grid_var
         y_grid[k] = y_grid_var
+    
+    print(f"[DEBUG] 成功获取所有grid变量，n={n}")
     
     # 计算grid的上界
     grid_w = int(math.ceil(W / grid_size))
@@ -145,6 +172,8 @@ def _add_exclude_dist_constraint(
     for i in range(n):
         for j in range(i + 1, n):
             chiplet_pairs.append((i, j))
+    
+    print(f"[DEBUG] 生成 {len(chiplet_pairs)} 个chiplet对")
     
     # 为每对chiplet计算当前解的距离（使用grid坐标）
     # 创建辅助变量表示距离的绝对值（所有chiplet对共享，避免重复创建）
@@ -159,7 +188,7 @@ def _add_exclude_dist_constraint(
     
     # max_dist_diff使用grid单位（最大可能的grid距离）
     max_dist_diff = grid_w + grid_h
-    epsilon = max(0.001, min_pair_dist_diff * 0.01)
+    epsilon = max(0.001, min_pair_dist_diff_grid * 0.01)
     
     for i, j in chiplet_pairs:
         # 创建辅助变量表示grid坐标差的绝对值
@@ -249,6 +278,7 @@ def _add_exclude_dist_constraint(
                 break
         
         if not pair_exists_in_all:
+            # 跳过不在所有之前解中都存在的对
             continue
         
         # 创建二进制变量：该对的距离是否与之前所有解都不同
@@ -304,7 +334,7 @@ def _add_exclude_dist_constraint(
             # 如果 same_dist_pair_prev = 1，则 dist_diff_abs_ij < min_pair_dist_diff
             constraint_name = f"same_dist_pair_upper_{solution_index_suffix}_{i}_{j}_prev{prev_idx}"
             constr = model.addConstr(
-                dist_diff_abs_ij <= min_pair_dist_diff - epsilon + M * (1 - same_dist_pair_prev[((i, j), prev_idx)]),
+                dist_diff_abs_ij <= min_pair_dist_diff - epsilon + M_dist * (1 - same_dist_pair_prev[((i, j), prev_idx)]),
                 name=constraint_name
             )
             print_constraint_formal(constr)
@@ -312,7 +342,7 @@ def _add_exclude_dist_constraint(
             # 如果 same_dist_pair_prev = 0，则 dist_diff_abs_ij >= min_pair_dist_diff
             constraint_name = f"same_dist_pair_lower_{solution_index_suffix}_{i}_{j}_prev{prev_idx}"
             constr = model.addConstr(
-                dist_diff_abs_ij >= min_pair_dist_diff - M * same_dist_pair_prev[((i, j), prev_idx)],
+                dist_diff_abs_ij >= min_pair_dist_diff - M_dist * same_dist_pair_prev[((i, j), prev_idx)],
                 name=constraint_name
             )
             print_constraint_formal(constr)
@@ -350,10 +380,14 @@ def _add_exclude_dist_constraint(
     # 即：至少存在一对chiplet，使得当前解的距离与所有之前解的距离都相差 >= min_pair_dist_diff
     if len(diff_dist_pair) > 0:
         constraint_name = f"exclude_solution_dist_pair_{solution_index_suffix}"
-        model.addConstr(
+        exclude_constr = model.addConstr(
             gp.quicksum([diff_dist_pair[pair] for pair in diff_dist_pair.keys()]) >= 1,
             name=constraint_name
         )
+        # 调试信息：确认约束已添加
+        print(f"[DEBUG] ✓ 添加排除约束: {constraint_name}, 涉及 {len(diff_dist_pair)} 对chiplet: {list(diff_dist_pair.keys())[:5]}...")
+    else:
+        print(f"[WARNING] ✗ diff_dist_pair为空，未添加排除约束！chiplet对总数: {len(chiplet_pairs)}, 之前解数量: {len(prev_pair_distances_list)}")
 
 
 def add_exclude_constraint(
@@ -390,39 +424,12 @@ def add_exclude_constraint(
     # 如果没有提供之前解的位置和距离列表，则尝试读取当前解作为上一解
     # 注意：这个分支通常不应该被执行，因为 add_exclude_constraint 是在求解之前调用的
     # 只有在求解之后需要添加排除约束时才会使用这个逻辑
+    # 但是，由于我们在求解之前调用此函数，所以如果 prev_positions 为空，应该跳过位置排除约束
+    # 只使用 prev_pair_distances_list 来添加排除约束
     if prev_positions is None or len(prev_positions) == 0:
-        # 检查模型状态，只有在求解成功时才能读取变量值
-        if model.status != GRB.OPTIMAL:
-            # 如果模型还没有求解或求解失败，无法读取变量值，直接返回
-            # 这种情况下，应该通过 prev_pair_distances_list 来添加排除约束
-            return
-        
-        # 读取当前解中每个chiplet的位置
-        x_prev = {}
-        y_prev = {}
-        valid_count = 0
-    
-        for k in range(n):
-            try:
-                x_val = get_var_value(x[k])
-                y_val = get_var_value(y[k])
-            except (AttributeError, ValueError, TypeError) as e:
-                # 如果无法获取变量值（例如模型未求解），跳过这个变量
-                continue
-            
-            if x_val is None or y_val is None:
-                continue
-            
-            x_prev[k] = float(x_val)
-            y_prev[k] = float(y_val)
-            valid_count += 1
-        
-        if valid_count < n:
-            # 如果无法获取足够的变量值，直接返回
-            # 这种情况下应该通过 prev_pair_distances_list 来添加排除约束
-            return
-
-        prev_positions = [{k: (x_prev[k], y_prev[k]) for k in x_prev.keys()}]
+        # 在求解之前调用时，无法读取变量值，跳过位置排除约束
+        # 只使用 prev_pair_distances_list 来添加排除约束
+        pass  # 不执行位置排除约束，继续执行距离排除约束
     
     # 获取位置排除约束的最小变化量
     # 优先级：min_pos_diff > min_diff > grid_size > 默认值0.01
@@ -444,7 +451,9 @@ def add_exclude_constraint(
     M = max(W, H) * 2  # Big-M常数
     
     # 调用距离排除约束函数（一次性处理所有之前解）
+    print(f"[DEBUG add_exclude_constraint] 检查条件: prev_pair_distances_list={prev_pair_distances_list is not None}, len={len(prev_pair_distances_list) if prev_pair_distances_list is not None else 0}, grid_size={ctx.grid_size}")
     if prev_pair_distances_list is not None and len(prev_pair_distances_list) > 0:
+        print(f"[DEBUG add_exclude_constraint] 准备添加排除约束，之前解数量: {len(prev_pair_distances_list)}")
         # 确保每个约束都有唯一的名称，避免冲突
         # 使用全局约束计数器确保唯一性
         if constraint_counter is not None:
@@ -454,6 +463,7 @@ def add_exclude_constraint(
         else:
             solution_index_suffix = f"{solution_index}"
         
+        print(f"[DEBUG add_exclude_constraint] 调用 _add_exclude_dist_constraint，solution_index_suffix={solution_index_suffix}")
         _add_exclude_dist_constraint(
             ctx=ctx,
             solution_index_suffix=solution_index_suffix,
@@ -461,6 +471,9 @@ def add_exclude_constraint(
             prev_pair_distances_list=prev_pair_distances_list,
             M=M,
         )
+        print(f"[DEBUG add_exclude_constraint] _add_exclude_dist_constraint 返回")
+    else:
+        print(f"[DEBUG add_exclude_constraint] prev_pair_distances_list为空或None，跳过排除约束")
 
 
 # print_pair_distances_only 和 print_all_variables 函数已移动到 tool.py
@@ -587,7 +600,9 @@ def search_multiple_solutions(
         )
         
         # 添加排除约束（排除之前找到的所有解）
+        print(f"[DEBUG search_multiple_solutions] 解 {i+1}: all_prev_pair_distances长度={len(all_prev_pair_distances)}")
         if len(all_prev_pair_distances) > 0:
+            print(f"[DEBUG search_multiple_solutions] 调用 add_exclude_constraint，之前解数量: {len(all_prev_pair_distances)}")
             add_exclude_constraint(
                 ctx=ctx,
                 solution_index=i,
@@ -595,6 +610,9 @@ def search_multiple_solutions(
                 prev_pair_distances_list=all_prev_pair_distances,
                 constraint_counter=constraint_counter,
             )
+            print(f"[DEBUG search_multiple_solutions] add_exclude_constraint 调用完成")
+        else:
+            print(f"[DEBUG search_multiple_solutions] all_prev_pair_distances为空，跳过排除约束")
         
         # 导出LP文件（在求解之前，包含所有约束）
         # 确定输出目录
@@ -628,24 +646,26 @@ def search_multiple_solutions(
             min_pair_dist_diff=min_pair_dist_diff
         )
         
-        # 计算并保存当前解的chiplet对之间的距离（使用grid坐标）
+        # 计算并保存当前解的chiplet对之间的距离（使用grid坐标的曼哈顿距离）
+        # 注意：chiplet旋转后，坐标仍然是左下角坐标，与旋转无关
+        # 但为了约束的一致性，我们使用grid坐标计算距离
         pair_distances = {}
         grid_size_val = ctx.grid_size if ctx.grid_size is not None else 1.0
         
-        # 获取当前解的实际坐标（用于打印输出）
-        x_prev = {}
-        y_prev = {}
+        # 获取当前解的实际坐标（左下角坐标，不受旋转影响）
+        x_coords = {}
+        y_coords = {}
         for k, node in enumerate(nodes):
             node_name = node.name if hasattr(node, 'name') else f"Chiplet_{k}"
             if node_name in result.layout:
-                x_prev[k], y_prev[k] = result.layout[node_name]
+                x_coords[k], y_coords[k] = result.layout[node_name]
             else:
-                x_prev[k] = 0.0
-                y_prev[k] = 0.0
+                x_coords[k] = 0.0
+                y_coords[k] = 0.0
         
         # 获取grid坐标值
-        x_grid_prev = {}
-        y_grid_prev = {}
+        x_grid_coords = {}
+        y_grid_coords = {}
         for k in range(len(nodes)):
             x_grid_var = ctx.model.getVarByName(f"x_grid_{k}")
             y_grid_var = ctx.model.getVarByName(f"y_grid_{k}")
@@ -653,24 +673,27 @@ def search_multiple_solutions(
                 x_grid_val = x_grid_var.X
                 y_grid_val = y_grid_var.X
                 if x_grid_val is not None and y_grid_val is not None:
-                    x_grid_prev[k] = int(x_grid_val)
-                    y_grid_prev[k] = int(y_grid_val)
+                    x_grid_coords[k] = int(x_grid_val)
+                    y_grid_coords[k] = int(y_grid_val)
                 else:
                     # 如果无法获取grid坐标，使用实际坐标转换为grid坐标
-                    x_grid_prev[k] = int(round(x_prev[k] / grid_size_val))
-                    y_grid_prev[k] = int(round(y_prev[k] / grid_size_val))
+                    x_grid_coords[k] = int(round(x_coords[k] / grid_size_val))
+                    y_grid_coords[k] = int(round(y_coords[k] / grid_size_val))
             else:
                 # 如果没有grid变量，使用实际坐标转换为grid坐标
-                x_grid_prev[k] = int(round(x_prev[k] / grid_size_val))
-                y_grid_prev[k] = int(round(y_prev[k] / grid_size_val))
+                x_grid_coords[k] = int(round(x_coords[k] / grid_size_val))
+                y_grid_coords[k] = int(round(y_coords[k] / grid_size_val))
         
+        # 计算每对chiplet之间的曼哈顿距离（使用grid坐标）
         for i_idx in range(len(nodes)):
             for j_idx in range(i_idx + 1, len(nodes)):
-                # 使用grid坐标计算距离（曼哈顿距离）
-                dx_grid = abs(x_grid_prev[i_idx] - x_grid_prev[j_idx])
-                dy_grid = abs(y_grid_prev[i_idx] - y_grid_prev[j_idx])
-                dist = dx_grid + dy_grid
-                pair_distances[(i_idx, j_idx)] = dist
+                if i_idx in x_grid_coords and j_idx in x_grid_coords and i_idx in y_grid_coords and j_idx in y_grid_coords:
+                    # 计算grid坐标的x轴和y轴的相对距离（绝对值差）
+                    dx_grid = abs(x_grid_coords[i_idx] - x_grid_coords[j_idx])
+                    dy_grid = abs(y_grid_coords[i_idx] - y_grid_coords[j_idx])
+                    # grid坐标的曼哈顿距离
+                    grid_manhattan_dist = dx_grid + dy_grid
+                    pair_distances[(i_idx, j_idx)] = grid_manhattan_dist
         all_prev_pair_distances.append(pair_distances)
         
         # 输出当前解的基本信息
@@ -682,7 +705,11 @@ def search_multiple_solutions(
         fixed_chiplet_names = set()
         for k, node in enumerate(nodes):
             node_name = node.name if hasattr(node, 'name') else f"Chiplet_{k}"
-            layout_dict[node_name] = (x_prev[k], y_prev[k])
+            # 直接从result.layout获取坐标（左下角坐标，不受旋转影响）
+            if node_name in result.layout:
+                layout_dict[node_name] = result.layout[node_name]
+            else:
+                layout_dict[node_name] = (0.0, 0.0)
             if fixed_chiplet_idx is not None and k == fixed_chiplet_idx:
                 fixed_chiplet_names.add(node_name)
         

@@ -34,6 +34,18 @@ from typing import Optional, List
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from ilp_sub_solution_search_gurobi import search_multiple_solutions
+from ilp_method_gurobi import ILPPlacementResult
+import json
+try:
+    from tool import ChipletNode
+except ImportError:
+    # 如果导入失败，定义一个简单的类
+    class ChipletNode:
+        def __init__(self, name, dimensions, phys=None, power=0.0):
+            self.name = name
+            self.dimensions = dimensions
+            self.phys = phys or []
+            self.power = power
 
 
 # 默认参数配置
@@ -78,6 +90,77 @@ class TeeOutput:
     def flush(self):
         for stream in self.streams:
             stream.flush()
+
+
+def print_solution_coordinates_and_distances(
+    solution: ILPPlacementResult,
+    solution_idx: int,
+    nodes: List,
+) -> None:
+    """
+    打印解的chiplet坐标位置和相对距离。
+    
+    参数:
+        solution: ILP求解结果
+        solution_idx: 解的索引（从0开始）
+        nodes: 节点列表，用于获取chiplet名称
+    """
+    if solution.status != "Optimal":
+        return
+    
+    print(f"\n=== 解 {solution_idx + 1} ===")
+    print(f"\n求解状态: {solution.status}")
+    print(f"求解时间: {solution.solve_time:.2f} 秒")
+    print(f"目标函数值: {solution.objective_value:.2f}")
+    
+    # 获取坐标
+    layout = solution.layout
+    
+    # 建立名称到索引的映射（基于nodes列表的顺序）
+    name_to_idx = {}
+    idx_to_name = {}
+    for idx, node in enumerate(nodes):
+        node_name = node.name if hasattr(node, 'name') else f"Chiplet_{idx}"
+        name_to_idx[node_name] = idx
+        idx_to_name[idx] = node_name
+    
+    # 如果layout中的名称不在nodes中，需要添加
+    # 但为了保持一致性，我们只处理nodes中存在的chiplet
+    n = len(nodes)
+    
+    # 获取每个chiplet的坐标（按索引）
+    x_coords = {}
+    y_coords = {}
+    for idx in range(n):
+        node_name = idx_to_name[idx]
+        if node_name in layout:
+            x_coords[idx], y_coords[idx] = layout[node_name]
+        else:
+            # 如果layout中没有该节点，尝试从其他名称匹配
+            # 或者设置为0
+            x_coords[idx] = 0.0
+            y_coords[idx] = 0.0
+    
+    # 输出每个chiplet的坐标位置
+    print(f"\n每个chiplet的坐标位置:")
+    for idx in range(n):
+        node_name = idx_to_name[idx]
+        if idx in x_coords and idx in y_coords:
+            x_val = x_coords[idx]
+            y_val = y_coords[idx]
+            print(f"  [{idx}] {node_name}: x={x_val:.3f}, y={y_val:.3f}")
+    
+    # 计算并输出每对chiplet的相对距离
+    print(f"\n每对chiplet的相对距离（|x[i]-x[j]|, |y[i]-y[j]|）:")
+    chiplet_pairs = [(i, j) for i in range(n) for j in range(i+1, n)]
+    for i, j in sorted(chiplet_pairs):
+        if i in x_coords and j in x_coords and i in y_coords and j in y_coords:
+            x_dist = abs(x_coords[i] - x_coords[j])
+            y_dist = abs(y_coords[i] - y_coords[j])
+            manhattan_dist = x_dist + y_dist
+            name_i = idx_to_name[i]
+            name_j = idx_to_name[j]
+            print(f"  ({i},{j}) [{name_i}, {name_j}]: x距离={x_dist:.3f}, y距离={y_dist:.3f}, 曼哈顿距离={manhattan_dist:.3f}")
 
 
 def setup_logging(output_dir: Path, core_name: str):
@@ -258,6 +341,44 @@ def run_batch_tests(
         logger.info(f"{'='*80}")
         
         try:
+            # 加载节点信息（用于输出坐标和相对距离）
+            nodes = []
+            try:
+                with open(json_file, 'r') as f:
+                    data = json.load(f)
+                
+                if "chiplets" in data and isinstance(data["chiplets"], list):
+                    # 格式1: ICCAD23格式
+                    for chiplet_info in data["chiplets"]:
+                        name = chiplet_info.get("name", "")
+                        width = chiplet_info.get("width", 0.0)
+                        height = chiplet_info.get("height", 0.0)
+                        nodes.append(
+                            ChipletNode(
+                                name=name,
+                                dimensions={"x": width, "y": height},
+                                phys=[],
+                                power=chiplet_info.get("power", 0.0),
+                            )
+                        )
+                else:
+                    # 格式2: 字典格式
+                    for chiplet_name, chiplet_data in data.items():
+                        if isinstance(chiplet_data, dict) and "dimensions" in chiplet_data:
+                            dims = chiplet_data["dimensions"]
+                            width = dims.get("x", 0.0) if isinstance(dims, dict) else 0.0
+                            height = dims.get("y", 0.0) if isinstance(dims, dict) else 0.0
+                            nodes.append(
+                                ChipletNode(
+                                    name=chiplet_name,
+                                    dimensions={"x": width, "y": height},
+                                    phys=chiplet_data.get("phys", []),
+                                    power=chiplet_data.get("power", 0.0),
+                                )
+                            )
+            except Exception as e:
+                logger.warning(f"加载节点信息失败: {e}，将使用解的layout信息推断节点")
+            
             # 运行求解搜索（使用Gurobi版本）
             logger.info(f"调用 search_multiple_solutions (Gurobi版本)...")
             sols = search_multiple_solutions(
@@ -272,6 +393,25 @@ def run_batch_tests(
             
             logger.info(f"\n共找到 {len(sols)} 个不同的解。")
             print(f"  ✓ 成功：找到 {len(sols)} 个解")
+            
+            # 如果没有从JSON加载到节点，尝试从第一个解的layout推断
+            if len(nodes) == 0 and len(sols) > 0 and sols[0].status == "Optimal":
+                layout = sols[0].layout
+                for idx, (name, (x, y)) in enumerate(sorted(layout.items())):
+                    nodes.append(
+                        ChipletNode(
+                            name=name,
+                            dimensions={"x": 0.0, "y": 0.0},  # 尺寸未知
+                            phys=[],
+                            power=0.0,
+                        )
+                    )
+            
+            # 输出每个解的坐标位置和相对距离
+            if len(nodes) > 0:
+                for idx, sol in enumerate(sols):
+                    print_solution_coordinates_and_distances(sol, idx, nodes)
+                    logger.info(f"\n解 {idx + 1} 的坐标和相对距离已输出")
             
             success_count += 1
             results_summary.append({

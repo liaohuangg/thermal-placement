@@ -589,30 +589,57 @@ if pulp is not None:
         pulp.LpConstraintEQ: "=",
     }
 
-    def print_constraint_formal(constraint: pulp.LpConstraint) -> None:
+    def print_constraint_formal(constraint) -> None:
         """
         打印约束的形式化数学表达。
         
         参数:
-            constraint: Pulp约束对象
+            constraint: Pulp约束对象或Gurobi约束对象
         """
-        # 处理左侧表达式：移除冗余的 *1.0，美化输出
-        lhs = str(constraint.expr).replace("*1.0", "").replace(" + ", " + ").strip()
+        # 检查是否是Gurobi约束
+        if gp is not None and isinstance(constraint, gp.Constr):
+            # Gurobi约束
+            try:
+                constraint_name = constraint.ConstrName
+            except (AttributeError, Exception):
+                # 如果约束还没有名称（例如刚添加但模型未更新），跳过打印
+                return
+            # Gurobi约束的字符串表示
+            constraint_str = str(constraint)
+            # 打印约束（可以修改为输出到日志文件）
+            # print(f"[ADD CONSTRAINT] {constraint_name}: {constraint_str}")
+            return
         
-        # 处理右侧常数：Pulp内部存储为 expr + constant <= 0，所以需要取负号
-        rhs = round(-constraint.constant, 4)
+        # PuLP约束
+        if pulp is not None and isinstance(constraint, pulp.LpConstraint):
+            # 处理左侧表达式：移除冗余的 *1.0，美化输出
+            lhs = str(constraint.expr).replace("*1.0", "").replace(" + ", " + ").strip()
+            
+            # 处理右侧常数：Pulp内部存储为 expr + constant <= 0，所以需要取负号
+            rhs = round(-constraint.constant, 4)
+            
+            # 获取约束方向字符串
+            sense_str = SENSE_MAP.get(constraint.sense, "?")
+            
+            # 构建形式化表达式
+            formal_expr = f"[{constraint.name}] {lhs} {sense_str} {rhs}"
+            
+            # 打印约束（可以修改为输出到日志文件）
+            # print(f"[ADD CONSTRAINT] {formal_expr}")
+            return
         
-        # 获取约束方向字符串
-        sense_str = SENSE_MAP.get(constraint.sense, "?")
-        
-        # 构建形式化表达式
-        formal_expr = f"[{constraint.name}] {lhs} {sense_str} {rhs}"
-        
-        # 打印约束（可以修改为输出到日志文件）
-        # print(f"[ADD CONSTRAINT] {formal_expr}")
+        # 如果都不匹配，静默忽略
+        pass
 else:
     # 如果pulp未安装，提供占位函数
     def print_constraint_formal(*args, **kwargs):
+        # 检查是否是Gurobi约束
+        if gp is not None and len(args) > 0:
+            constraint = args[0]
+            if isinstance(constraint, gp.Constr):
+                # Gurobi约束，静默处理
+                return
+        # 其他情况抛出错误
         raise ImportError("pulp库未安装，无法使用约束打印功能")
 
 
@@ -674,10 +701,15 @@ def print_pair_distances_only(
             x_dist, y_dist = curr_pair_distances[(i, j)]
             name_i = nodes[i].name if hasattr(nodes[i], 'name') else f"Chiplet_{i}"
             name_j = nodes[j].name if hasattr(nodes[j], 'name') else f"Chiplet_{j}"
-            print(f"  ({i},{j}) [{name_i}, {name_j}]: x距离={x_dist:.3f}, y距离={y_dist:.3f}")
+            # 计算曼哈顿距离（用于显示）
+            manhattan_dist = x_dist + y_dist
+            print(f"  ({i},{j}) [{name_i}, {name_j}]: x距离={x_dist:.3f}, y距离={y_dist:.3f}, 曼哈顿距离={manhattan_dist:.3f}")
     
     # 与之前解比较
     if prev_pair_distances_list and len(prev_pair_distances_list) > 0:
+        # 获取grid_size，用于将grid坐标距离转换为实际坐标距离
+        grid_size_val = ctx.grid_size if hasattr(ctx, 'grid_size') and ctx.grid_size is not None else 1.0
+        
         print(f"\n与之前解的距离比较（阈值={min_pair_dist_diff:.3f}）:")
         for prev_idx, prev_distances in enumerate(prev_pair_distances_list):
             print(f"\n  与解 {prev_idx + 1} 比较:")
@@ -687,9 +719,11 @@ def print_pair_distances_only(
             for i, j in sorted(chiplet_pairs):
                 if (i, j) in curr_pair_distances and (i, j) in prev_distances:
                     curr_x_dist, curr_y_dist = curr_pair_distances[(i, j)]
-                    prev_dist = prev_distances[(i, j)]  # 这是曼哈顿距离
+                    # prev_distances中存储的是grid坐标的曼哈顿距离，需要转换为实际坐标距离
+                    prev_dist_grid = prev_distances[(i, j)]  # grid坐标的曼哈顿距离
+                    prev_dist = prev_dist_grid * grid_size_val  # 转换为实际坐标距离
                     
-                    # 计算当前解的曼哈顿距离
+                    # 计算当前解的曼哈顿距离（实际坐标）
                     curr_dist = curr_x_dist + curr_y_dist
                     
                     # 计算距离差（绝对值）
@@ -708,7 +742,8 @@ def print_pair_distances_only(
                     if (i, j) in curr_pair_distances and (i, j) in prev_distances:
                         curr_x_dist, curr_y_dist = curr_pair_distances[(i, j)]
                         curr_dist = curr_x_dist + curr_y_dist
-                        prev_dist = prev_distances[(i, j)]
+                        prev_dist_grid = prev_distances[(i, j)]  # grid坐标距离
+                        prev_dist = prev_dist_grid * grid_size_val  # 转换为实际坐标距离
                         dist_diff = abs(curr_dist - prev_dist)
                         name_i = nodes[i].name if hasattr(nodes[i], 'name') else f"Chiplet_{i}"
                         name_j = nodes[j].name if hasattr(nodes[j], 'name') else f"Chiplet_{j}"

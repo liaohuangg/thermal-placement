@@ -1,6 +1,5 @@
 \ Model ChipletPlacementGrid
 \ LP format - for model browsing. Use MPS format to capture full model detail.
-\ Signature: 0x146c5c9394c7e464
 Minimize
   0 r_0 + 0 r_2 + 0 r_4 + dx_abs_0_1 + dy_abs_0_1 + dx_abs_2_4 + dy_abs_2_4
    + dx_abs_1_2 + dy_abs_1_2 + dx_abs_1_3 + dy_abs_1_3
