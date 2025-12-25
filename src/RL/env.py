@@ -14,6 +14,7 @@ from copy import deepcopy
 
 import numpy as np
 import json
+import random
 
 # 导入 baseline 中的数据结构和验证函数
 baseline_path = Path(__file__).parent.parent.parent / "baseline" / "ICCAD23" / "src"
@@ -80,7 +81,13 @@ class ChipletPlacementEnv:
         placement_reward: float = 50.0,
         compact: float = 30.0,# 利用率奖励权重
         min_wirelength_reward_scale: float = 0.0,  # 最短线长奖励权重，负数越短越好
-        extra_adjacency_reward: float = 10.0
+        extra_adjacency_reward: float = 10.0,
+        # 终局奖励参数（用于混合即时+终局策略）
+        terminal_util_reward_scale: float = 100.0,  # episode 结束时按最终利用率给的奖励权重
+        terminal_wirelength_reward_scale: float = 0.0,  # episode 结束时线长惩罚权重
+        # lenbase 估计参数：用于终局线长奖励系数计算（lenbase / lentotal）
+        lenbase_samples: int = 1000,
+        lenbase_seed: Optional[int] = None,
     ):
         """
         初始化环境
@@ -105,6 +112,12 @@ class ChipletPlacementEnv:
         self.compact = compact
         self.min_wirelength_reward_scale = min_wirelength_reward_scale
         self.extra_adjacency_reward = extra_adjacency_reward
+        self.terminal_util_reward_scale = terminal_util_reward_scale
+        self.terminal_wirelength_reward_scale = terminal_wirelength_reward_scale
+        # lenbase 估计配置
+        self.lenbase_samples = lenbase_samples
+        self.lenbase_seed = lenbase_seed
+        self.lenbase: float = 0.0
         
         # 初始化芯片
         self.chiplets: Dict[str, Chiplet] = {
@@ -159,6 +172,13 @@ class ChipletPlacementEnv:
         
         # 初始化状态
         self.state: ChipletState = self._init_state()
+
+        # 估计 lenbase（平均合法布局线长），可能较耗时但只在环境初始化时运行一次
+        try:
+            self.lenbase = self._estimate_lenbase(self.lenbase_samples, self.lenbase_seed)
+        except Exception:
+            # 任何异常都退回为1.0，避免后续除零
+            self.lenbase = 1.0
     
     def _init_state(self) -> ChipletState:
         """初始化状态"""
@@ -521,6 +541,81 @@ class ChipletPlacementEnv:
             features.append(0.0)
         
         return np.array(features, dtype=np.float32)
+
+
+    def _estimate_lenbase(self, num_samples: int = 1000, seed: Optional[int] = None) -> float:
+        """
+        通过随机生成若干合法布局（不改变外部状态）来估计基准线长 lenbase。
+
+        方法：对每个样本从空布局开始，按放置顺序对每个芯片随机选择一个合法位置。
+        若某个样本在中途无合法位置则丢弃该样本。返回所有成功样本的平均总线长。
+        """
+        if num_samples <= 0:
+            return 1.0
+
+        if seed is not None:
+            random.seed(seed)
+
+        original_state = self.state.copy()
+        lengths = []
+
+        try:
+            for _ in range(num_samples):
+                # 初始化试验状态为空布局
+                self.state = self._init_state()
+                failed = False
+
+                while self.state.current_step < self.num_chiplets:
+                    cur = self._get_current_chip_id()
+                    valid_positions = self._get_valid_positions(cur)
+                    if not valid_positions:
+                        failed = True
+                        break
+
+                    x_idx, y_idx, rotation = random.choice(valid_positions)
+                    tpl = self.chiplets[cur]
+                    chip = Chiplet(cur, tpl.width, tpl.height)
+                    if rotation == 1:
+                        chip.width, chip.height = chip.height, chip.width
+                    chip.x = x_idx * self.step_x
+                    chip.y = y_idx * self.step_y
+
+                    is_valid, _ = self._is_valid_placement(chip, cur)
+                    if not is_valid:
+                        failed = True
+                        break
+
+                    self.state.layout[cur] = chip
+                    self.state.placed.append(cur)
+                    self.state.remaining.remove(cur)
+                    self.state.current_step += 1
+
+                if not failed:
+                    # 计算该布局的总线长（欧氏中心距离，和主流程一致）
+                    total_dist = 0.0
+                    if len(self.state.layout) > 1:
+                        for chip_id1, chip_id2 in self.problem.connection_graph.edges():
+                            c1 = self.state.layout.get(chip_id1)
+                            c2 = self.state.layout.get(chip_id2)
+                            if c1 is None or c2 is None:
+                                continue
+                            cx1 = c1.x + c1.width / 2
+                            cy1 = c1.y + c1.height / 2
+                            cx2 = c2.x + c2.width / 2
+                            cy2 = c2.y + c2.height / 2
+                            dist = ((cx1 - cx2) ** 2 + (cy1 - cy2) ** 2) ** 0.5
+                            total_dist += dist
+
+                    lengths.append(total_dist)
+
+            if lengths:
+                return float(sum(lengths) / len(lengths))
+            else:
+                return 1.0
+
+        finally:
+            # 恢复原始状态
+            self.state = original_state.copy()
     
     def get_valid_actions(self) -> List[int]:
         """
@@ -604,14 +699,26 @@ class ChipletPlacementEnv:
                 "error": reason
             }
         
+        # 记录放置前的利用率（用于后续的利用率奖励），分母使用当前布局的包围盒面积
+        if self.state.layout:
+            chiplets_before = list(self.state.layout.values())
+            x_coords_b = [c.x for c in chiplets_before] + [c.x + c.width for c in chiplets_before]
+            y_coords_b = [c.y for c in chiplets_before] + [c.y + c.height for c in chiplets_before]
+            bbox_w_b = max(x_coords_b) - min(x_coords_b)
+            bbox_h_b = max(y_coords_b) - min(y_coords_b)
+            bbox_area_b = bbox_w_b * bbox_h_b if bbox_w_b > 0 and bbox_h_b > 0 else 1e-9
+            prev_util = sum(c.width * c.height for c in chiplets_before) / bbox_area_b
+        else:
+            prev_util = 0.0
+
         # 放置芯片
         self.state.layout[current_chip_id] = new_chiplet
         self.state.placed.append(current_chip_id)
         self.state.remaining.remove(current_chip_id)
         self.state.current_step += 1
-        
+
         # 计算奖励
-        reward = self.placement_reward# 放置奖励
+        reward = self.placement_reward  # 放置奖励
         #对当前放置的chiplet计算额外邻接奖励(奖励不要求connection的的芯片对) 
         neighbors = self.problem.get_neighbors(current_chip_id)
         for placed_chip_id, placed_chip in self.state.layout.items():
@@ -620,31 +727,37 @@ class ChipletPlacementEnv:
                 if placed_chip_id not in neighbors:
                     is_adj, overlap_len, _ = get_adjacency_info(new_chiplet, placed_chip)
                     if is_adj and overlap_len >= self.min_overlap:
-                        reward += self.extra_adjacency_reward*overlap_len
-
-
-
+                        reward += self.extra_adjacency_reward*overlap_len 
         
-        # 利用率奖励（每步计算）
-        if len(self.state.layout) > 1:
-            chiplets = list(self.state.layout.values())
-            
-            # 计算边界框
-            x_coords = [c.x for c in chiplets] + [c.x + c.width for c in chiplets]
-            y_coords = [c.y for c in chiplets] + [c.y + c.height for c in chiplets]
-            
-            bbox_width = max(x_coords) - min(x_coords)
-            bbox_height = max(y_coords) - min(y_coords)
-            bbox_area = bbox_width * bbox_height
-            
-            # 芯片总面积
-            chip_total_area = sum(c.width * c.height for c in chiplets)
-            
-            # 利用率 = 芯片面积 / 边界框面积
-            compactness = chip_total_area / bbox_area if bbox_area > 0 else 0
-            
-            # 紧凑性奖励（值域0-1，越接近1越好）
-            reward += compactness * self.compact  # 每步奖励紧凑布局
+
+
+
+        # 利用率奖励：根据利用率变化（分母改为当前布局包围盒面积）
+        # 先计算放置后的利用率并与放置前比较：
+        if self.state.layout:
+            chiplets_after = list(self.state.layout.values())
+            x_coords_a = [c.x for c in chiplets_after] + [c.x + c.width for c in chiplets_after]
+            y_coords_a = [c.y for c in chiplets_after] + [c.y + c.height for c in chiplets_after]
+            bbox_w_a = max(x_coords_a) - min(x_coords_a)
+            bbox_h_a = max(y_coords_a) - min(y_coords_a)
+            bbox_area_a = bbox_w_a * bbox_h_a if bbox_w_a > 0 and bbox_h_a > 0 else 1e-9
+            new_util = sum(c.width * c.height for c in chiplets_after) / bbox_area_a
+        else:
+            new_util = 0.0
+
+        util_delta = new_util - prev_util
+        EPS = 1e-9
+        # 增加或不变给奖励，减少给轻微惩罚
+        if util_delta > EPS:
+            reward += self.compact * util_delta
+        elif abs(util_delta) <= EPS:
+            # 利用率不变也给予小额奖励，鼓励稳定放置
+            reward += 0.5 * self.compact
+        else:
+            # 利用率下降，给予轻微惩罚（按下降幅度缩放）
+            reward -= 0.05 * self.compact * abs(util_delta)
+
+     
         
         # 检查相邻约束
         neighbors = self.problem.get_neighbors(current_chip_id)
@@ -672,10 +785,19 @@ class ChipletPlacementEnv:
         done = self.state.current_step >= self.num_chiplets# 所有芯片已放置
         
         if done:
-      
-            # 计算最短线长指标（所有有connection的芯片对的中心欧氏距离之和，负数越短越好）
-            if self.min_wirelength_reward_scale != 0.0 and len(self.state.layout) > 1:
-                total_dist = 0.0
+            # 计算episode级指标：最终利用率与总线长（用于终局奖励/惩罚）
+            total_dist = 0.0
+            final_util = 0.0
+            if len(self.state.layout) > 0:
+                chiplets_final = list(self.state.layout.values())
+                x_coords_f = [c.x for c in chiplets_final] + [c.x + c.width for c in chiplets_final]
+                y_coords_f = [c.y for c in chiplets_final] + [c.y + c.height for c in chiplets_final]
+                bbox_w_f = max(x_coords_f) - min(x_coords_f)
+                bbox_h_f = max(y_coords_f) - min(y_coords_f)
+                bbox_area_f = bbox_w_f * bbox_h_f if bbox_w_f > 0 and bbox_h_f > 0 else 1e-9
+                final_util = sum(c.width * c.height for c in chiplets_final) / bbox_area_f
+
+            if len(self.state.layout) > 1:
                 for chip_id1, chip_id2 in self.problem.connection_graph.edges():
                     c1 = self.state.layout[chip_id1]
                     c2 = self.state.layout[chip_id2]
@@ -685,8 +807,22 @@ class ChipletPlacementEnv:
                     cy2 = c2.y + c2.height / 2
                     dist = ((cx1 - cx2) ** 2 + (cy1 - cy2) ** 2) ** 0.5
                     total_dist += dist
-                # 线长越短越好，奖励为负线长乘以权重
+
+            # 原有的短线长即时奖励/惩罚（保持兼容）
+            if self.min_wirelength_reward_scale != 0.0 and total_dist > 0.0:
                 reward += -total_dist * self.min_wirelength_reward_scale
+
+            # 终局奖励（混合策略的主奖励）：按最终利用率给正奖励，按总线长给奖励/惩罚（使用 lenbase/lentotal 比值）
+            if self.terminal_util_reward_scale != 0.0:
+                reward += final_util * self.terminal_util_reward_scale
+            if self.terminal_wirelength_reward_scale != 0.0 and total_dist >= 0.0:
+                # 使用用户要求的比值：系数 * (lenbase / lentotal)
+                lentotal = total_dist if total_dist > 0.0 else 1e-9
+                if hasattr(self, 'lenbase') and self.lenbase > 0.0:
+                    ratio = self.lenbase / lentotal
+                else:
+                    ratio = 1.0 / lentotal
+                reward += self.terminal_wirelength_reward_scale * ratio
 
 
         

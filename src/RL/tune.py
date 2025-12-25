@@ -28,11 +28,12 @@ def transfer_learning():
         max_width=100.0,
         max_height=100.0,
         min_overlap=0.5,
-        placement_reward=20,
-        adjacency_reward=20,
-        compact=20,
+        placement_reward=1,
+        adjacency_reward=1,
+        compact=30,
         min_wirelength_reward_scale=0,
-        extra_adjacency_reward=350
+        extra_adjacency_reward=100,
+        terminal_util_reward_scale=30
     )
 
     print("12core环境信息:")
@@ -43,14 +44,14 @@ def transfer_learning():
     # 2. 创建训练器（针对12core）
     trainer = PPOTrainer(
         env_12core,
-        lr=5e-4,  # 降低学习率
+        lr=1e-4,  # 降低学习率
         entropy_coef=0.6,  # 增加熵系数鼓励探索
         # max_grad_norm=0.5,   # 减小梯度裁剪阈值
         load_optimizer=True  # 加载优化器状态
     )
 
     # 3. 加载6core预训练模型
-    model_path = "checkpoints/12ppo_episode_500.pt"  # 训练好的model路径
+    model_path = "checkpoints/ppo_episode_1200.pt"  # 训练好的model路径
     if Path(model_path).exists():
         trainer.load(model_path)
         print(f"✓ 已加载预训练模型: {model_path}")
@@ -61,7 +62,7 @@ def transfer_learning():
     print("\n开始在12core上fine-tune...")
     trained_model = train(
         json_path="../../baseline/ICCAD23/test_input/12core.json",
-        num_episodes=2000,  # fine-tune episode数
+        num_episodes=3000,  # fine-tune episode数
         save_interval=100,
         log_interval=100,
         trainer=trainer,  # 使用已加载的trainer
@@ -69,11 +70,13 @@ def transfer_learning():
         max_width=100.0, 
         max_height=100.0,
         min_overlap=0.5,
-        placement_reward=20,  # 增加放置奖励
-        adjacency_reward=20,
-        compact=20,
+        placement_reward=1,  # 增加放置奖励
+        adjacency_reward=1,   # 增加邻接奖励
+        compact=30,
         min_wirelength_reward_scale=0,
-        extra_adjacency_reward=350
+        extra_adjacency_reward=100,
+        terminal_util_reward_scale=30
+
     )
 
     print("\n✓ 迁移学习完成！模型已保存")

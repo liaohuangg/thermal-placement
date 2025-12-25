@@ -290,8 +290,11 @@ def main():
         placement_reward=1.0,
         adjacency_reward=1.0,
         extra_adjacency_reward=100,
-        compact=10.0,
-        min_wirelength_reward_scale=0
+        compact=3,
+        min_wirelength_reward_scale=0,
+        terminal_util_reward_scale=100.0,
+
+
     )
     
     print(f"\n环境信息:")

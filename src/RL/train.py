@@ -14,6 +14,13 @@ import json
 from pathlib import Path
 
 from env import ChipletPlacementEnv, create_env_from_json
+from copy import deepcopy
+import matplotlib
+# 使用无界面后端，避免在服务器/无显示环境下分配位图失败
+matplotlib.use('Agg')
+from unit import visualize_layout_with_bridges
+import contextlib
+import os
 
 # 设置设备
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -89,11 +96,11 @@ class PPOTrainer:
     def __init__(
         self,
         env: ChipletPlacementEnv,
-        lr: float = 0.0003,
+        lr: float = 1e-4,
         gamma: float = 0.99,
         epsilon: float = 0.2,
         value_coef: float = 0.5,
-        entropy_coef: float = 0.2,
+        entropy_coef: float = 0.6,
         max_grad_norm: float = 0.5,
         hidden_dim: int = 256,
         load_optimizer: bool = True
@@ -134,7 +141,7 @@ class PPOTrainer:
         self.rewards = []
         self.dones = []
     
-    def collect_episode(self) -> Tuple[float, bool]:
+    def collect_episode(self) -> Tuple[float, bool, Dict]:
         """
         收集一个episode的数据
         
@@ -155,7 +162,7 @@ class PPOTrainer:
             
             if not valid_actions:
                 # 无有效动作，episode失败
-                return total_reward, False
+                return total_reward, False, {}
             
             # 选择动作
             obs_tensor = torch.FloatTensor(obs).unsqueeze(0).to(device)
@@ -176,7 +183,9 @@ class PPOTrainer:
             obs = next_obs
             total_reward += reward
         
-        return total_reward, done
+        # 返回布局快照用于保存/分析
+        layout_snapshot = deepcopy(self.env.state.layout)
+        return total_reward, done, layout_snapshot
     
     def compute_returns(self) -> torch.Tensor:
         """计算折扣回报"""
@@ -385,14 +394,20 @@ def train(
     print(f"\n开始训练...")
     print("-" * 70)
     
+    # 准备保存 top-10 布局目录
+    # 准备保存当前最优布局目录（只保留一个best）
+    top_dir = Path("results/top_layouts")
+    top_dir.mkdir(parents=True, exist_ok=True)
+    best_layout_info: Dict = None  # 存储 dict: {'reward','episode','json','img'}
+
     for episode in range(1, num_episodes + 1):
-        # 收集经验
-        reward, success = trainer.collect_episode()
+        # 收集经验（现在返回布局快照）
+        reward, success, layout = trainer.collect_episode()
         episode_rewards.append(reward)
-        
+
         if success:
             success_count += 1
-        
+
         # 更新策略
         metrics = trainer.update(epochs=4)
         
@@ -415,6 +430,64 @@ def train(
                 if avg_reward < prev_avg * 0.8:  # 下降超过20%
                     print(f"  ⚠️ 警告：性能下降 {prev_avg:.1f} → {avg_reward:.1f}")
         
+        if layout:
+            # 检查并保存当前最优布局（只保留一个best，发现更好则覆盖旧文件）
+            if layout:
+                try:
+                    # 如果当前没有best，或本次reward更优，则保存并替换
+                    if best_layout_info is None or reward > best_layout_info['reward']:
+                        # 删除旧的best文件
+                        if best_layout_info is not None:
+                            try:
+                                Path(best_layout_info['json']).unlink()
+                            except Exception:
+                                pass
+                            try:
+                                Path(best_layout_info['img']).unlink()
+                            except Exception:
+                                pass
+
+                        json_name = f"layout_best_ep{episode}_r{reward:.2f}.json"
+                        img_name = f"layout_best_ep{episode}_r{reward:.2f}.png"
+                        json_path = top_dir / json_name
+                        img_path = top_dir / img_name
+
+                        # 保存 json
+                        layout_data = {
+                            chip_id: {
+                                "x": float(chip.x),
+                                "y": float(chip.y),
+                                "width": float(chip.width),
+                                "height": float(chip.height)
+                            }
+                            for chip_id, chip in layout.items()
+                        }
+                        with open(json_path, 'w', encoding='utf-8') as jf:
+                            json.dump(layout_data, jf, indent=2, ensure_ascii=False)
+
+                        # 保存图片（静默）
+                        try:
+                            with open(os.devnull, 'w') as devnull:
+                                with contextlib.redirect_stdout(devnull), contextlib.redirect_stderr(devnull):
+                                    visualize_layout_with_bridges(
+                                        layout,
+                                        env.problem,
+                                        output_file=str(img_path),
+                                        show_bridges=True,
+                                        show_coordinates=True
+                                    )
+                        except Exception:
+                            pass
+
+                        best_layout_info = {
+                            'reward': reward,
+                            'episode': episode,
+                            'json': str(json_path),
+                            'img': str(img_path)
+                        }
+                except Exception:
+                    pass
+
         # 保存模型
         if episode % save_interval == 0:
             Path("checkpoints").mkdir(exist_ok=True)
@@ -456,24 +529,24 @@ def train(
 
 if __name__ == "__main__":
     # 训练配置
-    json_file = "../../baseline/ICCAD23/test_input/6core.json"
+    json_file = "../../baseline/ICCAD23/test_input/5core.json"
     
     trained_model = train(
         json_path=json_file,
-        num_episodes=5000,
+        num_episodes=10000,
         save_interval=100,
         log_interval=100,
         grid_resolution=100,
         max_width=100.0,
         max_height=100.0,
         min_overlap=0.5,
-        placement_reward=15,  # 放置奖励
-        adjacency_reward=20,   # 邻接奖励
+        placement_reward=1,  # 放置奖励
+        adjacency_reward=10,   # 邻接奖励
         compact = 10,
         min_wirelength_reward_scale =0,
-        extra_adjacency_reward=20
-
-        
+        extra_adjacency_reward=0,
+        terminal_util_reward_scale=90.0 ,
+        terminal_wirelength_reward_scale = 30
     )
     
     print(f"\n✓ 模型已保存到 checkpoints/ppo_model.pt")
