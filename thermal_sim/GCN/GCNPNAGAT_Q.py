@@ -10,9 +10,11 @@ import torch.nn.functional as F
 import math, time, os
 import numpy as np
 from numpy import genfromtxt
+import gc
 
 import csv
 from shutil import copyfile
+from dataLoader import create_dataloader
 
 dataset_dir = '../dataset_rdl/data/'
 results_dir = '../dataset_rdl/dataresults/'
@@ -47,7 +49,7 @@ e_hidden_e = [1, 16, 32, 64, 128, 256, 512, 512, 512, 256, 128, 64, 32, 16, 0]#[
 #MLP_hidden_n = [64, 64, 128, 128, 256, 256, 512, 512, 1024, 1024, 2048,2048, 4096, 4096, 2048, 2048, 1024,1024, 512,512, 256,256, 128,128, 64,64,  1]
 
 
-batch_size = 2
+batch_size = 4
 
 if torch.cuda.is_available():
     device = torch.device('cuda')
@@ -341,6 +343,10 @@ def main():
         model.to(device=device)
         #node_MLP.to(device=device)
         
+        # ========== 训练开始前清理GPU显存 ==========
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            print("GPU cache cleared before training")
         
         MSEloss = nn.MSELoss()
 
@@ -370,10 +376,26 @@ def main():
         training_start_time = time.time()
         
         for epoch in range(epoch_mem,30000):
-
-            train_data = np.array(train_data)
-            train_data = np.random.permutation(train_data)
-            train_data = train_data.reshape(-1).tolist()
+            # 每个epoch重新创建DataLoader（实现shuffle）
+            train_data_shuffled = np.array(train_data)
+            train_data_shuffled = np.random.permutation(train_data_shuffled)
+            train_data_shuffled = train_data_shuffled.reshape(-1).tolist()
+            
+            # 创建训练DataLoader（CPU多进程并行加载）
+            train_loader = create_dataloader(
+                data_list=train_data_shuffled,
+                dataset_dir=dataset_dir,
+                Power_min=Power_min, Power_max=Power_max,
+                tPower_min=tPower_min, tPower_max=tPower_max,
+                Temperature_min=Temperature_min, Temperature_max=Temperature_max,
+                Conductance_min=Conductance_min, Conductance_max=Conductance_max,
+                batch_size=batch_size,
+                shuffle=False,  # 已经在上面shuffle了
+                num_workers=None,  # 自动设置为CPU核心数的1/2
+                pin_memory=True,  # 加速CPU→GPU传输
+                persistent_workers=True,  # 保持子进程常驻
+                drop_last=False
+            )
 
             model.train()
             #node_MLP.train()
@@ -392,16 +414,28 @@ def main():
                 elapsed_time = time.time() - training_start_time
                 print("\n[Progress] Epoch {} | Elapsed time: {:.2f}s ({:.2f} min)".format(epoch, elapsed_time, elapsed_time/60))
             
-            for i in range(0, num_train, batch_size):  
-                train_batch = train_data[i : min(i+batch_size, num_train)]
-                g, edge_feats = read_edge(train_batch)
-                node_feats1, node_feats2, node_labels = read_node(train_batch)
-
-                g = g.to(device=device)
-                node_feats1 = torch.Tensor(node_feats1).to(device=device)
-                node_feats2 = torch.Tensor(node_feats2).to(device=device)
-                node_labels = torch.Tensor(node_labels).to(device=device)
-                edge_feats = torch.Tensor(edge_feats).to(device=device)
+            # 使用DataLoader迭代器替换原有的循环
+            for batch_idx, batch_data in enumerate(train_loader):
+                # 记录batch开始时间
+                batch_start_time = time.time()
+                
+                # 从DataLoader获取数据（已在CPU上，且已批量处理）
+                train_batch = batch_data['case_nums']  # 保存case_nums用于后续可视化
+                g = batch_data['g']
+                node_feats1 = batch_data['node_feats1']
+                node_feats2 = batch_data['node_feats2']
+                node_labels = batch_data['node_labels']
+                edge_feats = batch_data['edge_feats']
+                
+                # 移动到GPU（使用non_blocking加速异步传输）
+                g = g.to(device=device, non_blocking=True)
+                node_feats1 = node_feats1.to(device=device, non_blocking=True)
+                node_feats2 = node_feats2.to(device=device, non_blocking=True)
+                node_labels = node_labels.to(device=device, non_blocking=True)
+                edge_feats = edge_feats.to(device=device, non_blocking=True)
+                
+                # 计算当前batch的索引（用于兼容原有代码）
+                i = batch_idx * batch_size
 
                 #hc = torch.cat([node_feats1,node_feats2], dim=1)
                 hv = model(g, node_feats2, node_feats1, edge_feats)
@@ -446,14 +480,20 @@ def main():
                 
                 #Temperature_base.close()
 
-                if i+2*batch_size >= num_train and i+batch_size<num_train:
-                    length_pred = int(math.sqrt((node_output.shape[0]/batch_size - 12)/3))
-                    length_stan = int(math.sqrt((node_labels.shape[0]/batch_size - 12)/3))
-                    for t in range(1):
+                # 保存最后一个batch的可视化（兼容原有逻辑）
+                if batch_idx == len(train_loader) - 1:
+                    # 将GPU张量转换为CPU numpy数组，避免在删除后访问
+                    node_output_cpu = node_output.detach().cpu().numpy()
+                    node_labels_cpu = node_labels.detach().cpu().numpy()
+                    
+                    current_batch_size = len(train_batch)
+                    length_pred = int(math.sqrt((node_output_cpu.shape[0]/current_batch_size - 12)/3))
+                    length_stan = int(math.sqrt((node_labels_cpu.shape[0]/current_batch_size - 12)/3))
+                    for t in range(min(1, current_batch_size)):
                         with open(results_dir+'Chiplet.grid.steady','w') as grid:
                             for m in range(length_pred):
                                 for n in range(length_pred):
-                                    grid.write(str(m*length_pred+n)+" "+ str((node_output[m*length_pred+n][0].tolist()+1)/2.0*(Temperature_max -Temperature_min)+Temperature_min)+"\n")
+                                    grid.write(str(m*length_pred+n)+" "+ str((node_output_cpu[m*length_pred+n][0]+1)/2.0*(Temperature_max -Temperature_min)+Temperature_min)+"\n")
                                 grid.write("\n")
                         cmd = "../grid_thermal_map.pl Chiplet_Core"+ train_batch[t][:train_batch[t].find('_')]+".flp "+results_dir+"Chiplet.grid.steady "+str(length_pred)+" "+ str(length_pred)+" > "+results_dir+"train_Chiplet_pred"+str(epoch)+"_"+str(0)+".svg"
             
@@ -462,32 +502,52 @@ def main():
                         with open(results_dir+'Chiplet.grid.steady','w') as grid:
                             for m in range(length_stan):
                                 for n in range(length_stan):
-                                    grid.write(str(m*length_stan+n)+" "+ str((node_labels[m*length_stan+n][0].tolist()+1)/2.0*(Temperature_max -Temperature_min)+Temperature_min)+"\n")
+                                    grid.write(str(m*length_stan+n)+" "+ str((node_labels_cpu[m*length_stan+n][0]+1)/2.0*(Temperature_max -Temperature_min)+Temperature_min)+"\n")
                                 grid.write("\n")
                         cmd = "../grid_thermal_map.pl Chiplet_Core"+ train_batch[t][:train_batch[t].find('_')]+".flp "+results_dir+"Chiplet.grid.steady "+str(length_stan)+" "+ str(length_stan)+" > "+results_dir+"train_Chiplet_stan"+str(epoch)+"_"+str(0)+".svg"
             
                         os.system(cmd)
+                    
+                    # 删除CPU副本
+                    del node_output_cpu, node_labels_cpu
 
                 # Per-batch training log (more informative than print(epoch, i))
                 batch_id = i // batch_size
-                node_preview_n = min(5, int(node_output.shape[0]))
-                node_output_preview = node_output[:node_preview_n].detach().cpu().reshape(-1).tolist()
+                # 保存用于打印的值（在删除张量之前）
+                loss_val = loss.item()
+                acc_val = acc_current.item()
+                
+                # ========== 显存释放：每个batch结束后释放GPU显存 ==========
+                # 1. 显式删除GPU张量/图
+                del g, node_feats1, node_feats2, node_labels, edge_feats, hv, loss, node_output
+                # 2. 强制Python垃圾回收
+                gc.collect()
+                # 3. 清理GPU缓存（关键）
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+                
+                # 计算batch运行时间
+                batch_time = time.time() - batch_start_time
+                
                 print(
                     "[TrainBatch] epoch {}/{} | batch_id {} | i {} | bs {} | "
-                    "loss {:.6f} | RMSE {:.6f}".format(
+                    "loss {:.6f} | RMSE {:.6f} | time {:.4f}s".format(
                         epoch, 30000 - 1,
                         batch_id, i, batch_size,
-                        loss.item(),
-                        acc_current.item()
+                        loss_val,
+                        acc_val,
+                        batch_time
                     )
                 )
                 
             if epoch >=3:
                 dur.append(time.time() - t0)
 
-            epoch_acc /= int(num_train/batch_size) + (num_train % batch_size > 0)
-            epoch_loss /= int(num_train / batch_size) + (num_train % batch_size > 0)
-            epoch_MAE /= int(num_train/batch_size) + (num_train%batch_size>0)
+            # 使用DataLoader的实际batch数量
+            num_batches = len(train_loader)
+            epoch_acc /= num_batches
+            epoch_loss /= num_batches
+            epoch_MAE /= num_batches
             
             epoch_time = np.mean(dur) if epoch >= 3 else 0
             print("Train Epoch {:05d} | Time(s) {:.4f} | Loss {:04f} | RMSE {:.4f} | MAE {:.4f} | AEmax {:.4f}".format(
@@ -502,16 +562,38 @@ def main():
                 epoch_test_acc = 0
                 epoch_test_MAE = 0
                 epoch_test_AEmax = 0
-                for i in range(0, num_test, batch_size):  
-                    test_batch = test_data[i : min(i+batch_size, num_test)]
-                    g, edge_feats = read_edge(test_batch)
-                    node_feats1, node_feats2, node_labels = read_node(test_batch)
-
-                    g = g.to(device=device)
-                    node_feats1 = torch.Tensor(node_feats1).to(device=device)
-                    node_feats2 = torch.Tensor(node_feats2).to(device=device)
-                    node_labels = torch.Tensor(node_labels).to(device=device)
-                    edge_feats = torch.Tensor(edge_feats).to(device=device)
+                
+                # 创建测试DataLoader（CPU多进程并行加载）
+                test_loader = create_dataloader(
+                    data_list=test_data,
+                    dataset_dir=dataset_dir,
+                    Power_min=Power_min, Power_max=Power_max,
+                    tPower_min=tPower_min, tPower_max=tPower_max,
+                    Temperature_min=Temperature_min, Temperature_max=Temperature_max,
+                    Conductance_min=Conductance_min, Conductance_max=Conductance_max,
+                    batch_size=batch_size,
+                    shuffle=False,  # 测试集不打乱
+                    num_workers=None,  # 自动设置为CPU核心数的1/2
+                    pin_memory=True,  # 加速CPU→GPU传输
+                    persistent_workers=True,  # 保持子进程常驻
+                    drop_last=False
+                )
+                
+                for batch_idx, batch_data in enumerate(test_loader):
+                    # 从DataLoader获取数据（已在CPU上，且已批量处理）
+                    test_batch = batch_data['case_nums']  # 保存case_nums用于后续可视化
+                    g = batch_data['g']
+                    node_feats1 = batch_data['node_feats1']
+                    node_feats2 = batch_data['node_feats2']
+                    node_labels = batch_data['node_labels']
+                    edge_feats = batch_data['edge_feats']
+                    
+                    # 移动到GPU（使用non_blocking加速异步传输）
+                    g = g.to(device=device, non_blocking=True)
+                    node_feats1 = node_feats1.to(device=device, non_blocking=True)
+                    node_feats2 = node_feats2.to(device=device, non_blocking=True)
+                    node_labels = node_labels.to(device=device, non_blocking=True)
+                    edge_feats = edge_feats.to(device=device, non_blocking=True)
      
                     acc, node_output, MAE, AEmax, _ = evaluate(model,  g, node_feats1,node_feats2,node_labels,edge_feats)
                     
@@ -520,11 +602,20 @@ def main():
                     if epoch_test_AEmax < AEmax:
                         epoch_test_AEmax = AEmax
 
-                    if i+2*batch_size >= num_test and i+batch_size < num_test:
+                    # 如果需要保存可视化，先转换到CPU并保存数据（在删除GPU张量之前）
+                    if batch_idx == len(test_loader) - 1:
+                        # 将GPU张量转换为CPU numpy数组，避免在删除后访问
+                        node_output_cpu = node_output.detach().cpu().numpy()
+                        node_labels_cpu = node_labels.detach().cpu().numpy()
+                        
+                        current_batch_size = len(test_batch)
+                        length_pred = int(math.sqrt((node_output_cpu.shape[0]/current_batch_size - 12)/3))
+                        length_stan = int(math.sqrt((node_labels_cpu.shape[0]/current_batch_size - 12)/3))
+                        
                         with open(results_dir+'Chiplet.grid.steady','w') as grid:
                             for m in range(length_pred):
                                 for n in range(length_pred):
-                                    grid.write(str(m*length_pred+n)+" "+ str((node_output[m*length_pred+n][0].tolist()+1)/2.0*(Temperature_max -Temperature_min)+Temperature_min)+"\n")
+                                    grid.write(str(m*length_pred+n)+" "+ str((node_output_cpu[m*length_pred+n][0]+1)/2.0*(Temperature_max -Temperature_min)+Temperature_min)+"\n")
                                 grid.write("\n")
                         cmd = "../grid_thermal_map.pl Chiplet_Core"+ test_batch[0][:test_batch[0].find('_')]+".flp "+results_dir+"Chiplet.grid.steady "+str(length_pred)+" "+ str(length_pred)+" > "+results_dir+"test_Chiplet_pred"+str(epoch)+"_"+str(0)+".svg"
                 
@@ -533,14 +624,28 @@ def main():
                         with open(results_dir+'Chiplet.grid.steady','w') as grid:
                             for m in range(length_stan):
                                 for n in range(length_stan):
-                                    grid.write(str(m*length_stan+n)+" "+ str((node_labels[m*length_stan+n][0].tolist()+1)/2.0*(Temperature_max -Temperature_min)+Temperature_min)+"\n")
+                                    grid.write(str(m*length_stan+n)+" "+ str((node_labels_cpu[m*length_stan+n][0]+1)/2.0*(Temperature_max -Temperature_min)+Temperature_min)+"\n")
                                 grid.write("\n")
                         cmd = "../grid_thermal_map.pl Chiplet_Core"+ test_batch[0][:test_batch[0].find('_')]+".flp "+results_dir+"Chiplet.grid.steady "+str(length_stan)+" "+ str(length_stan)+" > "+results_dir+"test_Chiplet_stan"+str(epoch)+"_"+str(0)+".svg"
                 
                         os.system(cmd)
+                        
+                        # 删除CPU副本
+                        del node_output_cpu, node_labels_cpu
 
-                epoch_test_acc /= int(num_test/batch_size) + (num_test%batch_size > 0)
-                epoch_test_MAE /= int(num_test/batch_size) + (num_test%batch_size > 0)
+                    # ========== 显存释放：测试循环中每个batch结束后释放GPU显存 ==========
+                    # 1. 显式删除GPU张量/图
+                    del g, node_feats1, node_feats2, node_labels, edge_feats, node_output
+                    # 2. 强制Python垃圾回收
+                    gc.collect()
+                    # 3. 清理GPU缓存
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
+
+                # 使用DataLoader的实际batch数量
+                num_test_batches = len(test_loader)
+                epoch_test_acc /= num_test_batches
+                epoch_test_MAE /= num_test_batches
                 test_time = time.time() - test_start_time
 
                 print("Test Epoch {:05d} | RMSE {:.4f} | MAE {:.4f} | AEmax {:.4f} | Test time: {:.4f}s".format(
