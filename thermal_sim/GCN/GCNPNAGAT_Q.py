@@ -1,3 +1,4 @@
+
 # GCN for Thermal analysis
 
 import dgl
@@ -12,13 +13,9 @@ from numpy import genfromtxt
 
 import csv
 from shutil import copyfile
-# 导入量化工具
-from torch.ao.quantization import QuantStub, DeQuantStub, get_default_qat_qconfig
-from torch.ao.quantization.fx import prepare_qat_fx, convert_fx
-from torch.ao.quantization import QConfigMapping
 
-dataset_dir = './dataset/data/'
-results_dir = './dataset/dataresults/'
+dataset_dir = '../dataset_rdl/data/'
+results_dir = '../dataset_rdl/dataresults/'
 
 
 
@@ -39,7 +36,8 @@ print(tPower_max, tPower_min, Power_max,Power_min,Temperature_max,Temperature_mi
 last_saved_epoch = 0
 date = '20210225'
 dir_name = 'GCN'
-ckpt_dir = 'ckptPNAGAT/{}_{}'.format(dir_name, date)
+# 使用相对路径保存到 save_model 目录
+ckpt_dir = '../save_model/{}_{}'.format(dir_name, date)
 is_inference = False
 ckpt_file = ckpt_dir + '/HSgcn_57.pkl'
 
@@ -98,13 +96,8 @@ def normal_init(m, mean, std):
 
 class MLP(nn.Module):
     def __init__(self,
-                 MLP_hidden_n,
-                 use_quantization=False):
+                 MLP_hidden_n):
         super(MLP, self).__init__()
-        self.use_quantization = use_quantization
-        if use_quantization:
-            self.quant = QuantStub()  # 量化入口
-            self.dequant = DeQuantStub()  # 反量化出口
         self.layers = nn.ModuleList()
         for i in range(len(MLP_hidden_n) - 1):
             self.layers.append(nn.Linear(MLP_hidden_n[i], MLP_hidden_n[i + 1]))
@@ -115,14 +108,11 @@ class MLP(nn.Module):
             normal_init(m, mean, std)
 
     def forward(self, hv):
-        if self.use_quantization:
-            hv = self.quant(hv)  # 量化
         for l, m in enumerate(self.layers):
             hv = m(hv)
             if l != len(self.layers) - 1:
                 hv = F.relu(hv)
-        if self.use_quantization:
-            hv = self.dequant(hv)  # 反量化
+
         return hv 
 
 
@@ -135,8 +125,7 @@ class HSConv(nn.Module):
                  edge_out_feats_size,
                  aggregators, 
                  scalers,
-                 avg_d,
-                 use_quantization=False):
+                 avg_d):
         super(HSConv, self).__init__()
 
         self.Skipnode_in_feats_size = Skipnode_in_feats_size
@@ -148,7 +137,7 @@ class HSConv(nn.Module):
         self.scalers = scalers
         self.avg_d = avg_d
 
-        self.posttrans = MLP([self.node_out_feats_size*len(aggregators)*len(scalers), self.node_out_feats_size], use_quantization=use_quantization) 
+        self.posttrans = MLP([self.node_out_feats_size*len(aggregators)*len(scalers), self.node_out_feats_size]) 
 
         self.weight_n2n_u = nn.Parameter(torch.Tensor(self.node_in_feats_size,self.node_out_feats_size))
         self.weight_n2n_v = nn.Parameter(torch.Tensor(self.Skipnode_in_feats_size+self.node_in_feats_size + self.node_out_feats_size,self.node_out_feats_size))
@@ -226,50 +215,30 @@ class HSModel(nn.Module):
                  aggregators,
                  scalers,
                  avg_d,
-                 activation,
-                 use_quantization=False):
+                 activation):
         super(HSModel, self).__init__()
-        self.use_quantization = use_quantization
-        if use_quantization:
-            self.quant = QuantStub()  # 量化入口
-            self.dequant = DeQuantStub()  # 反量化出口
         self.layers = nn.ModuleList()
         self.activation = activation
         self.n_layers = len(n_hidden_n)
         self.edge_out_feats_size = e_hidden_e[-1]
 
         for i in range(self.n_layers - 1):
-            self.layers.append(HSConv(Skipnode_in_feats_size, n_hidden_n[i], e_hidden_e[i], n_hidden_n[i + 1], e_hidden_e[i + 1], aggregators, scalers, avg_d, use_quantization))
+            self.layers.append(HSConv(Skipnode_in_feats_size, n_hidden_n[i], e_hidden_e[i], n_hidden_n[i + 1], e_hidden_e[i + 1], aggregators, scalers, avg_d))
             
     def forward(self, g, Skipnode_in_feats, node_in_feats, edge_in_feats):
-        if self.use_quantization:
-            node_in_feats = self.quant(node_in_feats)
-            edge_in_feats = self.quant(edge_in_feats)
-            Skipnode_in_feats = self.quant(Skipnode_in_feats)
-        
         hv = node_in_feats
         he = edge_in_feats
         for l, layer in enumerate(self.layers):
             if l == len(self.layers) - 1 and self.edge_out_feats_size == 0:
                 hv = layer(g, Skipnode_in_feats, hv, he)
-                if self.use_quantization:
-                    hv = self.dequant(hv)
                 return hv
 
             hv, he = layer(g, Skipnode_in_feats, hv, he)
             if l != len(self.layers) - 1:
                 hv = self.activation(hv)
                 he = self.activation(he)
-        
-        if self.use_quantization:
-            hv = self.dequant(hv)
-            if self.edge_out_feats_size != 0:
-                he = self.dequant(he)
-        
-        if self.edge_out_feats_size != 0:
-            return hv, he
-        else:
-            return hv
+
+        return hv, he
 
 
         
@@ -343,41 +312,6 @@ def read_edge(train_batch):
     return batched_graph, batched_edge_feats
 
 
-# 配置量化感知训练
-def setup_qat(model, backend='qnnpack', example_inputs=None):
-    """
-    配置训练感知量化（QAT）- 使用新版 FX 模式
-    backend: 'qnnpack' (CPU), 'fbgemm' (x86 CPU), 或 'x86' (x86 CPU)
-    example_inputs: 示例输入，用于 FX 模式追踪模型结构
-    """
-    # 获取 QAT 配置
-    qconfig = get_default_qat_qconfig(backend)
-    
-    # 创建 QConfigMapping
-    qconfig_mapping = QConfigMapping().set_global(qconfig)
-    
-    # 如果提供了示例输入，使用 FX 模式（推荐）
-    if example_inputs is not None:
-        try:
-            # 使用 FX 模式准备 QAT 模型
-            model = prepare_qat_fx(model, qconfig_mapping, example_inputs)
-            print("QAT setup using FX mode (recommended)")
-        except Exception as e:
-            print(f"FX mode failed: {e}, falling back to eager mode")
-            # 回退到 eager 模式
-            model.qconfig = qconfig
-            from torch.ao.quantization import prepare_qat
-            model = prepare_qat(model, inplace=True)
-    else:
-        # 如果没有示例输入，使用传统的 eager 模式
-        print("QAT setup using eager mode (no example inputs provided)")
-        model.qconfig = qconfig
-        from torch.ao.quantization import prepare_qat
-        model = prepare_qat(model, inplace=True)
-    
-    return model
-
-
 def main():
     global last_saved_epoch
     global Test_Acc_min
@@ -397,40 +331,14 @@ def main():
     test_data = test_data.reshape(-1).tolist()
     num_test = len(test_data)
 
-    # 创建模型，启用量化支持
-    model = HSModel(1, n_hidden_n, e_hidden_e, PNAaggregators, PNAscalers, {'log': np.log(7)}, F.relu, use_quantization=True)
+    model = HSModel(1, n_hidden_n, e_hidden_e, PNAaggregators, PNAscalers, {'log': np.log(7)}, F.relu)
     #node_MLP = MLP(1,MLP_hidden_n)
 
     if not is_inference:
         print("=" * 60)
-        print("Starting Training Mode with Quantization Aware Training (QAT)")
+        print("Starting Training Mode")
         print("=" * 60)
         model.to(device=device)
-        
-        # 配置并准备QAT
-        print("Setting up Quantization Aware Training...")
-        backend = 'qnnpack' if device.type == 'cpu' else 'x86'  # 使用 'x86' 替代 'fbgemm'（新版API）
-        
-        # 创建示例输入用于 FX 模式追踪模型结构
-        # 使用第一个训练样本作为示例
-        if len(train_data) > 0:
-            example_batch = [train_data[0]]
-            example_g, example_edge_feats = read_edge(example_batch)
-            example_node_feats1, example_node_feats2, example_node_labels = read_node(example_batch)
-            
-            example_g = example_g.to(device=device)
-            example_node_feats1 = torch.from_numpy(example_node_feats1).to(device=device)
-            example_node_feats2 = torch.from_numpy(example_node_feats2).to(device=device)
-            example_edge_feats = torch.from_numpy(example_edge_feats).to(device=device)
-            
-            # 创建示例输入元组 (g, node_feats2, node_feats1, edge_feats)
-            example_inputs = (example_g, example_node_feats2, example_node_feats1, example_edge_feats)
-        else:
-            example_inputs = None
-            print("Warning: No training data available, using eager mode for QAT")
-        
-        model = setup_qat(model, backend=backend, example_inputs=example_inputs)
-        print("QAT configured with backend: {}".format(backend))
         #node_MLP.to(device=device)
         
         
@@ -590,7 +498,6 @@ def main():
             
 
             if epoch % 1 == 0:
-                print("Testing...")
                 test_start_time = time.time()
                 epoch_test_acc = 0
                 epoch_test_MAE = 0
@@ -654,20 +561,6 @@ def main():
 
                 torch.save(model.state_dict(), ckpt_dir + '/HSgcn_{}.pkl'.format(epoch))
                 print("[Checkpoint] Model saved: HSgcn_{}.pkl (RMSE: {:.4f})".format(epoch, epoch_test_acc))
-                
-                # 保存量化版本的最佳模型
-                model.eval()
-                # 使用 convert_fx 进行转换（必须在 eval() 模式下执行）
-                try:
-                    quantized_best = convert_fx(model)
-                except Exception as e:
-                    print(f"convert_fx failed: {e}, falling back to convert")
-                    from torch.ao.quantization import convert
-                    quantized_best = convert(model, inplace=False)
-                torch.save(quantized_best.state_dict(), ckpt_dir + '/HSgcn_quantized_best_{}.pkl'.format(epoch))
-                print("[Checkpoint] Quantized best model saved: HSgcn_quantized_best_{}.pkl (RMSE: {:.4f})".format(epoch, epoch_test_acc))
-                model.train()  # 恢复训练模式
-                
                 #torch.save(node_MLP.state_dict(), ckpt_dir + '/HSdecoder_{}.pkl'.format(epoch))
                 #print("decoder saved")
                 
@@ -678,20 +571,6 @@ def main():
                 checkpoint_path = ckpt_dir + '/HSgcn_epoch_{}.pkl'.format(epoch)
                 torch.save(model.state_dict(), checkpoint_path)
                 print("[Checkpoint] Model saved every 10 epochs: HSgcn_epoch_{}.pkl (Epoch {})".format(epoch, epoch))
-                
-                # 每1个epoch保存一次量化模型
-                model.eval()
-                # 使用 convert_fx 进行转换（必须在 eval() 模式下执行）
-                try:
-                    quantized_model = convert_fx(model)
-                except Exception as e:
-                    print(f"convert_fx failed: {e}, falling back to convert")
-                    from torch.ao.quantization import convert
-                    quantized_model = convert(model, inplace=False)
-                quantized_model_path = ckpt_dir + '/HSgcn_quantized_epoch_{}.pkl'.format(epoch)
-                torch.save(quantized_model.state_dict(), quantized_model_path)
-                print("[Checkpoint] Quantized model saved every 10 epochs: HSgcn_quantized_epoch_{}.pkl (Epoch {})".format(epoch, epoch))
-                model.train()  # 恢复训练模式
             
             if epoch%1==0:
                 if os.path.exists(ckpt_dir+'/HSgcn.pt'):
