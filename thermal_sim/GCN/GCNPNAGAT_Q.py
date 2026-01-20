@@ -335,7 +335,7 @@ def main():
 
     model = HSModel(1, n_hidden_n, e_hidden_e, PNAaggregators, PNAscalers, {'log': np.log(7)}, F.relu)
     #node_MLP = MLP(1,MLP_hidden_n)
-
+    # 在训练开始前执行
     if not is_inference:
         print("=" * 60)
         print("Starting Training Mode")

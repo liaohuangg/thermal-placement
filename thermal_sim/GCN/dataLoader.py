@@ -140,7 +140,8 @@ def create_dataloader(data_list, dataset_dir,
     # 自动设置num_workers（CPU核心数的1/2，避免进程过多导致调度开销）
     if num_workers is None:
         cpu_count = os.cpu_count() or 4
-        num_workers = max(1, cpu_count // 2)
+        #num_workers = max(1, cpu_count // 2)  # 可自定义或者定义为1/2CPU核心数
+        num_workers = 12
         print(f"[DataLoader] Auto-set num_workers={num_workers} (CPU cores: {cpu_count})")
     
     # 创建Dataset
@@ -161,8 +162,8 @@ def create_dataloader(data_list, dataset_dir,
     dataloader = DataLoader(
         dataset=dataset,
         batch_size=batch_size,
-        shuffle=shuffle,
-        num_workers=num_workers,  # CPU多进程并行数
+        shuffle=True,
+        num_workers=8,  # CPU多进程并行数
         pin_memory=pin_memory,  # 锁页内存，加速CPU→GPU传输
         persistent_workers=persistent_workers if num_workers > 0 else False,  # 保持子进程常驻
         drop_last=drop_last,  # 是否丢弃最后一个不完整批次
