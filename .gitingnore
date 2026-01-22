@@ -1,0 +1,7 @@
+# 忽略特定文件类型
+*.ptrace
+*.flp
+*.log
+*.lp
+*.csv
+*.png
