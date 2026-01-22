@@ -541,7 +541,8 @@ def search_multiple_solutions(
     grid_size: Optional[float] = None,
     fixed_chiplet_idx: Optional[int] = None,
     min_pair_dist_diff: Optional[float] = None,  # chiplet对之间距离差异的最小阈值，如果为None则使用grid_size或默认值1.0；此参数控制距离排除约束：至少有一对chiplet的距离差必须 >= min_pair_dist_diff
-    output_dir: Optional[str] = None,  # 输出目录，用于保存.lp文件和图片；如果为None，则使用默认路径
+    output_dir: Optional[str] = None,  # 输出目录，用于保存.lp文件；如果为None，则使用默认路径
+    image_output_dir: Optional[str] = None,  # 图片输出目录，用于保存图片；如果为None则使用output_dir
 ) -> List[ILPPlacementResult]:
     """
     搜索多个不同的解。
@@ -555,7 +556,8 @@ def search_multiple_solutions(
         grid_size: 网格大小，如果提供则使用网格化布局
         fixed_chiplet_idx: 固定位置的chiplet索引
         min_pair_dist_diff: chiplet对之间距离差异的最小阈值，如果为None则使用grid_size或默认值1.0；此参数控制距离排除约束：至少有一对chiplet的距离差必须 >= min_pair_dist_diff
-        output_dir: 输出目录，用于保存.lp文件和图片；如果为None，则使用默认路径（相对于项目根目录的output目录）
+        output_dir: 输出目录，用于保存.lp文件；如果为None，则使用默认路径（相对于项目根目录的output目录）
+        image_output_dir: 图片输出目录，用于保存图片；如果为None则使用output_dir
     """
     # 如果提供了input_json_path，则从JSON文件加载
     if input_json_path is not None:
@@ -670,10 +672,14 @@ def search_multiple_solutions(
         # 确定输出目录
         if output_dir is None:
             # 默认输出目录：相对于项目根目录的output目录
-            default_output = Path(__file__).parent.parent / "output"
+            default_output = Path(__file__).parent.parent / "output_gurobi"
             output_dir_path = default_output
         else:
             output_dir_path = Path(output_dir)
+            # 如果是相对路径，将其解析为相对于项目根目录的路径
+            if not output_dir_path.is_absolute():
+                project_root = Path(__file__).parent.parent
+                output_dir_path = project_root / output_dir_path
         output_dir_path.mkdir(parents=True, exist_ok=True)
         lp_file = output_dir_path / f"constraints_solution_{i+1}_gurobi.lp"
         ctx.model.write(str(lp_file))
@@ -785,14 +791,23 @@ def search_multiple_solutions(
                 fixed_chiplet_names.add(node_name)
         
         # 保存图片到输出目录
-        # 使用相同的输出目录（如果output_dir为None，则使用默认路径）
-        if output_dir is None:
-            default_output = Path(__file__).parent.parent / "output"
-            output_dir_path = default_output
+        # 如果指定了image_output_dir，使用它；否则使用output_dir；如果都为None，则使用默认路径
+        project_root = Path(__file__).parent.parent
+        if image_output_dir is not None:
+            image_output_dir_path = Path(image_output_dir)
+            # 如果是相对路径，将其解析为相对于项目根目录的路径
+            if not image_output_dir_path.is_absolute():
+                image_output_dir_path = project_root / image_output_dir_path
+        elif output_dir is not None:
+            image_output_dir_path = Path(output_dir)
+            # 如果是相对路径，将其解析为相对于项目根目录的路径
+            if not image_output_dir_path.is_absolute():
+                image_output_dir_path = project_root / image_output_dir_path
         else:
-            output_dir_path = Path(output_dir)
-        output_dir_path.mkdir(parents=True, exist_ok=True)
-        image_path = output_dir_path / f"solution_{i+1}_layout_gurobi.png"
+            default_output = project_root / "output_gurobi"
+            image_output_dir_path = default_output
+        image_output_dir_path.mkdir(parents=True, exist_ok=True)
+        image_path = image_output_dir_path / f"solution_{i+1}_layout_gurobi.png"
         
         try:
             draw_chiplet_diagram(

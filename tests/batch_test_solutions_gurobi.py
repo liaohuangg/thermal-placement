@@ -312,6 +312,8 @@ def run_batch_tests(
     # 统计信息
     success_count = 0
     fail_count = 0
+    total_solutions_found = 0  # 总共找到的解的数量
+    total_solutions_expected = 0  # 期望找到的解的数量
     results_summary = []
     
     # 遍历每个JSON文件
@@ -400,6 +402,16 @@ def run_batch_tests(
             # 运行求解搜索（使用Gurobi版本）
             logger.info(f"调用 search_multiple_solutions (Gurobi版本)...")
 
+            # 转换为相对路径（相对于项目根目录）
+            project_root = Path(__file__).parent.parent
+            try:
+                lp_dir_relative = lp_dir.relative_to(project_root)
+                fig_dir_relative = fig_dir.relative_to(project_root)
+            except ValueError:
+                # 如果无法转换为相对路径，使用绝对路径
+                lp_dir_relative = lp_dir
+                fig_dir_relative = fig_dir
+            
             sols = search_multiple_solutions(
                 num_solutions=num_solutions,
                 min_shared_length=min_shared_length,
@@ -407,12 +419,16 @@ def run_batch_tests(
                 grid_size=grid_size,
                 fixed_chiplet_idx=fixed_chiplet_idx,
                 min_pair_dist_diff=min_pair_dist_diff,
-                output_dir=str(lp_dir),  # .lp文件保存到lp目录
-                image_output_dir=str(fig_dir)  # 图片保存到fig目录
+                output_dir=str(lp_dir_relative),  # .lp文件保存到lp目录（相对路径）
+                image_output_dir=str(fig_dir_relative)  # 图片保存到fig目录（相对路径）
             )
             time_end = time.time()
             logger.info(f"\n共找到 {len(sols)} 个不同的解。")
             print(f"  ✓ 成功：找到 {len(sols)} 个解")
+            
+            # 更新解的数量统计
+            total_solutions_found += len(sols)
+            total_solutions_expected += num_solutions
             
             # 如果没有从JSON加载到节点，尝试从第一个解的layout推断
             if len(nodes) == 0 and len(sols) > 0 and sols[0].status == "Optimal":
@@ -471,8 +487,11 @@ def run_batch_tests(
     time_end = time.time()
     print(f"  共花费时间: {time_end - time_start:.2f} 秒")
     print(f"{'='*80}")
-    print(f"成功: {success_count}/{len(json_files_list)}")
-    print(f"失败: {fail_count}/{len(json_files_list)}")
+    print(f"文件处理统计:")
+    print(f"  成功: {success_count}/{len(json_files_list)} 个文件")
+    print(f"  失败: {fail_count}/{len(json_files_list)} 个文件")
+    print(f"解的数量统计:")
+    print(f"  找到: {total_solutions_found}/{total_solutions_expected} 个解")
     print(f"\n详细结果:")
     for result in results_summary:
         if result['status'] == 'success':
