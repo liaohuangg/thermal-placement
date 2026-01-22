@@ -1,0 +1,94 @@
+{
+  "chiplets": [
+    {
+      "name": "A",
+      "width": 8.25,
+      "height": 9.0,
+      "power": 150
+    },
+    {
+      "name": "B",
+      "width": 8.25,
+      "height": 9.0,
+      "power": 150
+    },
+    {
+      "name": "C",
+      "width": 8.25,
+      "height": 9.0,
+      "power": 150
+    },
+    {
+      "name": "D",
+      "width": 8.25,
+      "height": 9.0,
+      "power": 150
+    },
+    {
+      "name": "E",
+      "width": 8.75,
+      "height": 8.75,
+      "power": 20
+    },
+    {
+      "name": "F",
+      "width": 8.75,
+      "height": 8.75,
+      "power": 20
+    },
+    {
+      "name": "G",
+      "width": 8.75,
+      "height": 8.75,
+      "power": 20
+    },
+    {
+      "name": "H",
+      "width": 8.75,
+      "height": 8.75,
+      "power": 20
+    }
+  ],
+  "connections": [
+    [
+      "A",
+      "B",
+      256
+    ],
+    [
+      "A",
+      "D",
+      256
+    ],
+    [
+      "A",
+      "E",
+      1024
+    ],
+    [
+      "B",
+      "C",
+      256
+    ],
+    [
+      "B",
+      "F",
+      1024
+    ],
+    [
+      "C",
+      "D",
+      256
+    ],
+    [
+      "C",
+      "G",
+      1024
+    ],
+    [
+      "D",
+      "H",
+      1024
+    ]
+  ]
+}
