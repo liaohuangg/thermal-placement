@@ -12,9 +12,9 @@
     # 指定参数处理所有文件
     python3 batch_test_solutions_gurobi.py --num-solutions 4 --grid-size 0.5 --min-pair-dist-diff 3.0
     
-    python batch_test_solutions_gurobi.py --num-solutions 30 --grid-size 0.5 --min-pair-dist-diff 10.0 --files 5core.json
+    python batch_test_solutions_gurobi.py --num-solutions 30 --grid-size 0.5 --min-pair-dist-diff 1.0 --files 5core.json
 
-    python batch_test_solutions_gurobi.py --num-solutions 30 --grid-size 0.5 --min-pair-dist-diff 10.0 --files 2core.json
+    python batch_test_solutions_gurobi.py --num-solutions 30 --grid-size 0.1 --min-pair-dist-diff 10.0 --files 2core.json
     # 只处理指定的文件
     python3 batch_test_solutions_gurobi.py --files 5core.json 6core.json
     
@@ -28,6 +28,7 @@ import shutil
 from pathlib import Path
 import logging
 from datetime import datetime
+import time
 from typing import Optional, List
 
 # 确保可以导入 ilp_sub_solution_search_gurobi
@@ -163,12 +164,17 @@ def print_solution_coordinates_and_distances(
             print(f"  ({i},{j}) [{name_i}, {name_j}]: x距离={x_dist:.3f}, y距离={y_dist:.3f}, 曼哈顿距离={manhattan_dist:.3f}")
 
 
-def setup_logging(output_dir: Path, core_name: str):
+def setup_logging(log_dir: Path, core_name: str):
     """
-    设置日志记录，将日志保存到输出目录。
+    设置日志记录，将日志保存到指定目录。
     同时设置stdout重定向，使print输出也保存到日志文件。
+    
+    Args:
+        log_dir: 日志文件保存目录
+        core_name: 核心名称
     """
-    log_file = output_dir / f"{core_name}_gurobi.log"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = log_dir / f"{core_name}_gurobi.log"
     
     # 打开日志文件用于写入
     log_file_handle = open(log_file, 'w', encoding='utf-8')
@@ -234,7 +240,7 @@ def run_batch_tests(
     
     # 确定测试输入目录
     if test_input_dir is None:
-        test_input_dir = project_root / "baseline" / "ICCAD23" / "test_input"
+        test_input_dir = project_root / "benchmark" / "test_input"
     
     if not test_input_dir.exists():
         print(f"错误：测试输入目录不存在: {test_input_dir}")
@@ -286,6 +292,7 @@ def run_batch_tests(
         return
     
     print(f"\n{'='*80}")
+    time_start = time.time()
     print(f"批量测试开始 (Gurobi版本)")
     print(f"{'='*80}")
     print(f"测试输入目录: {test_input_dir}")
@@ -310,28 +317,39 @@ def run_batch_tests(
     # 遍历每个JSON文件
     for idx, json_file in enumerate(json_files_list, 1):
         core_name = extract_core_name(json_file)
-        output_dir = output_base_dir / core_name
+        
+        # 创建分类输出目录
+        log_dir = output_base_dir / "log" / core_name
+        lp_dir = output_base_dir / "lp" / core_name
+        fig_dir = output_base_dir / "fig" / core_name
         
         print(f"\n[{idx}/{len(json_files_list)}] 处理文件: {json_file.name}")
         print(f"  核心名称: {core_name}")
-        print(f"  输出目录: {output_dir}")
+        print(f"  Log目录: {log_dir}")
+        print(f"  LP目录: {lp_dir}")
+        print(f"  Fig目录: {fig_dir}")
         
         # 删除旧的输出目录（如果存在）
-        if output_dir.exists():
-            print(f"  删除旧的输出目录: {output_dir}")
-            shutil.rmtree(output_dir)
+        for old_dir in [log_dir, lp_dir, fig_dir]:
+            if old_dir.exists():
+                print(f"  删除旧的输出目录: {old_dir}")
+                shutil.rmtree(old_dir)
         
         # 创建输出目录
-        output_dir.mkdir(parents=True, exist_ok=True)
+        log_dir.mkdir(parents=True, exist_ok=True)
+        lp_dir.mkdir(parents=True, exist_ok=True)
+        fig_dir.mkdir(parents=True, exist_ok=True)
         
         # 设置日志（同时重定向stdout到日志文件）
-        log_file, log_file_handle, original_stdout = setup_logging(output_dir, core_name)
+        log_file, log_file_handle, original_stdout = setup_logging(log_dir, core_name)
         logger = logging.getLogger()
         
         logger.info(f"{'='*80}")
         logger.info(f"开始处理: {json_file.name} (Gurobi版本)")
         logger.info(f"核心名称: {core_name}")
-        logger.info(f"输出目录: {output_dir}")
+        logger.info(f"Log目录: {log_dir}")
+        logger.info(f"LP目录: {lp_dir}")
+        logger.info(f"Fig目录: {fig_dir}")
         logger.info(f"参数配置:")
         logger.info(f"  - num_solutions: {num_solutions}")
         logger.info(f"  - min_shared_length: {min_shared_length}")
@@ -381,6 +399,7 @@ def run_batch_tests(
             
             # 运行求解搜索（使用Gurobi版本）
             logger.info(f"调用 search_multiple_solutions (Gurobi版本)...")
+
             sols = search_multiple_solutions(
                 num_solutions=num_solutions,
                 min_shared_length=min_shared_length,
@@ -388,9 +407,10 @@ def run_batch_tests(
                 grid_size=grid_size,
                 fixed_chiplet_idx=fixed_chiplet_idx,
                 min_pair_dist_diff=min_pair_dist_diff,
-                output_dir=str(output_dir)  # 指定输出目录
+                output_dir=str(lp_dir),  # .lp文件保存到lp目录
+                image_output_dir=str(fig_dir)  # 图片保存到fig目录
             )
-            
+            time_end = time.time()
             logger.info(f"\n共找到 {len(sols)} 个不同的解。")
             print(f"  ✓ 成功：找到 {len(sols)} 个解")
             
@@ -419,7 +439,9 @@ def run_batch_tests(
                 'core_name': core_name,
                 'status': 'success',
                 'num_solutions': len(sols),
-                'output_dir': str(output_dir)
+                'log_dir': str(log_dir),
+                'lp_dir': str(lp_dir),
+                'fig_dir': str(fig_dir)
             })
             
         except Exception as e:
@@ -432,7 +454,9 @@ def run_batch_tests(
                 'core_name': core_name,
                 'status': 'failed',
                 'error': str(e),
-                'output_dir': str(output_dir)
+                'log_dir': str(log_dir),
+                'lp_dir': str(lp_dir),
+                'fig_dir': str(fig_dir)
             })
         finally:
             # 恢复原始的stdout
@@ -444,6 +468,8 @@ def run_batch_tests(
     # 打印总结
     print(f"\n{'='*80}")
     print(f"批量测试完成 (Gurobi版本)")
+    time_end = time.time()
+    print(f"  共花费时间: {time_end - time_start:.2f} 秒")
     print(f"{'='*80}")
     print(f"成功: {success_count}/{len(json_files_list)}")
     print(f"失败: {fail_count}/{len(json_files_list)}")
@@ -451,11 +477,15 @@ def run_batch_tests(
     for result in results_summary:
         if result['status'] == 'success':
             print(f"  ✓ {result['file']} -> {result['core_name']}: {result['num_solutions']} 个解")
-            print(f"    输出目录: {result['output_dir']}")
+            print(f"    Log目录: {result.get('log_dir', 'N/A')}")
+            print(f"    LP目录: {result.get('lp_dir', 'N/A')}")
+            print(f"    Fig目录: {result.get('fig_dir', 'N/A')}")
         else:
             print(f"  ✗ {result['file']} -> {result['core_name']}: 失败")
             print(f"    错误: {result.get('error', 'Unknown error')}")
-            print(f"    输出目录: {result['output_dir']}")
+            print(f"    Log目录: {result.get('log_dir', 'N/A')}")
+            print(f"    LP目录: {result.get('lp_dir', 'N/A')}")
+            print(f"    Fig目录: {result.get('fig_dir', 'N/A')}")
     print(f"{'='*80}\n")
 
 
@@ -519,7 +549,7 @@ def main():
         '--test-input-dir',
         type=str,
         default=None,
-        help='测试输入目录（默认: baseline/ICCAD23/test_input）'
+        help='测试输入目录（默认: benchmark/test_input）'
     )
     
     parser.add_argument(

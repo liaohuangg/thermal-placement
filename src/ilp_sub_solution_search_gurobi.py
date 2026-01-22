@@ -566,7 +566,6 @@ def search_multiple_solutions(
             data = json.load(f)
         
         # 处理两种JSON格式：
-        # 格式1: {"chiplets": [...], "connections": [...]} (ICCAD23格式)
         # 格式2: {"chiplet_name": {"dimensions": ..., "phys": ..., "power": ...}} (旧格式)
         nodes = []
         edges = []
@@ -811,30 +810,3 @@ def search_multiple_solutions(
             pass
     
     return solutions
-
-
-if __name__ == "__main__":
-    import json
-    import sys
-    
-    if len(sys.argv) < 2:
-        print("Usage: python ilp_sub_solution_search_gurobi.py <input_json_file>")
-        sys.exit(1)
-    
-    input_file = sys.argv[1]
-    with open(input_file, 'r') as f:
-        data = json.load(f)
-    
-    nodes, edges = build_random_chiplet_graph(data)
-    
-    solutions = search_multiple_solutions(
-        nodes=nodes,
-        edges=edges,
-        num_solutions=5,
-        grid_size=0.5,
-        fixed_chiplet_idx=0,
-        min_pair_dist_diff=0.5,
-    )
-    
-    print(f"\n总共找到 {len(solutions)} 个解")
-

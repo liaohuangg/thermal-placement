@@ -203,45 +203,6 @@ def solve_placement_ilp_from_model(
             bounding_box=(W if W else 100.0, H if H else 100.0),
         )
 
-
-def solve_placement_ilp(
-    nodes: List[ChipletNode],
-    edges: List[Tuple[str, str]],
-    W: Optional[float] = None,
-    H: Optional[float] = None,
-    time_limit: int = 300,
-    verbose: bool = True,
-    min_shared_length: float = 0.0,
-    minimize_bbox_area: bool = True,
-    distance_weight: float = 1.0,
-    area_weight: float = 0.1,
-) -> ILPPlacementResult:
-    """
-    兼容旧接口的一站式求解函数：
-    内部先调用 :func:`build_placement_ilp_model_grid` 构建模型，
-    然后用 :func:`solve_placement_ilp_from_model` 进行一次求解。
-    """
-
-    ctx = build_placement_ilp_model_grid(
-        nodes=nodes,
-        edges=edges,
-        grid_size=1.0,  # 默认网格大小
-        W=W,
-        H=H,
-        verbose=verbose,
-        min_shared_length=min_shared_length,
-        minimize_bbox_area=minimize_bbox_area,
-        distance_weight=distance_weight,
-        area_weight=area_weight,
-    )
-
-    return solve_placement_ilp_from_model(
-        ctx,
-        time_limit=time_limit,
-        verbose=verbose,
-    )
-
-
 def build_placement_ilp_model_grid(
     nodes: List[ChipletNode],
     edges: List[Tuple[str, str]],
@@ -255,6 +216,8 @@ def build_placement_ilp_model_grid(
     distance_weight: float = 1.0,
     area_weight: float = 0.1,
     fixed_chiplet_idx: Optional[int] = None,  # 已废弃，不再使用固定芯粒约束
+    min_aspect_ratio: float = 0.8,
+    max_aspect_ratio: float = 1.25,
 ) -> ILPModelContext:
     """
     使用网格化ILP求解chiplet布局。
@@ -646,6 +609,51 @@ def build_placement_ilp_model_grid(
     model.addConstr(bbox_w == bbox_max_x - bbox_min_x, name="bbox_w_def")
     model.addConstr(bbox_h == bbox_max_y - bbox_min_y, name="bbox_h_def")
     
+    # 4.8 长宽比约束
+    if min_aspect_ratio is not None:
+        # bbox_w / bbox_h >= min_aspect_ratio
+        # 转换为线性约束: bbox_w >= min_aspect_ratio * bbox_h
+        model.addConstr(
+            bbox_w >= min_aspect_ratio * bbox_h,
+            name="aspect_ratio_min"
+        )
+        if verbose:
+            print(f"长宽比约束: bbox_w/bbox_h >= {min_aspect_ratio}")
+    
+    if max_aspect_ratio is not None:
+        # bbox_w / bbox_h <= max_aspect_ratio
+        # 转换为线性约束: bbox_w <= max_aspect_ratio * bbox_h
+        model.addConstr(
+            bbox_w <= max_aspect_ratio * bbox_h,
+            name="aspect_ratio_max"
+        )
+        if verbose:
+            print(f"长宽比约束: bbox_w/bbox_h <= {max_aspect_ratio}")
+    
+    # 5.3 长宽比优化目标（最小化长宽比与理想值的偏差）
+    # 理想长宽比设为1.0（正方形），使用 |bbox_w/bbox_h - 1| 的线性近似
+    aspect_ratio_penalty = None
+    if minimize_bbox_area:  # 只在最小化面积时考虑长宽比优化
+        # 使用辅助变量表示长宽比偏差
+        # 由于 bbox_w/bbox_h 是非线性的，我们使用 |bbox_w - bbox_h| 作为近似
+        # 这鼓励长宽接近，从而接近正方形
+        aspect_ratio_diff = model.addVar(
+            name="aspect_ratio_diff",
+            lb=0,
+            ub=max(W, H),
+            vtype=GRB.CONTINUOUS
+        )
+        # |bbox_w - bbox_h| <= aspect_ratio_diff
+        model.addConstr(
+            aspect_ratio_diff >= bbox_w - bbox_h,
+            name="aspect_ratio_diff_ge_w_minus_h"
+        )
+        model.addConstr(
+            aspect_ratio_diff >= bbox_h - bbox_w,
+            name="aspect_ratio_diff_ge_h_minus_w"
+        )
+        aspect_ratio_penalty = aspect_ratio_diff
+    
     # ============ 步骤5: 定义目标函数 ============
     # 5.1 线长（曼哈顿距离）
     wirelength = 0
@@ -770,14 +778,25 @@ def build_placement_ilp_model_grid(
     alpha = 0.8
     model.addConstr(t >= alpha * (bbox_w + bbox_h), name="t_ge_scaled_mean")
     
-    # 5.3 目标函数
+    # 5.4 目标函数
+    aspect_ratio_weight = 0.05  # 长宽比优化权重（相对于其他项）
+    
     if minimize_bbox_area:
-        model.setObjective(distance_weight * wirelength + area_weight * t, GRB.MINIMIZE)
+        if aspect_ratio_penalty is not None:
+            objective = (distance_weight * wirelength + 
+                        area_weight * t + 
+                        aspect_ratio_weight * aspect_ratio_penalty)
+            model.setObjective(objective, GRB.MINIMIZE)
+            if verbose:
+                print(f"目标函数: {distance_weight} * wirelength + {area_weight} * area_proxy + {aspect_ratio_weight} * aspect_ratio_penalty")
+        else:
+            model.setObjective(distance_weight * wirelength + area_weight * t, GRB.MINIMIZE)
+            if verbose:
+                print(f"目标函数: {distance_weight} * wirelength + {area_weight} * area_proxy")
     else:
         model.setObjective(distance_weight * wirelength, GRB.MINIMIZE)
-    
-    if verbose:
-        print(f"目标函数: {distance_weight} * wirelength + {area_weight} * area_proxy")
+        if verbose:
+            print(f"目标函数: {distance_weight} * wirelength")
     
     return ILPModelContext(
         model=model,
