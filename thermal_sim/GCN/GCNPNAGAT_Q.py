@@ -7,6 +7,7 @@ from dgl.nn import edge_softmax
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.amp import GradScaler, autocast
 import math, time, os
 import numpy as np
 from numpy import genfromtxt
@@ -49,7 +50,7 @@ e_hidden_e = [1, 16, 32, 64, 128, 256, 512, 512, 512, 256, 128, 64, 32, 16, 0]#[
 #MLP_hidden_n = [64, 64, 128, 128, 256, 256, 512, 512, 1024, 1024, 2048,2048, 4096, 4096, 2048, 2048, 1024,1024, 512,512, 256,256, 128,128, 64,64,  1]
 
 
-batch_size = 4
+batch_size = 6
 
 if torch.cuda.is_available():
     device = torch.device('cuda')
@@ -248,20 +249,21 @@ def evaluate(model, g, node_feats1, node_feats2, node_labels, edge_features):
     model.eval()
    # node_MLP.eval()
     with torch.no_grad():
-        #hc = torch.cat([node_feats1, node_feats2], dim=1)
-        nt = model(g, node_feats2, node_feats1, edge_features)
-        #nt = node_MLP(node_feats2,nt)
-    
+        # 在评估时也使用autocast加速计算
+        with autocast(device_type='cuda'):
+            #hc = torch.cat([node_feats1, node_feats2], dim=1)
+            nt = model(g, node_feats2, node_feats1, edge_features)
+            #nt = node_MLP(node_feats2,nt)
         
-        err = torch.sum((node_labels - nt)** 2)
-        
-        length = nt.shape[0] * nt.shape[1]
-        
-        rmse = torch.sqrt(err / length)
+            err = torch.sum((node_labels - nt)** 2)
+            
+            length = nt.shape[0] * nt.shape[1]
+            
+            rmse = torch.sqrt(err / length)
 
-        MAE = torch.mean(torch.abs(node_labels-nt))
-        AEmax = torch.max(torch.abs(node_labels-nt))
-        AEmin = torch.min(torch.abs(node_labels-nt))
+            MAE = torch.mean(torch.abs(node_labels-nt))
+            AEmax = torch.max(torch.abs(node_labels-nt))
+            AEmin = torch.min(torch.abs(node_labels-nt))
 
         return rmse, nt, MAE, AEmax, AEmin
 
@@ -353,10 +355,14 @@ def main():
         optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
         #optimizer_MLP = torch.optim.Adam(node_MLP.parameters(), lr=1e-4)
         
+        # 创建混合精度训练的GradScaler
+        scaler = GradScaler(device=device)
+        
         print('Model initialized on device: {}'.format(device))
         print('Batch size: {}, num_train: {}, num_test: {}'.format(batch_size, num_train, num_test))
         print('Checkpoint directory: {}'.format(ckpt_dir))
         print('Results directory: {}'.format(results_dir))
+        print('Mixed Precision Training: ENABLED (FP16)')
         print('-' * 60)
         
         # 确保检查点目录存在
@@ -371,6 +377,8 @@ def main():
         #    checkpoint = torch.load(ckpt_dir+'/HSgcn.pt')
         #    model.load_state_dict(checkpoint['model_state_dict'])
         #    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        #    if 'scaler_state_dict' in checkpoint:
+        #        scaler.load_state_dict(checkpoint['scaler_state_dict'])
         #    epoch_mem = checkpoint['epoch']+1
         
         training_start_time = time.time()
@@ -437,17 +445,21 @@ def main():
                 # 计算当前batch的索引（用于兼容原有代码）
                 i = batch_idx * batch_size
 
-                #hc = torch.cat([node_feats1,node_feats2], dim=1)
-                hv = model(g, node_feats2, node_feats1, edge_feats)
-
-                # loss = MSEloss(hv,node_labels)+MSEloss(he,edge_labels)
-                loss = MSEloss(hv,node_labels)
-                
+                # 使用混合精度训练：autocast包装前向传播和损失计算
                 optimizer.zero_grad()
                 #optimizer_MLP.zero_grad()
-
-                loss.backward()
-                optimizer.step()
+                
+                with autocast(device_type='cuda'):
+                    #hc = torch.cat([node_feats1,node_feats2], dim=1)
+                    hv = model(g, node_feats2, node_feats1, edge_feats)
+                    
+                    # loss = MSEloss(hv,node_labels)+MSEloss(he,edge_labels)
+                    loss = MSEloss(hv, node_labels)
+                
+                # 使用scaler进行梯度缩放和反向传播
+                scaler.scale(loss).backward()
+                scaler.step(optimizer)
+                scaler.update()  # 更新scaler状态
                 #optimizer_MLP.step()
 
 
@@ -684,7 +696,8 @@ def main():
                 torch.save({
                     'epoch':epoch,
                     'model_state_dict':model.state_dict(),
-                    'optimizer_state_dict':optimizer.state_dict()
+                    'optimizer_state_dict':optimizer.state_dict(),
+                    'scaler_state_dict':scaler.state_dict()  # 保存scaler状态用于恢复训练
                     }, ckpt_dir + '/HSgcn.pt')
                 if epoch % 100 == 0:
                     print("[Checkpoint] Full checkpoint saved: HSgcn.pt (Epoch {})".format(epoch))
