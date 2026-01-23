@@ -14,82 +14,8 @@ from ilp_method_gurobi import (
     ILPPlacementResult,
     build_placement_ilp_model_grid,
     solve_placement_ilp_from_model,
+    add_absolute_value_constraint_big_m,
 )
-
-
-def add_absolute_value_constraint_big_m(
-    model: gp.Model,
-    abs_var: gp.Var,
-    orig_var: gp.Var,
-    M: float,
-    constraint_prefix: str,
-) -> None:
-    """
-    使用Big-M方法添加绝对值约束：abs_var = |orig_var|
-    
-    参数:
-        model: Gurobi模型
-        abs_var: 绝对值变量（>= 0）
-        orig_var: 原始变量（可以是正数或负数）
-        M: Big-M常数（必须 >= |orig_var|的最大可能值）
-        constraint_prefix: 约束名称前缀（用于生成唯一的约束名称）
-    
-    实现方法（参考Big-M方法）：
-    1. 创建二进制变量 is_positive，表示 orig_var >= 0
-    2. 使用4个约束强制 abs_var = |orig_var|
-       - 当 orig_var >= 0 时 (is_positive=1): abs_var = orig_var
-       - 当 orig_var < 0 时 (is_positive=0): abs_var = -orig_var
-    3. 使用2个约束强制 is_positive 的正确性
-    """
-    # 创建二进制变量：is_positive = 1 当且仅当 orig_var >= 0
-    is_positive = model.addVar(
-        name=f"{constraint_prefix}_is_positive",
-        vtype=GRB.BINARY
-    )
-    
-    # 约束1: 当 orig_var >= 0 时 (is_positive=1)，约束简化为: abs_var >= orig_var
-    # 当 orig_var < 0 时 (is_positive=0)，约束不起作用（M很大）
-    model.addConstr(
-        abs_var >= orig_var - M * (1 - is_positive),
-        name=f"{constraint_prefix}_abs_ge_orig"
-    )
-    
-    # 约束2: 当 orig_var >= 0 时 (is_positive=1)，约束简化为: abs_var <= orig_var
-    # 当 orig_var < 0 时 (is_positive=0)，约束不起作用（M很大）
-    model.addConstr(
-        abs_var <= orig_var + M * (1 - is_positive),
-        name=f"{constraint_prefix}_abs_le_orig"
-    )
-    
-    # 约束3: 当 orig_var < 0 时 (is_positive=0)，约束简化为: abs_var >= -orig_var
-    # 当 orig_var >= 0 时 (is_positive=1)，约束不起作用（M很大）
-    model.addConstr(
-        abs_var >= -orig_var - M * is_positive,
-        name=f"{constraint_prefix}_abs_ge_neg_orig"
-    )
-    
-    # 约束4: 当 orig_var < 0 时 (is_positive=0)，约束简化为: abs_var <= -orig_var
-    # 当 orig_var >= 0 时 (is_positive=1)，约束不起作用（M很大）
-    model.addConstr(
-        abs_var <= -orig_var + M * is_positive,
-        name=f"{constraint_prefix}_abs_le_neg_orig"
-    )
-    
-    # 约束5: 强制 is_positive = 1 当 orig_var >= 0
-    # 如果 orig_var >= 0，则必须 is_positive = 1（否则约束不满足）
-    model.addConstr(
-        orig_var >= -M * (1 - is_positive),
-        name=f"{constraint_prefix}_force_positive"
-    )
-    
-    # 约束6: 强制 is_positive = 0 当 orig_var < 0
-    # 如果 orig_var < 0，则必须 is_positive = 0（否则约束不满足）
-    # 使用一个很小的epsilon来避免边界情况
-    epsilon = 0.001
-    model.addConstr(
-        orig_var <= M * is_positive - epsilon,
-        name=f"{constraint_prefix}_force_negative"
-    )
 
 
 def _add_exclude_dist_constraint(
@@ -465,14 +391,9 @@ def add_exclude_constraint(
         min_diff: 判断位置"不同"的最小差异阈值。如果为None，则使用grid_size（如果存在）或默认值0.01。
     """
 
-    model = ctx.model
-    x = ctx.x
-    y = ctx.y
-    n = len(ctx.nodes)
     W = ctx.W
     H = ctx.H
-    fixed_chiplet_idx = ctx.fixed_chiplet_idx  # 获取固定的chiplet索引
-    
+
     
     # 如果没有提供之前解的位置和距离列表，则尝试读取当前解作为上一解
     # 注意：这个分支通常不应该被执行，因为 add_exclude_constraint 是在求解之前调用的
@@ -567,66 +488,53 @@ def search_multiple_solutions(
         with open(input_json_path, 'r') as f:
             data = json.load(f)
         
-        # 处理两种JSON格式：
-        # 格式2: {"chiplet_name": {"dimensions": ..., "phys": ..., "power": ...}} (旧格式)
+        # 处理JSON格式：{"chiplets": [...], "connections": [...]}
         nodes = []
         edges = []
         
-        if "chiplets" in data and isinstance(data["chiplets"], list):
-            # 格式1: ICCAD23格式
-            for chiplet_info in data["chiplets"]:
-                name = chiplet_info.get("name", "")
-                width = chiplet_info.get("width", 0.0)
-                height = chiplet_info.get("height", 0.0)
-                
-                nodes.append(
-                    ChipletNode(
-                        name=name,
-                        dimensions={"x": width, "y": height},
-                        phys=[],
-                        power=chiplet_info.get("power", 0.0),
-                    )
-                )
-            
-            # 提取连接关系
-            if "connections" in data and isinstance(data["connections"], list):
-                for conn in data["connections"]:
-                    if isinstance(conn, list) and len(conn) >= 2:
-                        src, dst = conn[0], conn[1]
-                        # 确保边是唯一的（避免重复）
-                        edge = (src, dst) if src < dst else (dst, src)
-                        if edge not in edges:
-                            edges.append(edge)
-        else:
-            # 格式2: 旧格式（字典格式）
-            from input_process import build_chiplet_table
-            table = build_chiplet_table(data)
-            for row in table:
-                nodes.append(
-                    ChipletNode(
-                        name=row["name"],
-                        dimensions=row["dimensions"],
-                        phys=row["phys"],
-                        power=row["power"],
-                    )
-                )
-            
-            # 从JSON数据中提取边（如果存在）
-            for chiplet_name, chiplet_data in data.items():
-                if isinstance(chiplet_data, dict) and "connections" in chiplet_data:
-                    for conn in chiplet_data["connections"]:
-                        if isinstance(conn, dict) and "target" in conn:
-                            target = conn["target"]
-                            # 确保边是唯一的（避免重复）
-                            edge = (chiplet_name, target) if chiplet_name < target else (target, chiplet_name)
-                            if edge not in edges:
-                                edges.append(edge)
+        if "chiplets" not in data or not isinstance(data["chiplets"], list):
+            raise ValueError(f"JSON文件格式错误：必须包含 'chiplets' 列表字段。文件: {input_json_path}")
         
-        # 如果没有找到边，使用默认的随机生成方法
+        # 构建 ChipletNode 对象
+        for chiplet_info in data["chiplets"]:
+            name = chiplet_info.get("name", "")
+            width = chiplet_info.get("width", 0.0)
+            height = chiplet_info.get("height", 0.0)
+            
+            nodes.append(
+                ChipletNode(
+                    name=name,
+                    dimensions={"x": width, "y": height},
+                    phys=[],
+                    power=chiplet_info.get("power", 0.0),
+                )
+            )
+        
+        # 提取连接关系，支持连接类型（第四列：1=silicon_bridge, 0=standard）
+        if "connections" in data and isinstance(data["connections"], list):
+            for conn in data["connections"]:
+                if isinstance(conn, list) and len(conn) >= 3:
+                    src, dst = conn[0], conn[1]
+                    # 读取连接类型：必须有第四列
+                    if len(conn) < 4:
+                        raise ValueError(f"连接格式错误：必须包含4列 [src, dst, weight, conn_type]。当前连接: {conn}")
+                    conn_type = conn[3]
+                    if conn_type not in [0, 1]:
+                        raise ValueError(f"连接类型错误：conn_type 必须是 0 (standard) 或 1 (silicon_bridge)。当前值: {conn_type}")
+                    # 确保边是唯一的（避免重复），但保留连接类型信息
+                    if src < dst:
+                        edge = (src, dst, conn_type)
+                    else:
+                        edge = (dst, src, conn_type)
+                    # 检查是否已存在相同的边（忽略连接类型）
+                    edge_exists = any(e[0] == edge[0] and e[1] == edge[1] for e in edges)
+                    if not edge_exists:
+                        edges.append(edge)
+                else:
+                    raise ValueError(f"连接格式错误：每个连接必须是包含至少3个元素的列表 [src, dst, weight, conn_type]。当前连接: {conn}")
+        
         if len(edges) == 0:
-            from tool import generate_random_links
-            names = [n.name for n in nodes]
-            edges = generate_random_links(names, edge_prob=0.2, fixed_num_edges=4)
+            raise ValueError(f"JSON文件中没有找到有效的连接关系。文件: {input_json_path}")
     elif nodes is None or edges is None:
         raise ValueError("必须提供 input_json_path 或 nodes 和 edges 参数")
     
@@ -721,25 +629,29 @@ def search_multiple_solutions(
                 y_coords[k] = 0.0
         
         # 获取grid坐标值（左下角）
+        # 方法1：直接从 result.layout 获取（它已经是网格坐标）
         x_grid_coords = {}
         y_grid_coords = {}
-        for k in range(len(nodes)):
-            x_grid_var = ctx.model.getVarByName(f"x_grid_{k}")
-            y_grid_var = ctx.model.getVarByName(f"y_grid_{k}")
-            if x_grid_var is not None and y_grid_var is not None:
-                x_grid_val = x_grid_var.X
-                y_grid_val = y_grid_var.X
-                if x_grid_val is not None and y_grid_val is not None:
-                    x_grid_coords[k] = float(x_grid_val)
-                    y_grid_coords[k] = float(y_grid_val)
-                else:
-                    # 如果无法获取grid坐标，使用实际坐标转换为grid坐标
-                    x_grid_coords[k] = x_coords[k] / grid_size_val
-                    y_grid_coords[k] = y_coords[k] / grid_size_val
+        for k, node in enumerate(nodes):
+            node_name = node.name if hasattr(node, 'name') else f"Chiplet_{k}"
+            if node_name in result.layout:
+                x_grid_coords[k], y_grid_coords[k] = result.layout[node_name]
             else:
-                # 如果没有grid变量，使用实际坐标转换为grid坐标
-                x_grid_coords[k] = x_coords[k] / grid_size_val
-                y_grid_coords[k] = y_coords[k] / grid_size_val
+                # 方法2：如果 layout 中没有，尝试从模型变量获取
+                x_grid_var = ctx.model.getVarByName(f"x_grid_var_{k}")
+                y_grid_var = ctx.model.getVarByName(f"y_grid_var_{k}")
+                if x_grid_var is not None and y_grid_var is not None:
+                    x_grid_val = x_grid_var.X
+                    y_grid_val = y_grid_var.X
+                    if x_grid_val is not None and y_grid_val is not None:
+                        x_grid_coords[k] = float(x_grid_val)
+                        y_grid_coords[k] = float(y_grid_val)
+                    else:
+                        x_grid_coords[k] = 0.0
+                        y_grid_coords[k] = 0.0
+                else:
+                    x_grid_coords[k] = 0.0
+                    y_grid_coords[k] = 0.0
         
         # 计算每对chiplet之间的曼哈顿距离（使用grid坐标中心点）
         for i_idx in range(len(nodes)):
@@ -778,20 +690,44 @@ def search_multiple_solutions(
         print(f"目标函数值: {result.objective_value:.4f}")
         
         # 绘制并保存布局图片
+        # layout 包含网格坐标（x_grid_var, y_grid_var），draw_chiplet_diagram 会处理坐标转换和旋转
         layout_dict = {}
         fixed_chiplet_names = set()
+        
         for k, node in enumerate(nodes):
             node_name = node.name if hasattr(node, 'name') else f"Chiplet_{k}"
-            # 直接从result.layout获取坐标（左下角坐标，不受旋转影响）
+            
+            # 获取网格坐标（ILP求解的结果，已经是网格坐标）
             if node_name in result.layout:
-                layout_dict[node_name] = result.layout[node_name]
+                x_grid, y_grid = result.layout[node_name]
+                layout_dict[node_name] = (float(x_grid), float(y_grid))
             else:
                 layout_dict[node_name] = (0.0, 0.0)
+            
             if fixed_chiplet_idx is not None and k == fixed_chiplet_idx:
                 fixed_chiplet_names.add(node_name)
         
+        # 构建边类型映射（用于绘图时区分硅桥互联和普通互联）
+        edge_type_map = {}
+        for edge in edges:
+            if len(edge) == 3:
+                src, dst, conn_type = edge
+                # conn_type: 1=silicon_bridge, 0=standard
+                if conn_type == 1:
+                    edge_type_map[(src, dst)] = "silicon_bridge"
+                    edge_type_map[(dst, src)] = "silicon_bridge"  # 双向
+                else:
+                    edge_type_map[(src, dst)] = "normal"
+                    edge_type_map[(dst, src)] = "normal"  # 双向
+            elif len(edge) == 2:
+                # 旧格式，默认为普通连接
+                src, dst = edge
+                if (src, dst) not in edge_type_map:
+                    edge_type_map[(src, dst)] = "normal"
+                    edge_type_map[(dst, src)] = "normal"
+        
         # 保存图片到输出目录
-        # 如果指定了image_output_dir，使用它；否则使用output_dir；如果都为None，则使用默认路径
+        # 优先使用 image_output_dir，否则使用 output_dir/../fig，最后使用默认路径
         project_root = Path(__file__).parent.parent
         if image_output_dir is not None:
             image_output_dir_path = Path(image_output_dir)
@@ -799,29 +735,45 @@ def search_multiple_solutions(
             if not image_output_dir_path.is_absolute():
                 image_output_dir_path = project_root / image_output_dir_path
         elif output_dir is not None:
-            image_output_dir_path = Path(output_dir)
-            # 如果是相对路径，将其解析为相对于项目根目录的路径
-            if not image_output_dir_path.is_absolute():
-                image_output_dir_path = project_root / image_output_dir_path
+            # 如果 output_dir 是相对路径，解析为相对于项目根目录
+            output_dir_path = Path(output_dir)
+            if not output_dir_path.is_absolute():
+                output_dir_path = project_root / output_dir_path
+            # 图片保存到与 output_dir 同级的 fig 目录，保持相同的子目录结构
+            # 例如：output_gurobi/lp/acend910_core -> output_gurobi/fig/acend910_core
+            if output_dir_path.name:  # 如果有子目录名（如 acend910_core）
+                image_output_dir_path = output_dir_path.parent.parent / "fig" / output_dir_path.name
+            else:
+                image_output_dir_path = output_dir_path.parent / "fig"
         else:
-            default_output = project_root / "output_gurobi"
+            # 默认保存到 output_gurobi/fig
+            default_output = project_root / "output_gurobi" / "fig"
             image_output_dir_path = default_output
+        
+        # 确保目录存在
         image_output_dir_path.mkdir(parents=True, exist_ok=True)
         image_path = image_output_dir_path / f"solution_{i+1}_layout_gurobi.png"
         
+        print(f"[DEBUG] 图片保存路径: {image_path}")
+        print(f"[DEBUG] image_output_dir_path: {image_output_dir_path}")
+        print(f"[DEBUG] image_output_dir 参数: {image_output_dir}")
+        print(f"[DEBUG] output_dir 参数: {output_dir}")
+        
         try:
             draw_chiplet_diagram(
-                nodes=nodes,
+                nodes=nodes,  # 使用原始nodes，函数内部会处理旋转
                 edges=edges,
                 save_path=str(image_path),
-                layout=layout_dict,
+                layout=layout_dict,  # 网格坐标
                 fixed_chiplet_names=fixed_chiplet_names if fixed_chiplet_names else None,
+                grid_size=grid_size if grid_size is not None else 1.0,
+                rotations=result.rotations if hasattr(result, 'rotations') else None,
+                edge_types=edge_type_map,  # 传递边类型映射
             )
-            # 简化输出：不再打印布局图片保存信息
-            # print(f"\n布局图片已保存: {image_path}")
+            print(f"\n布局图片已保存: {image_path}")
         except Exception as e:
-            # 简化输出：不再打印错误信息
-            # print(f"\n警告: 保存布局图片时出错: {e}")
-            pass
+            print(f"\n警告: 保存布局图片时出错: {e}")
+            import traceback
+            traceback.print_exc()
     
     return solutions

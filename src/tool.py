@@ -348,6 +348,8 @@ def draw_chiplet_diagram(
     layout: Optional[Dict[str, Tuple[float, float]]] = None,
     edge_types: Optional[Dict[Tuple[str, str], str]] = None,
     fixed_chiplet_names: Optional[set] = None,  # 固定的chiplet名称集合，这些chiplet将用粉红色绘制
+    grid_size: float = 1.0,  # 网格大小，用于将网格坐标转换为实际坐标
+    rotations: Optional[Dict[str, bool]] = None,  # 旋转信息：name -> 是否旋转
 ):
     """
     画出 chiplet 方框图。
@@ -363,8 +365,8 @@ def draw_chiplet_diagram(
     save_path:
         若给定，则保存到该路径；否则直接 ``plt.show()``。
     layout:
-        可选，自定义布局 dict: name -> (origin_x, origin_y)。如果为 None，
-        则使用 :func:`default_grid_layout`。
+        可选，自定义布局 dict: name -> (x_grid, y_grid)，其中坐标是网格坐标（需要乘以 grid_size 得到实际坐标）。
+        如果为 None，则使用 :func:`default_grid_layout`。
     edge_types:
         可选的边类型映射，格式为 {(src, dst): "silicon_bridge" | "normal"}。
         如果 edges 是新格式或提供了此参数，将根据类型使用不同颜色：
@@ -372,6 +374,10 @@ def draw_chiplet_diagram(
         - 普通链接边：灰色
     fixed_chiplet_names:
         固定的chiplet名称集合。如果提供，这些chiplet将用粉红色绘制，其他chiplet用淡蓝色。
+    grid_size:
+        网格大小，用于将 layout 中的网格坐标转换为实际坐标。默认值为 1.0。
+    rotations:
+        旋转信息字典：name -> 是否旋转。如果提供，会根据旋转状态交换 chiplet 的长宽。
     """
 
     if not nodes:
@@ -398,11 +404,30 @@ def draw_chiplet_diagram(
             print(f"[警告] chiplet {node.name} 不在layout中，跳过绘制")
             continue
 
-        origin_x, origin_y = layout[node.name]
+        # 获取网格坐标并转换为实际坐标
+        x_grid, y_grid = layout[node.name]
+        origin_x = float(x_grid) * grid_size
+        origin_y = float(y_grid) * grid_size
+        
         drawn_count += 1
-        print(f"[DEBUG 绘图] 绘制 {node.name}: 位置=({origin_x:.2f}, {origin_y:.2f})")
-        w = float(node.dimensions.get("x", 0.0))
-        h = float(node.dimensions.get("y", 0.0))
+        print(f"[DEBUG 绘图] 绘制 {node.name}: 网格坐标=({x_grid:.2f}, {y_grid:.2f}), 实际坐标=({origin_x:.2f}, {origin_y:.2f})")
+        
+        # 获取原始尺寸
+        orig_w = float(node.dimensions.get("x", 0.0))
+        orig_h = float(node.dimensions.get("y", 0.0))
+        
+        # 检查是否旋转
+        is_rotated = False
+        if rotations is not None and node.name in rotations:
+            is_rotated = rotations[node.name]
+        
+        # 如果旋转，交换长宽
+        if is_rotated:
+            w = orig_h
+            h = orig_w
+        else:
+            w = orig_w
+            h = orig_h
 
         # 判断是否为固定chiplet，固定chiplet使用粉红色，其他使用淡蓝色
         if fixed_chiplet_names is not None and node.name in fixed_chiplet_names:
@@ -420,14 +445,18 @@ def draw_chiplet_diagram(
         )
         ax.add_patch(rect)
 
-        # 在左下角写名字
+        # 在chiplet块中心写名字
+        center_x = origin_x + w / 2.0
+        center_y = origin_y + h / 2.0
         ax.text(
-            origin_x + 0.1,
-            origin_y + h + 0.1,
+            center_x,
+            center_y,
             node.name,
-            fontsize=8,
-            ha="left",
-            va="bottom",
+            fontsize=10,
+            ha="center",
+            va="center",
+            weight="bold",
+            color="black",
         )
 
         # phys 点：红色小方块（仅用于显示，不用于连接）
@@ -457,15 +486,33 @@ def draw_chiplet_diagram(
         edge_type_map.update(edge_types)
     
     # 从edges中提取类型信息（如果是新格式）
+    # edges 可能是 (src, dst, conn_type) 格式，其中 conn_type 是整数：1=silicon_bridge, 0=standard
     for edge in edges:
         if len(edge) == 3:
-            src, dst, edge_type = edge
-            edge_type_map[(src, dst)] = edge_type
+            src, dst, conn_type = edge
+            # 将整数 conn_type 转换为字符串类型
+            if isinstance(conn_type, int):
+                if conn_type == 1:
+                    edge_type_map[(src, dst)] = "silicon_bridge"
+                    edge_type_map[(dst, src)] = "silicon_bridge"  # 双向
+                else:
+                    edge_type_map[(src, dst)] = "normal"
+                    edge_type_map[(dst, src)] = "normal"  # 双向
+            elif isinstance(conn_type, str):
+                # 如果已经是字符串，直接使用
+                edge_type_map[(src, dst)] = conn_type
+                edge_type_map[(dst, src)] = conn_type  # 双向
         elif len(edge) == 2:
             src, dst = edge
             # 如果没有提供类型信息，默认为普通链接边
             if (src, dst) not in edge_type_map:
                 edge_type_map[(src, dst)] = "normal"
+                edge_type_map[(dst, src)] = "normal"  # 双向
+    
+    # 调试输出：打印边类型映射
+    print(f"[DEBUG 绘图] 边类型映射:")
+    for (src, dst), etype in edge_type_map.items():
+        print(f"  ({src}, {dst}): {etype}")
     
     for edge in edges:
         # 处理不同格式的边
@@ -483,9 +530,10 @@ def draw_chiplet_diagram(
         
         # 根据边类型选择颜色
         edge_type = edge_type_map.get((src, dst), "normal")
+        print(f"[DEBUG 绘图] 绘制边 ({src}, {dst}): 类型={edge_type}")
         if edge_type == "silicon_bridge":
             edge_color = "green"  # 硅桥互联边：绿色
-            linewidth = 2.0  # 稍微粗一点以突出显示
+            linewidth = 3.0  # 更粗一点以突出显示
         else:
             edge_color = "gray"  # 普通链接边：灰色
             linewidth = 1.0
@@ -516,9 +564,27 @@ def draw_chiplet_diagram(
     for node in nodes:
         if node.name not in layout:
             continue
-        ox, oy = layout[node.name]
-        w = float(node.dimensions.get("x", 0.0))
-        h = float(node.dimensions.get("y", 0.0))
+        x_grid, y_grid = layout[node.name]
+        ox = float(x_grid) * grid_size
+        oy = float(y_grid) * grid_size
+        
+        # 获取原始尺寸
+        orig_w = float(node.dimensions.get("x", 0.0))
+        orig_h = float(node.dimensions.get("y", 0.0))
+        
+        # 检查是否旋转
+        is_rotated = False
+        if rotations is not None and node.name in rotations:
+            is_rotated = rotations[node.name]
+        
+        # 如果旋转，交换长宽
+        if is_rotated:
+            w = orig_h
+            h = orig_w
+        else:
+            w = orig_w
+            h = orig_h
+        
         # 记录左下角和右上角坐标
         all_x_min.append(ox)
         all_x_max.append(ox + w)
@@ -547,6 +613,7 @@ def draw_chiplet_diagram(
         plt.show()
 
     plt.close(fig)
+ 
 
 
 if __name__ == "__main__":
@@ -674,8 +741,8 @@ def print_pair_distances_only(
     x_curr = {}
     y_curr = {}
     for k in range(n):
-        x_val = get_var_value(ctx.x[k])
-        y_val = get_var_value(ctx.y[k])
+        x_val = get_var_value(ctx.x_grid_var[k])
+        y_val = get_var_value(ctx.y_grid_var[k])
         if x_val is not None and y_val is not None:
             x_curr[k] = float(x_val)
             y_curr[k] = float(y_val)
@@ -853,9 +920,15 @@ def print_all_variables(
             print(f"  cy[{k}] ({node_name}): {cy_val}")
     
     # 6. 相邻方式变量 (z1, z2, z1L, z1R, z2D, z2U)
-    if len(ctx.connected_pairs) > 0:
+    # 兼容新旧格式：如果有 connected_pairs 使用它，否则使用 silicon_bridge_pairs
+    connected_pairs = getattr(ctx, 'connected_pairs', None)
+    if connected_pairs is None:
+        # 新格式：使用 silicon_bridge_pairs（只有它们有相邻约束变量）
+        connected_pairs = getattr(ctx, 'silicon_bridge_pairs', [])
+    
+    if len(connected_pairs) > 0:
         print("\n【相邻方式变量】")
-        for i, j in ctx.connected_pairs:
+        for i, j in connected_pairs:
             name_i = nodes[i].name if hasattr(nodes[i], 'name') else f"Chiplet_{i}"
             name_j = nodes[j].name if hasattr(nodes[j], 'name') else f"Chiplet_{j}"
             z1_val = get_var_value(ctx.z1.get((i, j))) if (i, j) in ctx.z1 else None

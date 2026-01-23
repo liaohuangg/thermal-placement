@@ -56,7 +56,8 @@ class ILPModelContext:
     - `r`     : 每个 chiplet 的旋转变量
     - `z1, z2`: 每对有连边的 chiplet 的"相邻方式"变量（水平/垂直）
     - `z1L, z1R, z2D, z2U`: 每对有连边的 chiplet 的相对方向变量（左、右、下、上）
-    - `connected_pairs` : 有连边的 (i, j) 索引列表（i < j）
+    - `silicon_bridge_pairs` : silicon_bridge 连接的 (i, j) 索引列表（i < j）
+    - `standard_pairs` : standard 连接的 (i, j) 索引列表（i < j）
     - `bbox_w, bbox_h` : 外接方框宽和高对应的变量
     - `W, H`  : 外接边界框的上界尺寸（建模阶段确定）
     - `grid_size` : 网格大小（如果使用网格化，否则为None）
@@ -65,10 +66,10 @@ class ILPModelContext:
 
     model: gp.Model
     nodes: List[ChipletNode]
-    edges: List[Tuple[str, str]]
+    edges: List[Tuple[str, str, int]]  # (src, dst, connection_type): 1=silicon_bridge, 0=standard
 
-    x: Dict[int, gp.Var]
-    y: Dict[int, gp.Var]
+    x_grid_var: Dict[int, gp.Var]
+    y_grid_var: Dict[int, gp.Var]
     r: Dict[int, gp.Var]
     z1: Dict[Tuple[int, int], gp.Var]
     z2: Dict[Tuple[int, int], gp.Var]
@@ -76,7 +77,8 @@ class ILPModelContext:
     z1R: Dict[Tuple[int, int], gp.Var]
     z2D: Dict[Tuple[int, int], gp.Var]
     z2U: Dict[Tuple[int, int], gp.Var]
-    connected_pairs: List[Tuple[int, int]]
+    silicon_bridge_pairs: List[Tuple[int, int]]
+    standard_pairs: List[Tuple[int, int]]
 
     bbox_w: gp.Var
     bbox_h: gp.Var
@@ -109,7 +111,7 @@ def solve_placement_ilp_from_model(
 
     model = ctx.model
     nodes = ctx.nodes
-    x, y, r = ctx.x, ctx.y, ctx.r
+    x_grid_var, y_grid_var, r = ctx.x_grid_var, ctx.y_grid_var, ctx.r
     W, H = ctx.W, ctx.H
 
     start_time = time.time()
@@ -149,8 +151,8 @@ def solve_placement_ilp_from_model(
         rotations: Dict[str, bool] = {}
         for k, node in enumerate(nodes):
             if model.status == GRB.OPTIMAL:
-                x_val = x[k].X if x[k] is not None else 0.0
-                y_val = y[k].X if y[k] is not None else 0.0
+                x_val = x_grid_var[k].X if x_grid_var[k] is not None else 0.0
+                y_val = y_grid_var[k].X if y_grid_var[k] is not None else 0.0
                 r_val = r[k].X if r[k] is not None else 0.0
                 layout[node.name] = (x_val, y_val)
                 rotations[node.name] = bool(r_val > 0.5)
@@ -203,9 +205,71 @@ def solve_placement_ilp_from_model(
             bounding_box=(W if W else 100.0, H if H else 100.0),
         )
 
+
+def add_absolute_value_constraint_big_m(
+    model: gp.Model,
+    abs_var: gp.Var,
+    orig_var: gp.Var,
+    M: float,
+    constraint_prefix: str,
+) -> None:
+    """
+    使用Big-M方法添加绝对值约束：abs_var = |orig_var|
+    
+    实现方法（参考Big-M方法）：
+    1. 创建二进制变量 is_positive，表示 orig_var >= 0
+    2. 使用4个约束强制 abs_var = |orig_var|
+       - 当 orig_var >= 0 时 (is_positive=1): abs_var = orig_var
+       - 当 orig_var < 0 时 (is_positive=0): abs_var = -orig_var
+    3. 使用2个约束强制 is_positive 的正确性
+    """
+    # 创建二进制变量：is_positive = 1 当且仅当 orig_var >= 0
+    is_positive = model.addVar(
+        name=f"{constraint_prefix}_is_positive",
+        vtype=GRB.BINARY
+    )
+    
+    # 约束1: 当 orig_var >= 0 时 (is_positive=1)，约束简化为: abs_var >= orig_var
+    model.addConstr(
+        abs_var >= orig_var - M * (1 - is_positive),
+        name=f"{constraint_prefix}_abs_ge_orig"
+    )
+    
+    # 约束2: 当 orig_var >= 0 时 (is_positive=1)，约束简化为: abs_var <= orig_var
+    model.addConstr(
+        abs_var <= orig_var + M * (1 - is_positive),
+        name=f"{constraint_prefix}_abs_le_orig"
+    )
+    
+    # 约束3: 当 orig_var < 0 时 (is_positive=0)，约束简化为: abs_var >= -orig_var
+    model.addConstr(
+        abs_var >= -orig_var - M * is_positive,
+        name=f"{constraint_prefix}_abs_ge_neg_orig"
+    )
+    
+    # 约束4: 当 orig_var < 0 时 (is_positive=0)，约束简化为: abs_var <= -orig_var
+    model.addConstr(
+        abs_var <= -orig_var + M * is_positive,
+        name=f"{constraint_prefix}_abs_le_neg_orig"
+    )
+    
+    # 约束5: 强制 is_positive = 1 当 orig_var >= 0
+    model.addConstr(
+        orig_var >= -M * (1 - is_positive),
+        name=f"{constraint_prefix}_force_positive"
+    )
+    
+    # 约束6: 强制 is_positive = 0 当 orig_var < 0
+    epsilon = 0.001
+    model.addConstr(
+        orig_var <= M * is_positive - epsilon,
+        name=f"{constraint_prefix}_force_negative"
+    )
+
+
 def build_placement_ilp_model_grid(
     nodes: List[ChipletNode],
-    edges: List[Tuple[str, str]],
+    edges: List[Tuple[str, str, int]],  # (src, dst, connection_type): 1=silicon_bridge, 0=standard
     grid_size: float,
     W: Optional[float] = None,
     H: Optional[float] = None,
@@ -241,99 +305,122 @@ def build_placement_ilp_model_grid(
     name_to_idx = {node.name: i for i, node in enumerate(nodes)}
     
     # ============ 步骤1: 读取已知条件 ============
-    w_orig = {}
-    h_orig = {}
+    # 1.1 读取芯片原始尺寸 chiplet_w_orig chiplet_h_orig 表示chiplet的长宽
+    chiplet_w_orig = {}
+    chiplet_h_orig = {}
     for i, node in enumerate(nodes):
-        w_orig[i] = float(node.dimensions.get("x", 0.0))
-        h_orig[i] = float(node.dimensions.get("y", 0.0))
+        chiplet_w_orig[i] = float(node.dimensions.get("x", 0.0))
+        chiplet_h_orig[i] = float(node.dimensions.get("y", 0.0))
+        print(f"node {i} w: {chiplet_w_orig[i]}, h: {chiplet_h_orig[i]}")
     
-    # 找到所有有边连接的模块对
-    connected_pairs = []
-    for src_name, dst_name in edges:
+    chiplet_w_orig_grid = {} # 网格化后的尺寸
+    chiplet_h_orig_grid = {} # 网格化后的尺寸
+    for i, node in enumerate(nodes):
+        chiplet_w_orig_grid[i] = int(chiplet_w_orig[i] / grid_size)
+        chiplet_h_orig_grid[i] = int(chiplet_h_orig[i] / grid_size)
+        print(f"node {i} chiplet_w_orig_grid: {chiplet_w_orig_grid[i]}, chiplet_h_orig_grid: {chiplet_h_orig_grid[i]}")
+    
+    # 1.2 找到所有有边连接的模块对，并区分连接类型
+    silicon_bridge_pairs = []  # silicon_bridge 连接的模块对（需要紧邻约束）
+    standard_pairs = []  # standard 连接的模块对（可以更宽松的约束）
+    
+    for edge in edges:
+        # edges 必须是三元组格式 (src, dst, conn_type)
+        if len(edge) != 3:
+            raise ValueError(f"边格式错误：每条边必须是三元组 (src, dst, conn_type)，其中 conn_type 为 0 (standard) 或 1 (silicon_bridge)。当前边: {edge}")     
+        src_name, dst_name, conn_type = edge
+        
+        if conn_type not in [0, 1]:
+            raise ValueError(f"连接类型错误：conn_type 必须是 0 (standard) 或 1 (silicon_bridge)。当前值: {conn_type}，边: {edge}")
+        
         if src_name in name_to_idx and dst_name in name_to_idx:
             i = name_to_idx[src_name]
             j = name_to_idx[dst_name]
             if i != j:
                 if i > j:
                     i, j = j, i
-                connected_pairs.append((i, j))
-    connected_pairs = list(set(connected_pairs))
+                pair = (i, j)
+                # 根据连接类型分类
+                if conn_type == 1:  # silicon_bridge
+                    if pair not in silicon_bridge_pairs:
+                        silicon_bridge_pairs.append(pair)
+                else:  # standard (conn_type == 0)
+                    if pair not in standard_pairs:
+                        standard_pairs.append(pair)
     
-    # 估算芯片边界框尺寸
-    if W is None or H is None:
-        max_w = max(w_orig.values())
-        max_h = max(h_orig.values())
-        total_area = sum(w_orig[i] * h_orig[i] for i in range(n))
-        estimated_side = math.ceil(math.sqrt(total_area * 2))
-        if W is None:
-            W = max(estimated_side, max_w * 3)
-        if H is None:
-            H = max(estimated_side, max_h * 3)
-    
-    # 计算grid数量
-    grid_w = int(math.ceil(W / grid_size))
-    grid_h = int(math.ceil(H / grid_size))
+    silicon_bridge_pairs = list(set(silicon_bridge_pairs))
+    standard_pairs = list(set(standard_pairs))
+    all_connected_pairs = silicon_bridge_pairs + standard_pairs  # 用于统计和线长计算
     
     if verbose:
-        print(f"网格化布局: grid_size={grid_size}, grid_w={grid_w}, grid_h={grid_h}")
-        print(f"问题规模: {n} 个模块, {len(connected_pairs)} 对有连接的模块对")
+        print(f"连接类型统计: silicon_bridge={len(silicon_bridge_pairs)}, standard={len(standard_pairs)}, 总计={len(all_connected_pairs)}")
+    
+    # 1.3 估算芯片边界框尺寸,使用网格化后的尺寸
+    if W is None or H is None:
+        total_area = sum(chiplet_w_orig_grid[i] * chiplet_h_orig_grid[i] for i in range(n))
+        print(f"total_area: {total_area}")
+        estimated_side = math.ceil(math.sqrt(total_area * 2))
+        print(f"estimated_side: {estimated_side}")
+        if W is None:
+            W = estimated_side * 3
+        if H is None:
+            H = estimated_side * 3
+        print(f"Estimated W: {W}, H: {H}")
+    
+    if verbose:
+        print(f"网格化布局: grid_size={grid_size}, W={W}, grid_h={H}")
+        print(f"问题规模: {n} 个模块, {len(all_connected_pairs)} 对有连接的模块对")
+    
+    # 1.4 计算共享边长(硅桥互联硬约束)网格数
+    min_shared_length_grid = int(math.ceil(min_shared_length / grid_size))
     
     # ============ 步骤2: 创建ILP问题 ============
     model = gp.Model("ChipletPlacementGrid")
     
     # 大M常数
-    M = 200
-    
+    M = max(W, H) * 3 # 确保 M 足够覆盖任何两个组件之间的距离
+
     # ============ 步骤3: 定义变量 ============
-    # 3.1 整数变量：每个chiplet在grid中的左下角坐标（grid索引）
-    x_grid = {}
-    y_grid = {}
-    for k in range(n):
-        x_grid[k] = model.addVar(
-            name=f"x_grid_{k}",
-            lb=0,
-            ub=grid_w - 1,
-            vtype=GRB.INTEGER
-        )
-        y_grid[k] = model.addVar(
-            name=f"y_grid_{k}",
-            lb=0,
-            ub=grid_h - 1,
-            vtype=GRB.INTEGER
-        )
-    
-    # 3.2 连续变量：实际坐标（用于计算距离和共享边长）
-    x = {}
-    y = {}
-    for k in range(n):
-        x[k] = model.addVar(name=f"x_{k}", lb=0, ub=W, vtype=GRB.CONTINUOUS)
-        y[k] = model.addVar(name=f"y_{k}", lb=0, ub=H, vtype=GRB.CONTINUOUS)
-        # 约束：实际坐标 = grid坐标 * grid_size
-        model.addConstr(x[k] == x_grid[k] * grid_size, name=f"x_grid_to_real_{k}")
-        model.addConstr(y[k] == y_grid[k] * grid_size, name=f"y_grid_to_real_{k}")
-    
-    # 3.3 二进制变量：旋转变量
+    # 3.1 二进制变量：旋转变量
     r = {}
     for k in range(n):
         r[k] = model.addVar(name=f"r_{k}", vtype=GRB.BINARY)
     
-    # 3.4 连续变量：实际宽度和高度
-    w = {}
-    h = {}
+    # 3.2 整数变量：实际宽度和高度
+    w_var = {}
+    h_var = {}
     for k in range(n):
-        w_min = min(w_orig[k], h_orig[k])
-        w_max = max(w_orig[k], h_orig[k])
-        w[k] = model.addVar(name=f"w_{k}", lb=w_min, ub=w_max, vtype=GRB.CONTINUOUS)
-        h[k] = model.addVar(name=f"h_{k}", lb=w_min, ub=w_max, vtype=GRB.CONTINUOUS)
+        w_min = min(chiplet_w_orig_grid[k], chiplet_h_orig_grid[k])
+        w_max = max(chiplet_w_orig_grid[k], chiplet_h_orig_grid[k])
+        w_var[k] = model.addVar(name=f"w_var_{k}", lb=w_min, ub=w_max, vtype=GRB.INTEGER)
+        h_var[k] = model.addVar(name=f"h_var_{k}", lb=w_min, ub=w_max, vtype=GRB.INTEGER)
     
-    # 3.5 辅助变量：中心坐标
+    # 3.3 整数变量：每个chiplet在grid中的左下角坐标（grid索引）
+    # 坐标的上下界为0到W - w_var[k]和0到H - h_var[k] 不能超过边界框 - 实际长宽（考虑旋转）
+    x_grid_var = {}
+    y_grid_var = {}
+    for k in range(n):
+        x_grid_var[k] = model.addVar(
+            name=f"x_grid_var_{k}",
+            lb=0,
+            ub=W,
+            vtype=GRB.INTEGER
+        )
+        y_grid_var[k] = model.addVar(
+            name=f"y_grid_var_{k}",
+            lb=0,
+            ub=H,
+            vtype=GRB.INTEGER
+        )
+
+    # 3.4 辅助变量：中心坐标
     cx = {}
     cy = {}
     for k in range(n):
-        cx[k] = model.addVar(name=f"cx_{k}", lb=0, ub=W, vtype=GRB.CONTINUOUS)
-        cy[k] = model.addVar(name=f"cy_{k}", lb=0, ub=H, vtype=GRB.CONTINUOUS)
+        cx[k] = model.addVar(name=f"cx_{k}", lb=0, ub=W, vtype=GRB.INTEGER)
+        cy[k] = model.addVar(name=f"cy_{k}", lb=0, ub=H, vtype=GRB.INTEGER)
     
-    # 3.6 二进制变量：控制相邻方式
+    # 3.5 二进制变量：控制相邻方式
     z1 = {}
     z2 = {}
     z1L = {}
@@ -341,8 +428,8 @@ def build_placement_ilp_model_grid(
     z2D = {}
     z2U = {}
     
-    # 3.7 二进制变量：控制相邻方式
-    for i, j in connected_pairs:
+    # 3.6 二进制变量：控制相邻方式（仅对 silicon_bridge 连接需要）
+    for i, j in silicon_bridge_pairs:
         z1[(i, j)] = model.addVar(name=f"z1_{i}_{j}", vtype=GRB.BINARY)
         z2[(i, j)] = model.addVar(name=f"z2_{i}_{j}", vtype=GRB.BINARY)
         z1L[(i, j)] = model.addVar(name=f"z1L_{i}_{j}", vtype=GRB.BINARY)
@@ -351,179 +438,133 @@ def build_placement_ilp_model_grid(
         z2U[(i, j)] = model.addVar(name=f"z2U_{i}_{j}", vtype=GRB.BINARY)
     
     # ============ 步骤4: 定义约束 ============
-    
-    # 4.1 旋转约束
+
+    # 4.1 旋转约束 & 边界约束
     for k in range(n):
+        # 旋转约束  
         model.addConstr(
-            w[k] == w_orig[k] + r[k] * (h_orig[k] - w_orig[k]),
+            w_var[k] == chiplet_w_orig_grid[k] + r[k] * (chiplet_h_orig_grid[k] - chiplet_w_orig_grid[k]),
             name=f"width_rotation_{k}"
         )
         model.addConstr(
-            h[k] == h_orig[k] + r[k] * (w_orig[k] - h_orig[k]),
+            h_var[k] == chiplet_h_orig_grid[k] + r[k] * (chiplet_w_orig_grid[k] - chiplet_h_orig_grid[k]),
             name=f"height_rotation_{k}"
         )
+        # 边界约束
+        model.addConstr(x_grid_var[k] <= W - w_var[k], name=f"x_grid_var_ub_{k}")
+        model.addConstr(y_grid_var[k] <= H - h_var[k], name=f"y_grid_var_ub_{k}")
     
     # 4.2 中心坐标定义
-    for k in range(n):
-        model.addConstr(cx[k] == x[k] + w[k] / 2.0, name=f"cx_def_{k}")
-        model.addConstr(cy[k] == y[k] + h[k] / 2.0, name=f"cy_def_{k}")
-    
-    # 约束Chiplet宽高为grid_size的整数倍（对齐网格）
-    for k in range(n):
-        # 1. 计算固定的网格数（向上取整，不是变量）
-        w_grid_k = int(math.ceil(w_orig[k] / grid_size))
-        h_grid_k = int(math.ceil(h_orig[k] / grid_size))
-        
-        # 2. 约束芯片宽度=网格数×grid_size（对齐网格）
-        model.addConstr(w[k] == w_grid_k * grid_size, name=f"w_align_grid_{k}")
-        model.addConstr(h[k] == h_grid_k * grid_size, name=f"h_align_grid_{k}")
-        
-        # 3. 额外约束：对齐后的尺寸不超过全局范围（可选，确保合理性）
-        model.addConstr(w[k] <= W, name=f"w_max_{k}")
-        model.addConstr(h[k] <= H, name=f"h_max_{k}")
-    
-    # 4.4 相邻约束：对于每对有连接的模块对 (i, j)
-    for i, j in connected_pairs:
+    # for k in range(n):
+    #     model.addConstr(cx[k] == x_grid_var[k] + w_var[k] / 2.0, name=f"cx_def_{k}")
+    #     model.addConstr(cy[k] == y_grid_var[k] + h_var[k] / 2.0, name=f"cy_def_{k}")
+   
+    # 4.3 相邻约束：根据连接类型应用不同的约束
+    # 4.3.1 silicon_bridge 连接：必须紧邻（当前约束）
+    for i, j in silicon_bridge_pairs:
         # 规则1: 必须相邻，且只能选一种方式
         model.addConstr(
             z1[(i, j)] + z2[(i, j)] == 1,
-            name=f"must_adjacent_{i}_{j}"
+            name=f"must_adjacent_sb_{i}_{j}"
         )
         
         # 规则2: 如果水平相邻，要么 i 在左，要么 i 在右
         model.addConstr(
             z1L[(i, j)] + z1R[(i, j)] == z1[(i, j)],
-            name=f"horizontal_direction_{i}_{j}"
+            name=f"horizontal_direction_sb_{i}_{j}"
         )
         
         # 规则3: 如果垂直相邻，要么 i 在下，要么 i 在上
         model.addConstr(
             z2D[(i, j)] + z2U[(i, j)] == z2[(i, j)],
-            name=f"vertical_direction_{i}_{j}"
+            name=f"vertical_direction_sb_{i}_{j}"
         )
         
-        # 规则4: 水平相邻的具体约束
-        # 约束1：相邻方向的边界距离 ≤ grid_size
+        # 规则4: 水平相邻的具体约束（silicon_bridge：必须紧邻）
+        # 约束：相邻方向的边界距离 ≤ grid_size
         # 如果 i 在左（z1L[i,j] = 1）：x_j - (x_i + w_i) <= grid_size（距离不超过1个grid）
         model.addConstr(
-            x[j] - (x[i] + w[i]) <= grid_size + M * (1 - z1L[(i, j)]),
+            x_grid_var[j] - (x_grid_var[i] + w_var[i]) <= grid_size + M * (1 - z1L[(i, j)]),
             name=f"horizontal_left_dist_{i}_{j}"
         )
         model.addConstr(
-            x[j] - (x[i] + w[i]) >= 0 - M * (1 - z1L[(i, j)]),
+            x_grid_var[j] - (x_grid_var[i] + w_var[i]) >= 0 - M * (1 - z1L[(i, j)]),
             name=f"horizontal_left_dist_lb_{i}_{j}"
         )
         # 如果 i 在右（z1R[i,j] = 1）：x_i - (x_j + w_j) <= grid_size（距离不超过1个grid）
         model.addConstr(
-            x[i] - (x[j] + w[j]) <= grid_size + M * (1 - z1R[(i, j)]),
+            x_grid_var[i] - (x_grid_var[j] + w_var[j]) <= grid_size + M * (1 - z1R[(i, j)]),
             name=f"horizontal_right_dist_{i}_{j}"
         )
         model.addConstr(
-            x[i] - (x[j] + w[j]) >= 0 - M * (1 - z1R[(i, j)]),
+            x_grid_var[i] - (x_grid_var[j] + w_var[j]) >= 0 - M * (1 - z1R[(i, j)]),
             name=f"horizontal_right_dist_lb_{i}_{j}"
         )
         
-        # 约束2：垂直方向（与相邻方向垂直）的重叠长度 >= min_shared_length
-        # 重叠长度 = min(y[i] + h[i], y[j] + h[j]) - max(y[i], y[j])
-        # 首先确保有重叠：y[i] < y[j] + h[j] 且 y[j] < y[i] + h[i]
-        model.addConstr(
-            y[i] - (y[j] + h[j]) <= M * (1 - z1[(i, j)]),
-            name=f"horizontal_overlap_y1_{i}_{j}"
-        )
-        model.addConstr(
-            y[j] - (y[i] + h[i]) <= M * (1 - z1[(i, j)]),
-            name=f"horizontal_overlap_y2_{i}_{j}"
-        )
-        
-        # 共享边长度（垂直方向的重叠长度）
-        max_shared_y = max(h_orig[i], h_orig[j])
-        shared_y = model.addVar(
-            name=f"shared_y_{i}_{j}",
-            lb=0,
-            ub=max_shared_y,
-            vtype=GRB.CONTINUOUS
-        )
-        model.addConstr(
-            shared_y <= (y[i] + h[i]) - y[j] + M * (1 - z1[(i, j)]),
-            name=f"shared_y_ub1_{i}_{j}"
-        )
-        model.addConstr(
-            shared_y <= (y[j] + h[j]) - y[i] + M * (1 - z1[(i, j)]),
-            name=f"shared_y_ub2_{i}_{j}"
-        )
-        model.addConstr(
-            shared_y >= min_shared_length - M * (1 - z1[(i, j)]),
-            name=f"shared_y_min_{i}_{j}"
-        )
-        model.addConstr(
-            shared_y <= M * z1[(i, j)],
-            name=f"shared_y_zero_{i}_{j}"
-        )
-        
-        # 规则5: 垂直相邻的具体约束
-        # 约束1：相邻方向的边界距离 ≤ grid_size
+        # 规则5: 垂直相邻的具体约束（silicon_bridge：必须紧邻）
+        # 约束：相邻方向的边界距离 ≤ grid_size
         # 如果 i 在下（z2D[i,j] = 1）：y_j - (y_i + h_i) <= grid_size（距离不超过1个grid）
         model.addConstr(
-            y[j] - (y[i] + h[i]) <= grid_size + M * (1 - z2D[(i, j)]),
-            name=f"vertical_down_dist_{i}_{j}"
+            y_grid_var[j] - (y_grid_var[i] + h_var[i]) <= grid_size + M * (1 - z2D[(i, j)]),
+            name=f"vertical_down_dist_sb_{i}_{j}"
         )
         model.addConstr(
-            y[j] - (y[i] + h[i]) >= 0 - M * (1 - z2D[(i, j)]),
-            name=f"vertical_down_dist_lb_{i}_{j}"
+            y_grid_var[j] - (y_grid_var[i] + h_var[i]) >= 0 - M * (1 - z2D[(i, j)]),
+            name=f"vertical_down_dist_lb_sb_{i}_{j}"
         )
         # 如果 i 在上（z2U[i,j] = 1）：y_i - (y_j + h_j) <= grid_size（距离不超过1个grid）
         model.addConstr(
-            y[i] - (y[j] + h[j]) <= grid_size + M * (1 - z2U[(i, j)]),
-            name=f"vertical_up_dist_{i}_{j}"
+            y_grid_var[i] - (y_grid_var[j] + h_var[j]) <= grid_size + M * (1 - z2U[(i, j)]),
+            name=f"vertical_up_dist_sb_{i}_{j}"
         )
         model.addConstr(
-            y[i] - (y[j] + h[j]) >= 0 - M * (1 - z2U[(i, j)]),
-            name=f"vertical_up_dist_lb_{i}_{j}"
+            y_grid_var[i] - (y_grid_var[j] + h_var[j]) >= 0 - M * (1 - z2U[(i, j)]),
+            name=f"vertical_up_dist_lb_sb_{i}_{j}"
         )
-        
-        # 约束2：水平方向（与相邻方向垂直）的重叠长度 >= min_shared_length
-        # 重叠长度 = min(x[i] + w[i], x[j] + w[j]) - max(x[i], x[j])
-        # 首先确保有重叠：x[i] < x[j] + w[j] 且 x[j] < x[i] + w[i]
+
+
+        # 4.4 共享边长约束：如果紧邻，需要有一段长度为min_shared_length的共享边
+        # 约束1：如果水平相邻，那么垂直方向的重叠长度 >= min_shared_length_grid
+        shared_y = model.addVar(
+            name=f"shared_y_{i}_{j}",
+            lb=0,
+            ub=min(chiplet_w_orig_grid[i], chiplet_h_orig_grid[i], chiplet_w_orig_grid[j], chiplet_h_orig_grid[j]),
+            vtype=GRB.INTEGER
+        )
         model.addConstr(
-            x[i] - (x[j] + w[j]) <= M * (1 - z2[(i, j)]),
-            name=f"vertical_overlap_x1_{i}_{j}"
+            shared_y <= (y_grid_var[i] + h_var[i]) - y_grid_var[j] + M * (1 - z1[(i, j)]),
+            name=f"shared_y_ub1_{i}_{j}"
         )
         model.addConstr(
-            x[j] - (x[i] + w[i]) <= M * (1 - z2[(i, j)]),
-            name=f"vertical_overlap_x2_{i}_{j}"
+            shared_y <= (y_grid_var[j] + h_var[j]) - y_grid_var[i] + M * (1 - z1[(i, j)]),
+            name=f"shared_y_ub2_{i}_{j}"
         )
-        
-        # 共享边长度（水平方向的重叠长度）
-        max_shared_x = max(w_orig[i], w_orig[j])
+        model.addConstr(
+            shared_y >= min_shared_length_grid - M * (1 - z1[(i, j)]),
+            name=f"shared_y_min_{i}_{j}"
+        )
+
+        # 约束2：水平方向（与相邻方向垂直）的重叠长度 >= min_shared_length_grid 
         shared_x = model.addVar(
             name=f"shared_x_{i}_{j}",
             lb=0,
-            ub=max_shared_x,
-            vtype=GRB.CONTINUOUS
+            ub=min(chiplet_w_orig_grid[i], chiplet_h_orig_grid[i], chiplet_w_orig_grid[j], chiplet_h_orig_grid[j]),
+            vtype=GRB.INTEGER
         )
         model.addConstr(
-            shared_x <= (x[i] + w[i]) - x[j] + M * (1 - z2[(i, j)]),
+            shared_x <= (x_grid_var[i] + w_var[i]) - x_grid_var[j] + M * (1 - z2[(i, j)]),
             name=f"shared_x_ub1_{i}_{j}"
         )
         model.addConstr(
-            shared_x <= (x[j] + w[j]) - x[i] + M * (1 - z2[(i, j)]),
+            shared_x <= (x_grid_var[j] + w_var[j]) - x_grid_var[i] + M * (1 - z2[(i, j)]),
             name=f"shared_x_ub2_{i}_{j}"
         )
         model.addConstr(
-            shared_x >= min_shared_length - M * (1 - z2[(i, j)]),
+            shared_x >= min_shared_length_grid - M * (1 - z2[(i, j)]),
             name=f"shared_x_min_{i}_{j}"
         )
-        model.addConstr(
-            shared_x <= M * z2[(i, j)],
-            name=f"shared_x_zero_{i}_{j}"
-        )
-    
-    # 4.5 边界约束
-    for k in range(n):
-        model.addConstr(x[k] + w[k] <= W, name=f"boundary_x_{k}")
-        model.addConstr(y[k] + h[k] <= H, name=f"boundary_y_{k}")
-    
-    # 4.6 非重叠约束
+       
+    # 4.5 非重叠约束
     # 定义非重叠约束的二进制变量（对于所有模块对，不仅仅是连接的）
     p_left = {}
     p_right = {}
@@ -541,185 +582,132 @@ def build_placement_ilp_model_grid(
 
     # 对于每对模块 (i, j)
     for i, j in all_pairs:
-        # 修复漏洞1：恢复互斥约束（必须且仅需满足一个非重叠条件）
+        # 放宽约束：至少满足一个非重叠条件
         model.addConstr(
-            p_left[(i, j)] + p_right[(i, j)] + p_down[(i, j)] + p_up[(i, j)] == 1,
+            p_left[(i, j)] + p_right[(i, j)] + p_down[(i, j)] + p_up[(i, j)] >= 1,
             name=f"non_overlap_any_{i}_{j}"
         )
         
         # 情况1: i 在 j 的左边（x_i + w_i <= x_j）
         # 正向约束：p_left=1 → x_i + w_i <= x_j
         model.addConstr(
-            x[i] + w[i] - x[j] <= M * (1 - p_left[(i, j)]),
+            x_grid_var[i] + w_var[i] - x_grid_var[j] <= M * (1 - p_left[(i, j)]),
             name=f"non_overlap_left_{i}_{j}"
         )
         # 修复漏洞2：正确的反向约束（x_i + w_i <= x_j → p_left=1）
         model.addConstr(
-            x[j] - (x[i] + w[i]) <= M * p_left[(i, j)],
+            x_grid_var[j] - (x_grid_var[i] + w_var[i]) <= M * p_left[(i, j)],
             name=f"non_overlap_left_rev_{i}_{j}"
         )
         
         # 情况2: i 在 j 的右边（x_j + w_j <= x_i）
         model.addConstr(
-            x[j] + w[j] - x[i] <= M * (1 - p_right[(i, j)]),
+            x_grid_var[j] + w_var[j] - x_grid_var[i] <= M * (1 - p_right[(i, j)]),
             name=f"non_overlap_right_{i}_{j}"
         )
         model.addConstr(
-            x[i] - (x[j] + w[j]) <= M * p_right[(i, j)],
+            x_grid_var[i] - (x_grid_var[j] + w_var[j]) <= M * p_right[(i, j)],
             name=f"non_overlap_right_rev_{i}_{j}"
         )
         
         # 情况3: i 在 j 的下边（y_i + h_i <= y_j）
         model.addConstr(
-            y[i] + h[i] - y[j] <= M * (1 - p_down[(i, j)]),
+            y_grid_var[i] + h_var[i] - y_grid_var[j] <= M * (1 - p_down[(i, j)]),
             name=f"non_overlap_down_{i}_{j}"
         )
         model.addConstr(
-            y[j] - (y[i] + h[i]) <= M * p_down[(i, j)],
+            y_grid_var[j] - (y_grid_var[i] + h_var[i]) <= M * p_down[(i, j)],
             name=f"non_overlap_down_rev_{i}_{j}"
         )
         
         # 情况4: i 在 j 的上边（y_j + h_j <= y_i）
         model.addConstr(
-            y[j] + h[j] - y[i] <= M * (1 - p_up[(i, j)]),
+            y_grid_var[j] + h_var[j] - y_grid_var[i] <= M * (1 - p_up[(i, j)]),
             name=f"non_overlap_up_{i}_{j}"
         )
         model.addConstr(
-            y[i] - (y[j] + h[j]) <= M * p_up[(i, j)],
+            y_grid_var[i] - (y_grid_var[j] + h_var[j]) <= M * p_up[(i, j)],
             name=f"non_overlap_up_rev_{i}_{j}"
         )
 
     if verbose:
-        print(f"非重叠约束: {len(all_pairs)} 对模块对（所有模块对），M={M}（基板尺寸最大值）")
+        print(f"非重叠约束: {len(all_pairs)} 对模块对(所有模块对)M={M}（基板尺寸最大值）")
     
-    # 4.7 外接方框约束
-    bbox_min_x = model.addVar(name="bbox_min_x", lb=0, ub=W, vtype=GRB.CONTINUOUS)
-    bbox_max_x = model.addVar(name="bbox_max_x", lb=0, ub=W, vtype=GRB.CONTINUOUS)
-    bbox_min_y = model.addVar(name="bbox_min_y", lb=0, ub=H, vtype=GRB.CONTINUOUS)
-    bbox_max_y = model.addVar(name="bbox_max_y", lb=0, ub=H, vtype=GRB.CONTINUOUS)
-    bbox_w = model.addVar(name="bbox_w", lb=0, ub=W, vtype=GRB.CONTINUOUS)
-    bbox_h = model.addVar(name="bbox_h", lb=0, ub=H, vtype=GRB.CONTINUOUS)
+    # 4.4.2 standard 连接：允许更宽松的约束（不强制紧邻，但鼓励靠近）
+    # 对于 standard 连接，不强制紧邻
+    # 可以通过线长目标函数来鼓励它们靠近
+    # 不添加额外的相邻约束，让优化器通过最小化线长来自然靠近
+    # if verbose and len(standard_pairs) > 0:
+    #     print(f"standard 连接 ({len(standard_pairs)} 对): 不强制紧邻，通过线长优化鼓励靠近")
+
+    # 4.6 外接方框约束
+    bbox_min_x = model.addVar(name="bbox_min_x", lb=0, ub=W, vtype=GRB.INTEGER)
+    bbox_max_x = model.addVar(name="bbox_max_x", lb=0, ub=W, vtype=GRB.INTEGER)
+    bbox_min_y = model.addVar(name="bbox_min_y", lb=0, ub=H, vtype=GRB.INTEGER)
+    bbox_max_y = model.addVar(name="bbox_max_y", lb=0, ub=H, vtype=GRB.INTEGER)
+    bbox_w = model.addVar(name="bbox_w", lb=0, ub=W, vtype=GRB.INTEGER)
+    bbox_h = model.addVar(name="bbox_h", lb=0, ub=H, vtype=GRB.INTEGER)
     
     for k in range(n):
-        model.addConstr(bbox_min_x <= x[k], name=f"bbox_min_x_{k}")
-        model.addConstr(bbox_max_x >= x[k] + w[k], name=f"bbox_max_x_{k}")
-        model.addConstr(bbox_min_y <= y[k], name=f"bbox_min_y_{k}")
-        model.addConstr(bbox_max_y >= y[k] + h[k], name=f"bbox_max_y_{k}")
+        model.addConstr(bbox_min_x <= x_grid_var[k], name=f"bbox_min_x_{k}")
+        model.addConstr(bbox_max_x >= x_grid_var[k] + w_var[k], name=f"bbox_max_x_{k}")
+        model.addConstr(bbox_min_y <= y_grid_var[k], name=f"bbox_min_y_{k}")
+        model.addConstr(bbox_max_y >= y_grid_var[k] + h_var[k], name=f"bbox_max_y_{k}")
     
     model.addConstr(bbox_w == bbox_max_x - bbox_min_x, name="bbox_w_def")
     model.addConstr(bbox_h == bbox_max_y - bbox_min_y, name="bbox_h_def")
     
     # 4.8 长宽比约束
-    if min_aspect_ratio is not None:
-        # bbox_w / bbox_h >= min_aspect_ratio
-        # 转换为线性约束: bbox_w >= min_aspect_ratio * bbox_h
-        model.addConstr(
-            bbox_w >= min_aspect_ratio * bbox_h,
-            name="aspect_ratio_min"
-        )
-        if verbose:
-            print(f"长宽比约束: bbox_w/bbox_h >= {min_aspect_ratio}")
+    # if min_aspect_ratio is not None:
+    #     # bbox_w / bbox_h >= min_aspect_ratio
+    #     # 转换为线性约束: bbox_w >= min_aspect_ratio * bbox_h
+    #     model.addConstr(
+    #         bbox_w >= min_aspect_ratio * bbox_h,
+    #         name="aspect_ratio_min"
+    #     )
+    #     if verbose:
+    #         print(f"长宽比约束: bbox_w/bbox_h >= {min_aspect_ratio}")
     
-    if max_aspect_ratio is not None:
-        # bbox_w / bbox_h <= max_aspect_ratio
-        # 转换为线性约束: bbox_w <= max_aspect_ratio * bbox_h
-        model.addConstr(
-            bbox_w <= max_aspect_ratio * bbox_h,
-            name="aspect_ratio_max"
-        )
-        if verbose:
-            print(f"长宽比约束: bbox_w/bbox_h <= {max_aspect_ratio}")
+    # if max_aspect_ratio is not None:
+    #     # bbox_w / bbox_h <= max_aspect_ratio
+    #     # 转换为线性约束: bbox_w <= max_aspect_ratio * bbox_h
+    #     model.addConstr(
+    #         bbox_w <= max_aspect_ratio * bbox_h,
+    #         name="aspect_ratio_max"
+    #     )
+    #     if verbose:
+    #         print(f"长宽比约束: bbox_w/bbox_h <= {max_aspect_ratio}")
     
     # 5.3 长宽比优化目标（最小化长宽比与理想值的偏差）
     # 理想长宽比设为1.0（正方形），使用 |bbox_w/bbox_h - 1| 的线性近似
     aspect_ratio_penalty = None
-    if minimize_bbox_area:  # 只在最小化面积时考虑长宽比优化
-        # 使用辅助变量表示长宽比偏差
-        # 由于 bbox_w/bbox_h 是非线性的，我们使用 |bbox_w - bbox_h| 作为近似
-        # 这鼓励长宽接近，从而接近正方形
-        aspect_ratio_diff = model.addVar(
-            name="aspect_ratio_diff",
-            lb=0,
-            ub=max(W, H),
-            vtype=GRB.CONTINUOUS
-        )
-        # |bbox_w - bbox_h| <= aspect_ratio_diff
-        model.addConstr(
-            aspect_ratio_diff >= bbox_w - bbox_h,
-            name="aspect_ratio_diff_ge_w_minus_h"
-        )
-        model.addConstr(
-            aspect_ratio_diff >= bbox_h - bbox_w,
-            name="aspect_ratio_diff_ge_h_minus_w"
-        )
-        aspect_ratio_penalty = aspect_ratio_diff
+    # if minimize_bbox_area:  # 只在最小化面积时考虑长宽比优化
+    #     # 使用辅助变量表示长宽比偏差
+    #     # 由于 bbox_w/bbox_h 是非线性的，我们使用 |bbox_w - bbox_h| 作为近似
+    #     # 这鼓励长宽接近，从而接近正方形
+    #     aspect_ratio_diff = model.addVar(
+    #         name="aspect_ratio_diff",
+    #         lb=0,
+    #         ub=max(W, H),
+    #         vtype=GRB.CONTINUOUS
+    #     )
+    #     # |bbox_w - bbox_h| <= aspect_ratio_diff
+    #     model.addConstr(
+    #         aspect_ratio_diff >= bbox_w - bbox_h,
+    #         name="aspect_ratio_diff_ge_w_minus_h"
+    #     )
+    #     model.addConstr(
+    #         aspect_ratio_diff >= bbox_h - bbox_w,
+    #         name="aspect_ratio_diff_ge_h_minus_w"
+    #     )
+    #     aspect_ratio_penalty = aspect_ratio_diff
     
     # ============ 步骤5: 定义目标函数 ============
     # 5.1 线长（曼哈顿距离）
     wirelength = 0
     
-    # Big-M方法添加绝对值约束的辅助函数
-    def add_absolute_value_constraint_big_m(
-        model: gp.Model,
-        abs_var: gp.Var,
-        orig_var: gp.Var,
-        M: float,
-        constraint_prefix: str,
-    ) -> None:
-        """
-        使用Big-M方法添加绝对值约束：abs_var = |orig_var|
-        
-        实现方法（参考Big-M方法）：
-        1. 创建二进制变量 is_positive，表示 orig_var >= 0
-        2. 使用4个约束强制 abs_var = |orig_var|
-           - 当 orig_var >= 0 时 (is_positive=1): abs_var = orig_var
-           - 当 orig_var < 0 时 (is_positive=0): abs_var = -orig_var
-        3. 使用2个约束强制 is_positive 的正确性
-        """
-        # 创建二进制变量：is_positive = 1 当且仅当 orig_var >= 0
-        is_positive = model.addVar(
-            name=f"{constraint_prefix}_is_positive",
-            vtype=GRB.BINARY
-        )
-        
-        # 约束1: 当 orig_var >= 0 时 (is_positive=1)，约束简化为: abs_var >= orig_var
-        model.addConstr(
-            abs_var >= orig_var - M * (1 - is_positive),
-            name=f"{constraint_prefix}_abs_ge_orig"
-        )
-        
-        # 约束2: 当 orig_var >= 0 时 (is_positive=1)，约束简化为: abs_var <= orig_var
-        model.addConstr(
-            abs_var <= orig_var + M * (1 - is_positive),
-            name=f"{constraint_prefix}_abs_le_orig"
-        )
-        
-        # 约束3: 当 orig_var < 0 时 (is_positive=0)，约束简化为: abs_var >= -orig_var
-        model.addConstr(
-            abs_var >= -orig_var - M * is_positive,
-            name=f"{constraint_prefix}_abs_ge_neg_orig"
-        )
-        
-        # 约束4: 当 orig_var < 0 时 (is_positive=0)，约束简化为: abs_var <= -orig_var
-        model.addConstr(
-            abs_var <= -orig_var + M * is_positive,
-            name=f"{constraint_prefix}_abs_le_neg_orig"
-        )
-        
-        # 约束5: 强制 is_positive = 1 当 orig_var >= 0
-        model.addConstr(
-            orig_var >= -M * (1 - is_positive),
-            name=f"{constraint_prefix}_force_positive"
-        )
-        
-        # 约束6: 强制 is_positive = 0 当 orig_var < 0
-        epsilon = 0.001
-        model.addConstr(
-            orig_var <= M * is_positive - epsilon,
-            name=f"{constraint_prefix}_force_negative"
-        )
-    
-    for i, j in connected_pairs:
+    # 计算所有连接的线长（包括 silicon_bridge 和 standard）
+    for i, j in all_connected_pairs:
         dx_abs = model.addVar(name=f"dx_abs_{i}_{j}", lb=0, vtype=GRB.CONTINUOUS)
         dy_abs = model.addVar(name=f"dy_abs_{i}_{j}", lb=0, vtype=GRB.CONTINUOUS)
         
@@ -742,8 +730,8 @@ def build_placement_ilp_model_grid(
         model.addConstr(dy_diff == cy[i] - cy[j], name=f"dy_diff_def_{i}_{j}")
         
         # 使用Big-M方法添加绝对值约束
-        M_dx = W  # Big-M常数
-        M_dy = H  # Big-M常数
+        M_dx = M  # Big-M常数
+        M_dy = M  # Big-M常数
         add_absolute_value_constraint_big_m(
             model=model,
             abs_var=dx_abs,
@@ -780,30 +768,26 @@ def build_placement_ilp_model_grid(
     
     # 5.4 目标函数
     aspect_ratio_weight = 0.05  # 长宽比优化权重（相对于其他项）
-    
-    if minimize_bbox_area:
-        if aspect_ratio_penalty is not None:
-            objective = (distance_weight * wirelength + 
-                        area_weight * t + 
-                        aspect_ratio_weight * aspect_ratio_penalty)
-            model.setObjective(objective, GRB.MINIMIZE)
-            if verbose:
-                print(f"目标函数: {distance_weight} * wirelength + {area_weight} * area_proxy + {aspect_ratio_weight} * aspect_ratio_penalty")
-        else:
-            model.setObjective(distance_weight * wirelength + area_weight * t, GRB.MINIMIZE)
-            if verbose:
-                print(f"目标函数: {distance_weight} * wirelength + {area_weight} * area_proxy")
-    else:
-        model.setObjective(distance_weight * wirelength, GRB.MINIMIZE)
+
+    if aspect_ratio_penalty is not None:
+        objective = (distance_weight * wirelength + 
+                    area_weight * t + 
+                    aspect_ratio_weight * aspect_ratio_penalty)
+        model.setObjective(objective, GRB.MINIMIZE)
         if verbose:
-            print(f"目标函数: {distance_weight} * wirelength")
+            print(f"目标函数: {distance_weight} * wirelength + {area_weight} * area_proxy + {aspect_ratio_weight} * aspect_ratio_penalty")
+    else:
+        model.setObjective(distance_weight * wirelength + area_weight * t, GRB.MINIMIZE)
+        if verbose:
+            print(f"目标函数: {distance_weight} * wirelength + {area_weight} * area_proxy")
+
     
     return ILPModelContext(
         model=model,
         nodes=nodes,
         edges=edges,
-        x=x,
-        y=y,
+        x_grid_var=x_grid_var,
+        y_grid_var=y_grid_var,
         r=r,
         z1=z1,
         z2=z2,
@@ -811,7 +795,8 @@ def build_placement_ilp_model_grid(
         z1R=z1R,
         z2D=z2D,
         z2U=z2U,
-        connected_pairs=connected_pairs,
+        silicon_bridge_pairs=silicon_bridge_pairs,
+        standard_pairs=standard_pairs,
         bbox_w=bbox_w,
         bbox_h=bbox_h,
         W=W,
@@ -875,12 +860,20 @@ def main():
                 )
             )
         
-        # 提取连接关系
+        # 提取连接关系，支持连接类型（第四列：1=silicon_bridge, 0=standard）
         if "connections" in data and isinstance(data["connections"], list):
             for conn in data["connections"]:
-                if isinstance(conn, list) and len(conn) >= 2:
+                if isinstance(conn, list) and len(conn) >= 3:
                     src, dst = conn[0], conn[1]
-                    edges.append((src, dst))
+                    # 读取连接类型：必须有第四列
+                    if len(conn) < 4:
+                        raise ValueError(f"连接格式错误：必须包含4列 [src, dst, weight, conn_type]。当前连接: {conn}")
+                    conn_type = conn[3]
+                    if conn_type not in [0, 1]:
+                        raise ValueError(f"连接类型错误：conn_type 必须是 0 (standard) 或 1 (silicon_bridge)。当前值: {conn_type}，连接: {conn}")
+                    edges.append((src, dst, conn_type))
+                else:
+                    raise ValueError(f"连接格式错误：每个连接必须是包含至少3个元素的列表 [src, dst, weight, conn_type]。当前连接: {conn}")
     
     if len(nodes) == 0:
         raise ValueError("未能从JSON文件中加载任何chiplet节点")
@@ -943,8 +936,10 @@ def main():
             draw_chiplet_diagram(
                 nodes=nodes,
                 edges=edges,
-                layout=result.layout,
+                layout=result.layout,  # 网格坐标
                 save_path=str(save_path),
+                grid_size=grid_size,
+                rotations=result.rotations,
             )
             print(f"图表已保存至: {save_path}")
         except Exception as e:

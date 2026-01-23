@@ -401,7 +401,7 @@ def run_batch_tests(
             
             # 运行求解搜索（使用Gurobi版本）
             logger.info(f"调用 search_multiple_solutions (Gurobi版本)...")
-
+            
             # 转换为相对路径（相对于项目根目录）
             project_root = Path(__file__).parent.parent
             try:
@@ -411,6 +411,20 @@ def run_batch_tests(
                 # 如果无法转换为相对路径，使用绝对路径
                 lp_dir_relative = lp_dir
                 fig_dir_relative = fig_dir
+            
+            # 在求解之前输出参数值，确认参数传入成功
+            logger.info(f"{'='*80}")
+            logger.info(f"求解参数确认（在调用 search_multiple_solutions 之前）:")
+            logger.info(f"  - num_solutions: {num_solutions} (类型: {type(num_solutions).__name__})")
+            logger.info(f"  - min_shared_length: {min_shared_length} (类型: {type(min_shared_length).__name__})")
+            logger.info(f"  - grid_size: {grid_size} (类型: {type(grid_size).__name__})")
+            logger.info(f"  - fixed_chiplet_idx: {fixed_chiplet_idx} (类型: {type(fixed_chiplet_idx).__name__})")
+            logger.info(f"  - min_pair_dist_diff: {min_pair_dist_diff} (类型: {type(min_pair_dist_diff).__name__})")
+            logger.info(f"  - input_json_path: {str(json_file.absolute())}")
+            logger.info(f"  - output_dir: {str(lp_dir_relative)}")
+            logger.info(f"  - image_output_dir: {str(fig_dir_relative)}")
+            logger.info(f"{'='*80}")
+            logger.info(f"开始调用 search_multiple_solutions...")
             
             sols = search_multiple_solutions(
                 num_solutions=num_solutions,
@@ -540,6 +554,7 @@ def main():
         '--min-shared-length',
         type=float,
         default=DEFAULT_MIN_SHARED_LENGTH,
+        dest='min_shared_length',  # 显式指定目标属性名
         help=f'相邻chiplet之间的最小共享边长（默认: {DEFAULT_MIN_SHARED_LENGTH}）'
     )
     
@@ -587,7 +602,33 @@ def main():
         help='指定要处理的JSON文件列表（文件名或完整路径），可以指定多个文件。例如: --files 5core.json 6core.json 或 --files 5core 6core'
     )
     
+    # 在解析之前输出原始命令行参数
+    print(f"\n{'='*80}")
+    print(f"原始命令行参数:")
+    print(f"  sys.argv: {sys.argv}")
+    print(f"{'='*80}\n")
+    
     args = parser.parse_args()
+    
+    # 在解析参数后立即输出参数值，确认参数传入成功
+    print(f"\n{'='*80}")
+    print(f"命令行参数解析结果:")
+    print(f"  - num_solutions: {args.num_solutions} (类型: {type(args.num_solutions).__name__})")
+    print(f"  - min_shared_length: {args.min_shared_length} (类型: {type(args.min_shared_length).__name__})")
+    print(f"  - grid_size: {args.grid_size} (类型: {type(args.grid_size).__name__})")
+    print(f"  - fixed_chiplet_idx: {args.fixed_chiplet_idx} (类型: {type(args.fixed_chiplet_idx).__name__})")
+    print(f"  - min_pair_dist_diff: {args.min_pair_dist_diff} (类型: {type(args.min_pair_dist_diff).__name__})")
+    print(f"  - files: {args.files}")
+    print(f"  - test_input_dir: {args.test_input_dir}")
+    print(f"  - output_dir: {args.output_dir}")
+    print(f"{'='*80}\n")
+    
+    # 检查是否有未识别的参数
+    if hasattr(args, '__dict__'):
+        print(f"所有解析后的参数:")
+        for key, value in vars(args).items():
+            print(f"  {key}: {value} (类型: {type(value).__name__})")
+        print(f"{'='*80}\n")
     
     # 转换路径
     test_input_dir = Path(args.test_input_dir) if args.test_input_dir else None
