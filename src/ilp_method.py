@@ -255,7 +255,7 @@ def solve_placement_ilp(
     )
 
 
-def build_placement_ilp_model_grid(
+def build_placement_ilp_model(
     nodes: List[ChipletNode],
     edges: List[Tuple[str, str]],
     grid_size: float,
@@ -738,7 +738,7 @@ def main():
     
     # 构建ILP模型
     print("\n构建ILP模型...")
-    ctx = build_placement_ilp_model_grid(
+    ctx = build_placement_ilp_model(
         nodes=nodes,
         edges=edges,
         grid_size=grid_size,

@@ -3,23 +3,23 @@
 批量测试脚本：对 test_input 目录下的所有例子进行解的搜索（Gurobi版本）。
 
 用法：
-    python3 batch_test_solutions_gurobi.py [--num-solutions N] [--min-pair-dist-diff DIFF] [--files FILE1 FILE2 ...]
+    python3 batch_test_solutions_gurobi_EMIB.py [--min-pair-dist-diff DIFF] [--files FILE1 FILE2 ...]
     
 例如：
     # 处理所有文件
     python3 batch_test_solutions_gurobi.py
     
     # 指定参数处理所有文件
-    python3 batch_test_solutions_gurobi.py --num-solutions 4 --min-pair-dist-diff 3.0
+    python3 batch_test_solutions_gurobi_EMIB.py --min-pair-dist-diff 3.0
     
-    python batch_test_solutions_gurobi.py --num-solutions 30 --min-pair-dist-diff 1.0 --files 5core.json
+    python batch_test_solutions_gurobi_EMIB.py --min-pair-dist-diff 1.0 --files 5core.json
 
-    python batch_test_solutions_gurobi.py --num-solutions 30 --min-pair-dist-diff 10.0 --files 2core.json
+    python batch_test_solutions_gurobi_EMIB.py --min-pair-dist-diff 10.0 --files 2core.json
     # 只处理指定的文件
-    python3 batch_test_solutions_gurobi.py --files 5core.json 6core.json
+    python3 batch_test_solutions_gurobi_EMIB.py --files 5core.json 6core.json
     
     # 指定文件（可以不带.json扩展名）
-    python3 batch_test_solutions_gurobi.py --files 5core 6core 8core
+    python3 batch_test_solutions_gurobi_EMIB.py --files 5core 6core 8core
 """
 
 import sys
@@ -31,10 +31,10 @@ from datetime import datetime
 import time
 from typing import Optional, List
 
-# 确保可以导入 ilp_sub_solution_search_gurobi
+# 确保可以导入 ilp_reduce_EMIB_search_gurobi
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from ilp_sub_solution_search_gurobi import search_multiple_solutions
+from ilp_reduce_EMIB_search_gurobi import search_multiple_solutions as solve_emib_reduce
 from ilp_method_gurobi import ILPPlacementResult
 import json
 try:
@@ -49,8 +49,7 @@ except ImportError:
             self.power = power
 
 
-# 默认参数配置
-DEFAULT_NUM_SOLUTIONS = 4
+# 默认参数配置（EMIB版本不做“多解搜索”，每个case最多返回1个解）
 DEFAULT_MIN_SHARED_LENGTH = 0.1
 DEFAULT_FIXED_CHIPLET_IDX = 0
 DEFAULT_MIN_PAIR_DIST_DIFF = 7.0
@@ -212,7 +211,6 @@ def setup_logging(log_dir: Path, core_name: str):
 
 
 def run_batch_tests(
-    num_solutions: int = DEFAULT_NUM_SOLUTIONS,
     min_shared_length: float = DEFAULT_MIN_SHARED_LENGTH,
     fixed_chiplet_idx: int = DEFAULT_FIXED_CHIPLET_IDX,
     min_pair_dist_diff: float = DEFAULT_MIN_PAIR_DIST_DIFF,
@@ -225,7 +223,7 @@ def run_batch_tests(
     批量运行测试用例（Gurobi版本）。
     
     参数:
-        num_solutions: 需要搜索的解的数量
+        （EMIB版本不做多解搜索，每个case最多返回1个解）
         min_shared_length: 相邻chiplet之间的最小共享边长
         fixed_chiplet_idx: 固定位置的chiplet索引
         min_pair_dist_diff: chiplet对之间距离差异的最小阈值
@@ -299,7 +297,6 @@ def run_batch_tests(
     if json_files is not None and len(json_files) > 0:
         print(f"指定处理的文件: {', '.join([f.name for f in json_files_list])}")
     print(f"\n参数配置:")
-    print(f"  - num_solutions: {num_solutions}")
     print(f"  - min_shared_length: {min_shared_length}")
     print(f"  - fixed_chiplet_idx: {fixed_chiplet_idx}")
     print(f"  - min_pair_dist_diff: {min_pair_dist_diff}")
@@ -311,7 +308,7 @@ def run_batch_tests(
     success_count = 0
     fail_count = 0
     total_solutions_found = 0  # 总共找到的解的数量
-    total_solutions_expected = 0  # 期望找到的解的数量
+    total_solutions_expected = 0  # 期望找到的解的数量（EMIB每个case最多1个）
     results_summary = []
     
     # 遍历每个JSON文件
@@ -351,7 +348,6 @@ def run_batch_tests(
         logger.info(f"LP目录: {lp_dir}")
         logger.info(f"Fig目录: {fig_dir}")
         logger.info(f"参数配置:")
-        logger.info(f"  - num_solutions: {num_solutions}")
         logger.info(f"  - min_shared_length: {min_shared_length}")
         logger.info(f"  - fixed_chiplet_idx: {fixed_chiplet_idx}")
         logger.info(f"  - min_pair_dist_diff: {min_pair_dist_diff}")
@@ -397,8 +393,8 @@ def run_batch_tests(
             except Exception as e:
                 logger.warning(f"加载节点信息失败: {e}，将使用解的layout信息推断节点")
             
-            # 运行求解搜索（使用Gurobi版本）
-            logger.info(f"调用 search_multiple_solutions (Gurobi版本)...")
+            # 运行 EMIB 降级求解（使用Gurobi版本）
+            logger.info(f"调用 EMIB reduce solver (Gurobi版本)...")
             
             # 转换为相对路径（相对于项目根目录）
             project_root = Path(__file__).parent.parent
@@ -412,8 +408,7 @@ def run_batch_tests(
             
             # 在求解之前输出参数值，确认参数传入成功
             logger.info(f"{'='*80}")
-            logger.info(f"求解参数确认（在调用 search_multiple_solutions 之前）:")
-            logger.info(f"  - num_solutions: {num_solutions} (类型: {type(num_solutions).__name__})")
+            logger.info(f"求解参数确认（在调用 EMIB reduce solver 之前）:")
             logger.info(f"  - min_shared_length: {min_shared_length} (类型: {type(min_shared_length).__name__})")
             logger.info(f"  - fixed_chiplet_idx: {fixed_chiplet_idx} (类型: {type(fixed_chiplet_idx).__name__})")
             logger.info(f"  - min_pair_dist_diff: {min_pair_dist_diff} (类型: {type(min_pair_dist_diff).__name__})")
@@ -422,10 +417,10 @@ def run_batch_tests(
             logger.info(f"  - output_dir: {str(lp_dir_relative)}")
             logger.info(f"  - image_output_dir: {str(fig_dir_relative)}")
             logger.info(f"{'='*80}")
-            logger.info(f"开始调用 search_multiple_solutions...")
+            logger.info(f"开始调用 EMIB reduce solver...")
             
-            sols = search_multiple_solutions(
-                num_solutions=num_solutions,
+            sols = solve_emib_reduce(
+                num_solutions=1,
                 min_shared_length=min_shared_length,
                 input_json_path=str(json_file.absolute()),
                 fixed_chiplet_idx=fixed_chiplet_idx,
@@ -435,12 +430,12 @@ def run_batch_tests(
                 image_output_dir=str(fig_dir_relative)  # 图片保存到fig目录（相对路径）
             )
             time_end = time.time()
-            logger.info(f"\n共找到 {len(sols)} 个不同的解。")
-            print(f"  ✓ 成功：找到 {len(sols)} 个解")
+            logger.info(f"\nEMIB求解返回 {len(sols)} 个解（最多1个）。")
+            print(f"  ✓ EMIB求解：返回 {len(sols)} 个解")
             
             # 更新解的数量统计
             total_solutions_found += len(sols)
-            total_solutions_expected += num_solutions
+            total_solutions_expected += 1
             
             # 如果没有从JSON加载到节点，尝试从第一个解的layout推断
             if len(nodes) == 0 and len(sols) > 0 and sols[0].status == "Optimal":
@@ -523,29 +518,19 @@ def run_batch_tests(
 def main():
     """主函数，解析命令行参数并运行批量测试。"""
     parser = argparse.ArgumentParser(
-        description='批量测试脚本：对 test_input 目录下的所有例子进行解的搜索（Gurobi版本）',
+        description='批量测试脚本：对 test_input 目录下的所有例子进行 EMIB(硅桥)降级求解（Gurobi版本）',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 示例:
   # 使用默认参数
-  python3 batch_test_solutions_gurobi.py
+  python3 batch_test_solutions_gurobi_EMIB.py
   
   # 指定参数
-  python3 batch_test_solutions_gurobi.py --num-solutions 4 --min-pair-dist-diff 3.0
-  
-  # 只指定部分参数
-  python3 batch_test_solutions_gurobi.py --num-solutions 6
+  python3 batch_test_solutions_gurobi_EMIB.py --min-pair-dist-diff 3.0
   
   # 处理指定文件
-  python3 batch_test_solutions_gurobi.py --files 5core.json 6core.json
+  python3 batch_test_solutions_gurobi_EMIB.py --files 5core.json 6core.json
         """
-    )
-    
-    parser.add_argument(
-        '--num-solutions',
-        type=int,
-        default=DEFAULT_NUM_SOLUTIONS,
-        help=f'需要搜索的解的数量（默认: {DEFAULT_NUM_SOLUTIONS}）'
     )
     
     parser.add_argument(
@@ -611,7 +596,6 @@ def main():
     # 在解析参数后立即输出参数值，确认参数传入成功
     print(f"\n{'='*80}")
     print(f"命令行参数解析结果:")
-    print(f"  - num_solutions: {args.num_solutions} (类型: {type(args.num_solutions).__name__})")
     print(f"  - min_shared_length: {args.min_shared_length} (类型: {type(args.min_shared_length).__name__})")
     print(f"  - fixed_chiplet_idx: {args.fixed_chiplet_idx} (类型: {type(args.fixed_chiplet_idx).__name__})")
     print(f"  - min_pair_dist_diff: {args.min_pair_dist_diff} (类型: {type(args.min_pair_dist_diff).__name__})")
@@ -634,7 +618,6 @@ def main():
     
     # 运行批量测试
     run_batch_tests(
-        num_solutions=args.num_solutions,
         min_shared_length=args.min_shared_length,
         fixed_chiplet_idx=args.fixed_chiplet_idx,
         min_pair_dist_diff=args.min_pair_dist_diff,

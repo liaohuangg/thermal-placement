@@ -12,9 +12,60 @@ from tool import draw_chiplet_diagram, print_constraint_formal, print_pair_dista
 from ilp_method_gurobi import (
     ILPModelContext,
     ILPPlacementResult,
-    build_placement_ilp_model_grid,
+    add_absolute_value_constraint_big_m,
+    build_placement_ilp_model,
     solve_placement_ilp_from_model,
 )
+
+
+def _get_var_value(model: gp.Model, var_name: str) -> Optional[float]:
+    v = model.getVarByName(var_name)
+    if v is None:
+        return None
+    try:
+        return float(v.X)
+    except Exception:
+        return None
+
+
+def _compute_objective_terms_from_model(
+    ctx: ILPModelContext,
+) -> Tuple[float, Optional[float], Optional[float]]:
+    """
+    计算并返回目标函数中的关键项数值（与 ilp_method_gurobi.py 的建模变量一致）：
+    - wirelength: sum(dx_abs_{i}_{j} + dy_abs_{i}_{j})
+    - t: bbox_area_proxy_t
+    - aspect_ratio_penalty: aspect_ratio_diff（若未启用则为 None）
+    """
+    model = ctx.model
+
+    # wirelength：由 build_placement_ilp_model 创建的 dx_abs_{i}_{j}, dy_abs_{i}_{j} 组成
+    wirelength_val = 0.0
+    connected_pairs: List[Tuple[int, int]] = []
+    if getattr(ctx, "silicon_bridge_pairs", None):
+        connected_pairs.extend(ctx.silicon_bridge_pairs)
+    if getattr(ctx, "standard_pairs", None):
+        connected_pairs.extend(ctx.standard_pairs)
+
+    for (i, j) in connected_pairs:
+        dx = _get_var_value(model, f"dx_abs_{i}_{j}")
+        dy = _get_var_value(model, f"dy_abs_{i}_{j}")
+        # 保险：若变量名方向不同，尝试互换
+        if dx is None:
+            dx = _get_var_value(model, f"dx_abs_{j}_{i}")
+        if dy is None:
+            dy = _get_var_value(model, f"dy_abs_{j}_{i}")
+        if dx is None or dy is None:
+            continue
+        wirelength_val += dx + dy
+
+    # 面积代理变量 t
+    t_val = _get_var_value(model, "bbox_area_proxy_t")
+
+    # 长宽比偏差（如果启用 minimize_bbox_area 才会存在）
+    aspect_val = _get_var_value(model, "aspect_ratio_diff")
+
+    return wirelength_val, t_val, aspect_val
 
 
 def _add_exclude_dist_constraint(
@@ -42,11 +93,6 @@ def _add_exclude_dist_constraint(
     n = len(ctx.nodes)
     W = ctx.W
     H = ctx.H
-    grid_size = ctx.grid_size
-    
-    if grid_size is None:
-        print(f"[WARNING] grid_size为None，跳过排除约束")
-        return
     
     if len(prev_pair_distances_list) == 0:
         print(f"[WARNING] prev_pair_distances_list为空，跳过排除约束")
@@ -54,10 +100,9 @@ def _add_exclude_dist_constraint(
     
     print(f"[DEBUG] 开始添加排除约束，之前解数量: {len(prev_pair_distances_list)}, min_pair_dist_diff: {min_pair_dist_diff}")
     
-    # 将min_pair_dist_diff从实际坐标单位转换为grid坐标单位
-    # 因为约束中使用的是grid坐标距离，所以阈值也需要是grid坐标单位
-    min_pair_dist_diff_grid = min_pair_dist_diff / grid_size
-    print(f"[DEBUG] min_pair_dist_diff (实际坐标): {min_pair_dist_diff}, 转换为grid坐标: {min_pair_dist_diff_grid}")
+    # 连续坐标系：不再进行 grid_size 换算
+    min_pair_dist_diff_grid = float(min_pair_dist_diff)
+    print(f"[DEBUG] min_pair_dist_diff (连续坐标): {min_pair_dist_diff_grid}")
     
     # 更新模型以确保变量名称可用
     try:
@@ -122,13 +167,13 @@ def _add_exclude_dist_constraint(
     #         name=f"cx_grid_center_{solution_index_suffix}_{k}",
     #         lb=0,
     #         ub=W,  # 增加上界以容纳chiplet宽度
-    #         vtype=GRB.INTEGER
+    #         vtype=GRB.CONTINUOUS
     #     )
     #     cy_grid_var[k] = model.addVar(
     #         name=f"cy_grid_center_{solution_index_suffix}_{k}",
     #         lb=0,
     #         ub=H,  # 增加上界以容纳chiplet高度
-    #         vtype=GRB.INTEGER
+    #         vtype=GRB.CONTINUOUS
     #     )
         
     #     # 约束：2 * 中心坐标 = 2 * 左下角坐标 + (宽度, 高度) 
@@ -171,13 +216,13 @@ def _add_exclude_dist_constraint(
             name=f"dx_grid_abs_pair_{solution_index_suffix}_{i}_{j}",
             lb=0,
             ub=W,  # 增加上界以容纳chiplet宽度
-            vtype=GRB.INTEGER
+            vtype=GRB.CONTINUOUS
         )
         dy_grid_abs_ij = model.addVar(
             name=f"dy_grid_abs_pair_{solution_index_suffix}_{i}_{j}",
             lb=0,
             ub=H,  # 增加上界以容纳chiplet高度
-            vtype=GRB.INTEGER
+            vtype=GRB.CONTINUOUS
         )
         
         # 计算grid坐标中心点的差
@@ -189,16 +234,18 @@ def _add_exclude_dist_constraint(
             name=f"dx_grid_diff_{solution_index_suffix}_{i}_{j}",
             lb=-W,
             ub=W,
-            vtype=GRB.INTEGER
+            vtype=GRB.CONTINUOUS
         )
         model.addConstr(
             dx_grid_diff == cx_grid_var[i] - cx_grid_var[j],
             name=f"dx_grid_diff_def_{solution_index_suffix}_{i}_{j}"
         )
-        model.addGenConstrAbs(
-            dx_grid_abs_ij,
-            dx_grid_diff,
-            name=f"dx_grid_abs_pair_{solution_index_suffix}_{i}_{j}",
+        add_absolute_value_constraint_big_m(
+            model=model,
+            abs_var=dx_grid_abs_ij,
+            orig_var=dx_grid_diff,
+            M=M,
+            constraint_prefix=f"dx_grid_abs_pair_{solution_index_suffix}_{i}_{j}",
         )
         
         # 使用Big-M方法添加绝对值约束：dy_grid_abs_ij = |cy_grid[i] - cy_grid[j]|
@@ -206,16 +253,18 @@ def _add_exclude_dist_constraint(
             name=f"dy_grid_diff_{solution_index_suffix}_{i}_{j}",
             lb=-H,
             ub=H,
-            vtype=GRB.INTEGER
+            vtype=GRB.CONTINUOUS
         )
         model.addConstr(
             dy_grid_diff == cy_grid_var[i] - cy_grid_var[j],
             name=f"dy_grid_diff_def_{solution_index_suffix}_{i}_{j}"
         )
-        model.addGenConstrAbs(
-            dy_grid_abs_ij,
-            dy_grid_diff,
-            name=f"dy_grid_abs_pair_{solution_index_suffix}_{i}_{j}",
+        add_absolute_value_constraint_big_m(
+            model=model,
+            abs_var=dy_grid_abs_ij,
+            orig_var=dy_grid_diff,
+            M=M,
+            constraint_prefix=f"dy_grid_abs_pair_{solution_index_suffix}_{i}_{j}",
         )
         
         # 创建ILP变量表示当前距离（grid单位）,可能是对角线距离，上界为W+H
@@ -223,7 +272,7 @@ def _add_exclude_dist_constraint(
             name=f"dist_curr_pair_{solution_index_suffix}_{i}_{j}",
             lb=0,
             ub=W+H,
-            vtype=GRB.INTEGER
+            vtype=GRB.CONTINUOUS
         )
         
         # 约束：当前距离 = dx_grid_abs_ij + dy_grid_abs_ij
@@ -269,7 +318,7 @@ def _add_exclude_dist_constraint(
                 name=f"dist_diff_pair_{solution_index_suffix}_{i}_{j}_prev{prev_idx}",
                 lb=-W-H,
                 ub=W+H,
-                vtype=GRB.INTEGER
+                vtype=GRB.CONTINUOUS
             )
             
             # 距离差 = 当前距离 - 之前距离
@@ -285,12 +334,14 @@ def _add_exclude_dist_constraint(
                 name=f"dist_diff_abs_pair_{solution_index_suffix}_{i}_{j}_prev{prev_idx}",
                 lb=0,
                 ub=W+H,
-                vtype=GRB.INTEGER
+                vtype=GRB.CONTINUOUS
             )
-            model.addGenConstrAbs(
-                dist_diff_abs_ij,
-                dist_diff_ij,
-                name=f"dist_diff_abs_pair_{solution_index_suffix}_{i}_{j}_prev{prev_idx}",
+            add_absolute_value_constraint_big_m(
+                model=model,
+                abs_var=dist_diff_abs_ij,
+                orig_var=dist_diff_ij,
+                M=M,
+                constraint_prefix=f"dist_diff_abs_pair_{solution_index_suffix}_{i}_{j}_prev{prev_idx}",
             )
             
             # 约束逻辑：same_dist_pair_prev[((i,j), prev_idx)] = 1 当且仅当 dist_diff_abs_ij < min_pair_dist_diff
@@ -360,8 +411,8 @@ def add_exclude_constraint(
     *,
     require_change_pairs: int = 1,  # 目前没有用到这个参数，先保留接口
     solution_index: int = 0,  # 解的索引，用于生成唯一的约束名称
-    min_diff: Optional[float] = None,  # 判断"不同"的最小差异阈值，如果为None则使用grid_size（已废弃，使用min_pos_diff）
-    min_pos_diff: Optional[float] = None,  # 位置排除约束的最小变化量，如果为None则使用min_diff或grid_size
+    min_diff: Optional[float] = None,  # 判断"不同"的最小差异阈值（已废弃，使用min_pos_diff）
+    min_pos_diff: Optional[float] = None,  # 位置排除约束的最小变化量，如果为None则使用min_diff或默认值0.01
     min_pair_dist_diff: Optional[float] = None,  # chiplet对之间距离差异的最小阈值，如果为None则使用min_pos_diff
     prev_positions: Optional[List[Dict[int, Tuple[float, float]]]] = None,  # 之前所有解的位置列表
     prev_pair_distances_list: Optional[List[Dict[Tuple[int, int], float]]] = None,  # 之前所有解的chiplet对距离列表
@@ -374,7 +425,7 @@ def add_exclude_constraint(
     注意：固定的chiplet位置不会被约束，只考虑非固定的chiplet。
     
     参数:
-        min_diff: 判断位置"不同"的最小差异阈值。如果为None，则使用grid_size（如果存在）或默认值0.01。
+        min_diff: 判断位置"不同"的最小差异阈值。如果为None，则使用默认值0.01。
     """
 
     W = ctx.W
@@ -392,16 +443,12 @@ def add_exclude_constraint(
         pass  # 不执行位置排除约束，继续执行距离排除约束
     
     # 获取位置排除约束的最小变化量
-    # 优先级：min_pos_diff > min_diff > grid_size > 默认值0.01
+    # 优先级：min_pos_diff > min_diff > 默认值0.01
     if min_pos_diff is None:
         if min_diff is not None:
             min_pos_diff = min_diff
         else:
-            grid_size = ctx.grid_size
-            if grid_size is not None:
-                min_pos_diff = grid_size
-            else:
-                min_pos_diff = 0.01
+            min_pos_diff = 0.01
     
     # 获取距离排除约束的最小变化量
     # 如果 min_pair_dist_diff 为 None，则使用 min_pos_diff
@@ -411,7 +458,7 @@ def add_exclude_constraint(
     M = max(W, H) * 2  # Big-M常数
     
     # 调用距离排除约束函数（一次性处理所有之前解）
-    print(f"[DEBUG add_exclude_constraint] 检查条件: prev_pair_distances_list={prev_pair_distances_list is not None}, len={len(prev_pair_distances_list) if prev_pair_distances_list is not None else 0}, grid_size={ctx.grid_size}")
+    print(f"[DEBUG add_exclude_constraint] 检查条件: prev_pair_distances_list={prev_pair_distances_list is not None}, len={len(prev_pair_distances_list) if prev_pair_distances_list is not None else 0}")
     if prev_pair_distances_list is not None and len(prev_pair_distances_list) > 0:
         print(f"[DEBUG add_exclude_constraint] 准备添加排除约束，之前解数量: {len(prev_pair_distances_list)}")
         # 确保每个约束都有唯一的名称，避免冲突
@@ -445,9 +492,8 @@ def search_multiple_solutions(
     input_json_path: Optional[str] = None,
     nodes: Optional[List] = None,
     edges: Optional[List[Tuple[int, int]]] = None,
-    grid_size: Optional[float] = None,
     fixed_chiplet_idx: Optional[int] = None,
-    min_pair_dist_diff: Optional[float] = None,  # chiplet对之间距离差异的最小阈值，如果为None则使用grid_size或默认值1.0；此参数控制距离排除约束：至少有一对chiplet的距离差必须 >= min_pair_dist_diff
+    min_pair_dist_diff: Optional[float] = None,  # chiplet对之间距离差异的最小阈值；此参数控制距离排除约束：至少有一对chiplet的距离差必须 >= min_pair_dist_diff
     time_limit: int = 600,  # 求解时间限制（秒），默认10分钟
     output_dir: Optional[str] = None,  # 输出目录，用于保存.lp文件；如果为None，则使用默认路径
     image_output_dir: Optional[str] = None,  # 图片输出目录，用于保存图片；如果为None则使用output_dir
@@ -461,9 +507,8 @@ def search_multiple_solutions(
         input_json_path: 可选，从JSON文件加载输入
         nodes: 可选，chiplet节点列表（如果提供input_json_path则忽略此参数）
         edges: 可选，连接关系列表（如果提供input_json_path则忽略此参数）
-        grid_size: 网格大小，如果提供则使用网格化布局
         fixed_chiplet_idx: 固定位置的chiplet索引
-        min_pair_dist_diff: chiplet对之间距离差异的最小阈值，如果为None则使用grid_size或默认值1.0；此参数控制距离排除约束：至少有一对chiplet的距离差必须 >= min_pair_dist_diff
+        min_pair_dist_diff: chiplet对之间距离差异的最小阈值；此参数控制距离排除约束：至少有一对chiplet的距离差必须 >= min_pair_dist_diff
         output_dir: 输出目录，用于保存.lp文件；如果为None，则使用默认路径（相对于项目根目录的output目录）
         image_output_dir: 图片输出目录，用于保存图片；如果为None则使用output_dir
     """
@@ -531,21 +576,39 @@ def search_multiple_solutions(
     # 全局约束计数器，确保每个约束名称唯一
     constraint_counter = [0]
     
-    # 确定 min_pair_dist_diff 的值：如果为None，则使用grid_size或默认值1.0
+    # 确定 min_pair_dist_diff 的值：如果为None，则使用默认值1.0
     if min_pair_dist_diff is None:
-        if grid_size is not None:
-            min_pair_dist_diff = grid_size
-        else:
-            min_pair_dist_diff = 1.0
+        min_pair_dist_diff = 1.0
     
     for i in range(num_solutions):
-        # 构建ILP模型（只使用网格化版本）
-        ctx = build_placement_ilp_model_grid(
+        # === 从 edges 中分类得到 silicon_bridge_pairs / standard_pairs（把该逻辑从 build_placement_ilp_model 中上移） ===
+        name_to_idx = {node.name: k for k, node in enumerate(nodes)}
+        silicon_bridge_pairs: List[Tuple[int, int]] = []
+        standard_pairs: List[Tuple[int, int]] = []
+        for (src, dst, conn_type) in edges:
+            if src not in name_to_idx or dst not in name_to_idx:
+                continue
+            a = name_to_idx[src]
+            b = name_to_idx[dst]
+            if a == b:
+                continue
+            if a > b:
+                a, b = b, a
+            if conn_type == 1:
+                silicon_bridge_pairs.append((a, b))
+            else:
+                standard_pairs.append((a, b))
+        silicon_bridge_pairs = list(set(silicon_bridge_pairs))
+        standard_pairs = list(set(standard_pairs))
+
+        # 构建ILP模型
+        ctx = build_placement_ilp_model(
             nodes=nodes,
             edges=edges,
-            grid_size=grid_size if grid_size is not None else 1.0,  # 如果未指定grid_size，使用默认值1.0
             fixed_chiplet_idx=fixed_chiplet_idx,
             min_shared_length=min_shared_length,
+            silicon_bridge_pairs=silicon_bridge_pairs,
+            standard_pairs=standard_pairs,
         )
         
         # 添加排除约束（排除之前找到的所有解）
@@ -589,6 +652,12 @@ def search_multiple_solutions(
             print(f"\n求解状态: {result.status}，停止搜索")
             break
 
+        # 求解成功后，打印目标函数各组成项的数值
+        wirelength_val, t_val, aspect_val = _compute_objective_terms_from_model(ctx)
+        t_str = f"{t_val:.6f}" if t_val is not None else "N/A"
+        aspect_str = f"{aspect_val:.6f}" if aspect_val is not None else "N/A"
+        print(f"[OBJ] wirelength={wirelength_val:.6f}, t={t_str}, aspect_ratio_penalty={aspect_str}")
+
         solutions.append(result)
         
         # 简化输出：只打印相对距离和比较信息
@@ -603,8 +672,6 @@ def search_multiple_solutions(
         # 计算并保存当前解的chiplet对之间的距离（使用grid坐标中心点的曼哈顿距离）
         # 注意：使用中心点坐标计算距离，而不是左下角坐标
         pair_distances = {}
-        grid_size_val = ctx.grid_size if ctx.grid_size is not None else 1.0
-        
         # 获取grid坐标值（左下角）
         # 方法1：直接从 result.layout 获取（它已经是网格坐标）
         x_grid_var = {}
@@ -736,7 +803,6 @@ def search_multiple_solutions(
                 save_path=str(image_path),
                 layout=layout_dict,  # 网格坐标
                 fixed_chiplet_names=fixed_chiplet_names if fixed_chiplet_names else None,
-                grid_size=grid_size if grid_size is not None else 1.0,
                 rotations=result.rotations if hasattr(result, 'rotations') else None,
                 edge_types=edge_type_map,  # 传递边类型映射
             )

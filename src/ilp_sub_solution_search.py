@@ -11,7 +11,7 @@ from tool import build_random_chiplet_graph, draw_chiplet_diagram, print_constra
 from ilp_method import (
     ILPModelContext,
     ILPPlacementResult,
-    build_placement_ilp_model_grid,
+    build_placement_ilp_model,
     solve_placement_ilp_from_model,
 )
 
@@ -497,7 +497,7 @@ def search_multiple_solutions(
     
     for i in range(num_solutions):
         # 构建ILP模型（只使用网格化版本）
-        ctx = build_placement_ilp_model_grid(
+        ctx = build_placement_ilp_model(
         nodes=nodes,
         edges=edges,
             grid_size=grid_size if grid_size is not None else 1.0,  # 如果未指定grid_size，使用默认值1.0

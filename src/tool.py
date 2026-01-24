@@ -804,7 +804,7 @@ def print_pair_distances_only(
                         diff_pairs_with_info.append((i, j, curr_dist, prev_dist, dist_diff))
             
             if same_pairs:
-                print(f"    相同的chiplet对（距离差 < 阈值 {min_pair_dist_diff / grid_size_val:.3f}）:")
+                print(f"    相同的chiplet对（距离差 < 阈值 {min_pair_dist_diff:.3f}）:")
                 for i, j in same_pairs:
                     if (i, j) in curr_pair_distances and (i, j) in prev_distances:
                         curr_x_dist, curr_y_dist = curr_pair_distances[(i, j)]
@@ -816,7 +816,7 @@ def print_pair_distances_only(
                         name_j = nodes[j].name if hasattr(nodes[j], 'name') else f"Chiplet_{j}"
                         print(f"      ({i},{j}) [{name_i}, {name_j}]: 当前距离={curr_dist:.3f}, 之前距离={prev_dist:.3f}, 距离差={dist_diff:.3f} (< {min_pair_dist_diff:.3f})")
             if diff_pairs_with_info:
-                print(f"    不同的chiplet对（距离差 >= 阈值 {min_pair_dist_diff / grid_size_val:.3f}）:")
+                print(f"    不同的chiplet对（距离差 >= 阈值 {min_pair_dist_diff:.3f}）:")
                 for i, j, curr_dist, prev_dist, dist_diff in diff_pairs_with_info:
                     name_i = nodes[i].name if hasattr(nodes[i], 'name') else f"Chiplet_{i}"
                     name_j = nodes[j].name if hasattr(nodes[j], 'name') else f"Chiplet_{j}"
