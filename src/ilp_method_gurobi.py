@@ -38,12 +38,16 @@ except ImportError:
 class ILPPlacementResult:
     """ILP求解结果"""
 
-    layout: Dict[str, Tuple[float, float]]  # name -> (x, y)
+    # 网格坐标（chiplet左下角，grid单位）
+    layout: Dict[str, Tuple[float, float]]  # name -> (x_grid, y_grid)
     rotations: Dict[str, bool]  # name -> 是否旋转
     objective_value: float
     status: str
     solve_time: float
-    bounding_box: Tuple[float, float]  # (W, H) 边界框尺寸
+    bounding_box: Tuple[float, float]  # (W, H) 边界框尺寸（grid单位）
+    # 中心坐标（grid单位；注意：这里保存的是“2×中心坐标”，用于保持整数域）
+    cx_grid_var: Dict[str, float]
+    cy_grid_var: Dict[str, float]
 
 
 @dataclass
@@ -71,6 +75,8 @@ class ILPModelContext:
     x_grid_var: Dict[int, gp.Var]
     y_grid_var: Dict[int, gp.Var]
     r: Dict[int, gp.Var]
+    cx_grid_var: Dict[int, gp.Var]
+    cy_grid_var: Dict[int, gp.Var]
     z1: Dict[Tuple[int, int], gp.Var]
     z2: Dict[Tuple[int, int], gp.Var]
     z1L: Dict[Tuple[int, int], gp.Var]
@@ -87,8 +93,6 @@ class ILPModelContext:
     H: float
     grid_size: Optional[float] = None
     fixed_chiplet_idx: Optional[int] = None
-    cx: Optional[Dict[int, gp.Var]] = None  # 中心坐标x（如果使用网格化模型）
-    cy: Optional[Dict[int, gp.Var]] = None  # 中心坐标y（如果使用网格化模型）
 
     # 为了兼容性，添加 prob 属性（指向 model）
     @property
@@ -112,6 +116,7 @@ def solve_placement_ilp_from_model(
     model = ctx.model
     nodes = ctx.nodes
     x_grid_var, y_grid_var, r = ctx.x_grid_var, ctx.y_grid_var, ctx.r
+    cx_grid_var, cy_grid_var = ctx.cx_grid_var, ctx.cy_grid_var
     W, H = ctx.W, ctx.H
 
     start_time = time.time()
@@ -149,17 +154,24 @@ def solve_placement_ilp_from_model(
         # 提取解
         layout: Dict[str, Tuple[float, float]] = {}
         rotations: Dict[str, bool] = {}
+        cx_grid_val: Dict[str, float] = {}
+        cy_grid_val: Dict[str, float] = {}
         for k, node in enumerate(nodes):
             if model.status == GRB.OPTIMAL:
-                x_val = x_grid_var[k].X if x_grid_var[k] is not None else 0.0
-                y_val = y_grid_var[k].X if y_grid_var[k] is not None else 0.0
-                r_val = r[k].X if r[k] is not None else 0.0
+                x_val = float(x_grid_var[k].X) if x_grid_var[k] is not None else 0.0
+                y_val = float(y_grid_var[k].X) if y_grid_var[k] is not None else 0.0
+                r_val = float(r[k].X) if r[k] is not None else 0.0
                 layout[node.name] = (x_val, y_val)
                 rotations[node.name] = bool(r_val > 0.5)
+
+                # 这里的 cx/cy 是“2×中心坐标”的整数值（与建模约束一致）
+                cx_grid_val[node.name] = float(cx_grid_var[k].X) if cx_grid_var.get(k) is not None else 0.0
+                cy_grid_val[node.name] = float(cy_grid_var[k].X) if cy_grid_var.get(k) is not None else 0.0
             else:
                 layout[node.name] = (0.0, 0.0)
                 rotations[node.name] = False
-
+                cx_grid_val[node.name] = 0.0
+                cy_grid_val[node.name] = 0.0
         obj_value = (
             model.ObjVal if model.status == GRB.OPTIMAL else float("inf")
         )
@@ -183,6 +195,8 @@ def solve_placement_ilp_from_model(
             status=status_str,
             solve_time=solve_time,
             bounding_box=bbox_tuple,
+            cx_grid_var=cx_grid_val,
+            cy_grid_var=cy_grid_val,
         )
 
     except Exception as e:
@@ -217,7 +231,7 @@ def build_placement_ilp_model_grid(
     min_shared_length: float = 0.0,
     minimize_bbox_area: bool = True,
     distance_weight: float = 1.0,
-    area_weight: float = 0.1,
+    area_weight: float = 2.0,
     fixed_chiplet_idx: Optional[int] = None,  # 已废弃，不再使用固定芯粒约束
     min_aspect_ratio: float = 0.8,
     max_aspect_ratio: float = 1.25,
@@ -352,12 +366,12 @@ def build_placement_ilp_model_grid(
             vtype=GRB.INTEGER
         )
 
-    # 3.4 辅助变量：中心坐标
-    cx = {}
-    cy = {}
+    # 3.4 辅助变量：中心坐标（为保持整数域，这里使用“2×中心坐标”）
+    cx_grid_var = {}
+    cy_grid_var = {}
     for k in range(n):
-        cx[k] = model.addVar(name=f"cx_grid_var_{k}", lb=0, ub=W, vtype=GRB.INTEGER)
-        cy[k] = model.addVar(name=f"cy_grid_var_{k}", lb=0, ub=H, vtype=GRB.INTEGER)
+        cx_grid_var[k] = model.addVar(name=f"cx_grid_var_{k}", lb=0, ub=2 * W, vtype=GRB.INTEGER)
+        cy_grid_var[k] = model.addVar(name=f"cy_grid_var_{k}", lb=0, ub=2 * H, vtype=GRB.INTEGER)
     
     # 3.5 二进制变量：控制相邻方式
     z1 = {}
@@ -394,9 +408,10 @@ def build_placement_ilp_model_grid(
         model.addConstr(y_grid_var[k] <= H - h_var[k], name=f"y_grid_var_ub_{k}")
     
     # 4.2 中心坐标定义
+    # 约束：cx2 = 2*x + w, cy2 = 2*y + h （其中 cx2/cy2 即“2×中心坐标”）
     for k in range(n):
-        model.addConstr(2.0 * cx[k] == 2.0 * x_grid_var[k] + w_var[k], name=f"cx_def_{k}")
-        model.addConstr(2.0 * cy[k] == 2.0 * y_grid_var[k] + h_var[k], name=f"cy_def_{k}")
+        model.addConstr(cx_grid_var[k] == 2 * x_grid_var[k] + w_var[k], name=f"cx_def_{k}")
+        model.addConstr(cy_grid_var[k] == 2 * y_grid_var[k] + h_var[k], name=f"cy_def_{k}")
    
     # 4.3 相邻约束：根据连接类型应用不同的约束
     # 4.3.1 silicon_bridge 连接：必须紧邻（当前约束）
@@ -587,6 +602,7 @@ def build_placement_ilp_model_grid(
     bbox_w = model.addVar(name="bbox_w", lb=0, ub=W, vtype=GRB.INTEGER)
     bbox_h = model.addVar(name="bbox_h", lb=0, ub=H, vtype=GRB.INTEGER)
     
+    # 左下角坐标 + 宽度/高度 作为外接方框的边界
     for k in range(n):
         model.addConstr(bbox_min_x <= x_grid_var[k], name=f"bbox_min_x_{k}")
         model.addConstr(bbox_max_x >= x_grid_var[k] + w_var[k], name=f"bbox_max_x_{k}")
@@ -620,26 +636,26 @@ def build_placement_ilp_model_grid(
     # 5.3 长宽比优化目标（最小化长宽比与理想值的偏差）
     # 理想长宽比设为1.0（正方形），使用 |bbox_w/bbox_h - 1| 的线性近似
     aspect_ratio_penalty = None
-    # if minimize_bbox_area:  # 只在最小化面积时考虑长宽比优化
-    #     # 使用辅助变量表示长宽比偏差
-    #     # 由于 bbox_w/bbox_h 是非线性的，我们使用 |bbox_w - bbox_h| 作为近似
-    #     # 这鼓励长宽接近，从而接近正方形
-    #     aspect_ratio_diff = model.addVar(
-    #         name="aspect_ratio_diff",
-    #         lb=0,
-    #         ub=max(W, H),
-    #         vtype=GRB.CONTINUOUS
-    #     )
-    #     # |bbox_w - bbox_h| <= aspect_ratio_diff
-    #     model.addConstr(
-    #         aspect_ratio_diff >= bbox_w - bbox_h,
-    #         name="aspect_ratio_diff_ge_w_minus_h"
-    #     )
-    #     model.addConstr(
-    #         aspect_ratio_diff >= bbox_h - bbox_w,
-    #         name="aspect_ratio_diff_ge_h_minus_w"
-    #     )
-    #     aspect_ratio_penalty = aspect_ratio_diff
+    if minimize_bbox_area:  # 只在最小化面积时考虑长宽比优化
+        # 使用辅助变量表示长宽比偏差
+        # 由于 bbox_w/bbox_h 是非线性的，我们使用 |bbox_w - bbox_h| 作为近似
+        # 这鼓励长宽接近，从而接近正方形
+        aspect_ratio_diff = model.addVar(
+            name="aspect_ratio_diff",
+            lb=0,
+            ub=max(W, H),
+            vtype=GRB.INTEGER
+        )
+        # |bbox_w - bbox_h| <= aspect_ratio_diff
+        model.addConstr(
+            aspect_ratio_diff >= bbox_w - bbox_h,
+            name="aspect_ratio_diff_ge_w_minus_h"
+        )
+        model.addConstr(
+            aspect_ratio_diff >= bbox_h - bbox_w,
+            name="aspect_ratio_diff_ge_h_minus_w"
+        )
+        aspect_ratio_penalty = aspect_ratio_diff
     
     # ============ 步骤5: 定义目标函数 ============
     # 5.1 线长（曼哈顿距离）
@@ -647,26 +663,26 @@ def build_placement_ilp_model_grid(
     
     # 计算所有连接的线长（包括 silicon_bridge 和 standard）
     for i, j in all_connected_pairs:
-        dx_abs = model.addVar(name=f"dx_abs_{i}_{j}", lb=0, vtype=GRB.CONTINUOUS)
-        dy_abs = model.addVar(name=f"dy_abs_{i}_{j}", lb=0, vtype=GRB.CONTINUOUS)
+        dx_abs = model.addVar(name=f"dx_abs_{i}_{j}", lb=0, vtype=GRB.INTEGER)
+        dy_abs = model.addVar(name=f"dy_abs_{i}_{j}", lb=0, vtype=GRB.INTEGER)
         
         # 创建辅助变量表示差值
         dx_diff = model.addVar(
             name=f"dx_diff_{i}_{j}",
             lb=-W,
             ub=W,
-            vtype=GRB.CONTINUOUS
+            vtype=GRB.INTEGER
         )
         dy_diff = model.addVar(
             name=f"dy_diff_{i}_{j}",
             lb=-H,
             ub=H,
-            vtype=GRB.CONTINUOUS
+            vtype=GRB.INTEGER
         )
         
-        # 定义差值
-        model.addConstr(dx_diff == cx[i] - cx[j], name=f"dx_diff_def_{i}_{j}")
-        model.addConstr(dy_diff == cy[i] - cy[j], name=f"dy_diff_def_{i}_{j}")
+        # 定义差值（注意：cx_grid_var/cy_grid_var 是“2×中心坐标”，因此这里的线长也会相应扩大 2 倍；用于比较/优化时不影响正确性）
+        model.addConstr(dx_diff == cx_grid_var[i] - cx_grid_var[j], name=f"dx_diff_def_{i}_{j}")
+        model.addConstr(dy_diff == cy_grid_var[i] - cy_grid_var[j], name=f"dy_diff_def_{i}_{j}")
         
         # 使用Gurobi原生绝对值约束
         model.addGenConstrAbs(dx_abs, dx_diff, name=f"dx_abs_{i}_{j}")
@@ -675,36 +691,40 @@ def build_placement_ilp_model_grid(
         wirelength += dx_abs + dy_abs
     
     # 5.2 面积代理
-    t = model.addVar(
-        name="bbox_area_proxy_t",
-        lb=0,
-        ub=W+H,
-        vtype=GRB.CONTINUOUS
-    )
-    # 4. 核心约束：让 t 合理代理面积（无冲突、紧凑）
-    ## 约束1：t 至少 ≥ 宽/高（保证 t 不小于单个维度）
-    model.addConstr(t >= bbox_w, name="t_ge_width")
-    model.addConstr(t >= bbox_h, name="t_ge_height")
+    # t = model.addVar(
+    #     name="bbox_area_proxy_t",
+    #     lb=0,
+    #     ub=W+H,
+    #     vtype=GRB.CONTINUOUS
+    # )
+    # # 4. 核心约束：让 t 合理代理面积（无冲突、紧凑）
+    # ## 约束1：t 至少 ≥ 宽/高（保证 t 不小于单个维度）
+    # model.addConstr(t >= bbox_w, name="t_ge_width")
+    # model.addConstr(t >= bbox_h, name="t_ge_height")
     
-    ## 约束2：t 至少 ≥ 宽×高的"线性近似"（关键：用均值放大系数逼近面积）
-    # 系数 alpha 取 0.5~1（平衡近似精度和约束紧凑性）
-    alpha = 0.8
-    model.addConstr(t >= alpha * (bbox_w + bbox_h), name="t_ge_scaled_mean")
+    # ## 约束2：t 至少 ≥ 宽×高的"线性近似"（关键：用均值放大系数逼近面积）
+    # # 系数 alpha 取 0.5~1（平衡近似精度和约束紧凑性）
+    # alpha = 0.8
+    # model.addConstr(t >= alpha * (bbox_w + bbox_h), name="t_ge_scaled_mean")
     
     # 5.4 目标函数
-    aspect_ratio_weight = 0.05  # 长宽比优化权重（相对于其他项）
+    distance_weight = 0.1
+    area_weight = 1
+    # distance_weight = 1.0
+    # area_weight = 2.0
+    aspect_ratio_weight = 1  # 长宽比优化权重（相对于其他项）
 
     if aspect_ratio_penalty is not None:
         objective = (distance_weight * wirelength + 
-                    area_weight * t + 
+                    area_weight * (bbox_w + bbox_h) + 
                     aspect_ratio_weight * aspect_ratio_penalty)
         model.setObjective(objective, GRB.MINIMIZE)
         if verbose:
-            print(f"目标函数: {distance_weight} * wirelength + {area_weight} * area_proxy + {aspect_ratio_weight} * aspect_ratio_penalty")
+            print(f"目标函数: {distance_weight} * wirelength + {area_weight} * (bbox_w + bbox_h) + {aspect_ratio_weight} * aspect_ratio_penalty")
     else:
-        model.setObjective(distance_weight * wirelength + area_weight * t, GRB.MINIMIZE)
+        model.setObjective(distance_weight * wirelength + area_weight * (bbox_w + bbox_h), GRB.MINIMIZE)
         if verbose:
-            print(f"目标函数: {distance_weight} * wirelength + {area_weight} * area_proxy")
+            print(f"目标函数: {distance_weight} * wirelength + {area_weight} * (bbox_w + bbox_h)")
 
     
     return ILPModelContext(
@@ -728,8 +748,8 @@ def build_placement_ilp_model_grid(
         H=H,
         grid_size=grid_size,
         fixed_chiplet_idx=fixed_chiplet_idx,
-        cx=cx,
-        cy=cy,
+        cx_grid_var=cx_grid_var,
+        cy_grid_var=cy_grid_var,
     )
 
 

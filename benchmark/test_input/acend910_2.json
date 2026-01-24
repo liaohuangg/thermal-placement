@@ -1,0 +1,24 @@
+{
+  "chiplets": [
+    {
+      "name": "A",
+      "width": 14.5,
+      "height": 31.4,
+      "power": 256
+    },
+    {
+      "name": "B",
+      "width": 10.5,
+      "height": 16.0,
+      "power": 14
+    }
+  ],
+  "connections": [
+    [
+      "A",
+      "B",
+      200,
+      1
+    ]
+  ]
+}

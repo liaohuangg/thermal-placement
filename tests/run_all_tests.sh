@@ -24,47 +24,47 @@ if [ $# -gt 0 ]; then
         "acend910")
             if [ -f "$log_dir/acend910.log" ]; then rm -f "$log_dir/acend910.log"; fi
             touch "$log_dir/acend910.log"
-            python3 batch_test_solutions_gurobi.py --num-solutions 5 --grid-size 0.01  --min-shared-length 2 --min-pair-dist-diff 1 --files acend910.json > "$log_dir/acend910.log" 2>&1
+            python3 batch_test_solutions_gurobi.py --num-solutions 3 --grid-size 0.01  --min-shared-length 1 --min-pair-dist-diff 2 --files acend910.json > "$log_dir/acend910.log" 2>&1
             ;;
         "cpu-dram")
             if [ -f "$log_dir/cpu-dram.log" ]; then rm -f "$log_dir/cpu-dram.log"; fi
             touch "$log_dir/cpu-dram.log"
-            python3 batch_test_solutions_gurobi.py --num-solutions 2 --grid-size 0.01  --min-shared-length 2 --min-pair-dist-diff 0.01 --files cpu-dram.json > "$log_dir/cpu-dram.log" 2>&1
+            python3 batch_test_solutions_gurobi.py --num-solutions 3 --grid-size 0.01  --min-shared-length 1 --min-pair-dist-diff 2 --files cpu-dram.json > "$log_dir/cpu-dram.log" 2>&1
             ;;
         "hp11_m")
             if [ -f "$log_dir/hp11_m.log" ]; then rm -f "$log_dir/hp11_m.log"; fi
             touch "$log_dir/hp11_m.log"
-            python3 batch_test_solutions_gurobi.py --num-solutions 2 --grid-size 0.01  --min-shared-length 2 --min-pair-dist-diff 0.01 --files hp11_m.json > "$log_dir/hp11_m.log" 2>&1
+            python3 batch_test_solutions_gurobi.py --num-solutions 3 --grid-size 0.01  --min-shared-length 1 --min-pair-dist-diff 2 --files hp11_m.json > "$log_dir/hp11_m.log" 2>&1
             ;;
         "hp6_m")
             if [ -f "$log_dir/hp6_m.log" ]; then rm -f "$log_dir/hp6_m.log"; fi
             touch "$log_dir/hp6_m.log"
-            python3 batch_test_solutions_gurobi.py --num-solutions 2 --grid-size 0.01  --min-shared-length 2 --min-pair-dist-diff 0.01 --files hp6_m.json > "$log_dir/hp6_m.log" 2>&1
+            python3 batch_test_solutions_gurobi.py --num-solutions 3 --grid-size 0.01  --min-shared-length 1 --min-pair-dist-diff 2 --files hp6_m.json > "$log_dir/hp6_m.log" 2>&1
             ;;
         "hp8_m")
             if [ -f "$log_dir/hp8_m.log" ]; then rm -f "$log_dir/hp8_m.log"; fi
             touch "$log_dir/hp8_m.log"
-            python3 batch_test_solutions_gurobi.py --num-solutions 2 --grid-size 0.01  --min-shared-length 2 --min-pair-dist-diff 0.01 --files hp8_m.json > "$log_dir/hp8_m.log" 2>&1
+            python3 batch_test_solutions_gurobi.py --num-solutions 3 --grid-size 0.01  --min-shared-length 1 --min-pair-dist-diff 2 --files hp8_m.json > "$log_dir/hp8_m.log" 2>&1
             ;;
         "multigpu")
             if [ -f "$log_dir/multigpu.log" ]; then rm -f "$log_dir/multigpu.log"; fi
             touch "$log_dir/multigpu.log"
-            python3 batch_test_solutions_gurobi.py --num-solutions 2 --grid-size 0.01  --min-shared-length 2 --min-pair-dist-diff 0.01 --files multigpu.json > "$log_dir/multigpu.log" 2>&1
+            python3 batch_test_solutions_gurobi.py --num-solutions 3 --grid-size 0.01  --min-shared-length 1 --min-pair-dist-diff 2 --files multigpu.json > "$log_dir/multigpu.log" 2>&1
             ;;
         "xerox6_m")
             if [ -f "$log_dir/xerox6_m.log" ]; then rm -f "$log_dir/xerox6_m.log"; fi
             touch "$log_dir/xerox6_m.log"
-            python3 batch_test_solutions_gurobi.py --num-solutions 2 --grid-size 0.01  --min-shared-length 2 --min-pair-dist-diff 0.01 --files xerox6_m.json > "$log_dir/xerox6_m.log" 2>&1
+            python3 batch_test_solutions_gurobi.py --num-solutions 3 --grid-size 0.01  --min-shared-length 1 --min-pair-dist-diff 2 --files xerox6_m.json > "$log_dir/xerox6_m.log" 2>&1
             ;;
         "xerox7_m")
             if [ -f "$log_dir/xerox7_m.log" ]; then rm -f "$log_dir/xerox7_m.log"; fi
             touch "$log_dir/xerox7_m.log"
-            python3 batch_test_solutions_gurobi.py --num-solutions 2 --grid-size 0.01  --min-shared-length 2 --min-pair-dist-diff 0.01 --files xerox7_m.json > "$log_dir/xerox7_m.log" 2>&1
+            python3 batch_test_solutions_gurobi.py --num-solutions 3 --grid-size 0.01  --min-shared-length 1 --min-pair-dist-diff 2 --files xerox7_m.json > "$log_dir/xerox7_m.log" 2>&1
             ;;
         "xerox8_m")
             if [ -f "$log_dir/xerox8_m.log" ]; then rm -f "$log_dir/xerox8_m.log"; fi
             touch "$log_dir/xerox8_m.log"
-            python3 batch_test_solutions_gurobi.py --num-solutions 2 --grid-size 0.01  --min-shared-length 2 --min-pair-dist-diff 0.01 --files xerox8_m.json > "$log_dir/xerox8_m.log" 2>&1
+            python3 batch_test_solutions_gurobi.py --num-solutions 3 --grid-size 0.01  --min-shared-length 1 --min-pair-dist-diff 2 --files xerox8_m.json > "$log_dir/xerox8_m.log" 2>&1
             ;;
         *)
             echo "错误: 未知的测试名称: $1"
@@ -79,37 +79,37 @@ else
     # 如果没有参数，运行所有测试
     if [ -f "$log_dir/acend910.log" ]; then rm -f "$log_dir/acend910.log"; fi
     touch "$log_dir/acend910.log"
-    python3 batch_test_solutions_gurobi.py --num-solutions 2 --grid-size 0.01  --min-shared-length 2 --min-pair-dist-diff 0.01 --files acend910.json > "$log_dir/acend910.log" 2>&1
+    python3 batch_test_solutions_gurobi.py --num-solutions 3 --grid-size 0.01  --min-shared-length 1 --min-pair-dist-diff 2 --files acend910.json > "$log_dir/acend910.log" 2>&1
     
     if [ -f "$log_dir/cpu-dram.log" ]; then rm -f "$log_dir/cpu-dram.log"; fi
     touch "$log_dir/cpu-dram.log"
-    python3 batch_test_solutions_gurobi.py --num-solutions 2 --grid-size 0.01  --min-shared-length 2 --min-pair-dist-diff 0.01 --files cpu-dram.json > "$log_dir/cpu-dram.log" 2>&1
+    python3 batch_test_solutions_gurobi.py --num-solutions 3 --grid-size 0.01  --min-shared-length 1 --min-pair-dist-diff 2 --files cpu-dram.json > "$log_dir/cpu-dram.log" 2>&1
     
     if [ -f "$log_dir/hp11_m.log" ]; then rm -f "$log_dir/hp11_m.log"; fi
     touch "$log_dir/hp11_m.log"
-    python3 batch_test_solutions_gurobi.py --num-solutions 2 --grid-size 0.01  --min-shared-length 2 --min-pair-dist-diff 0.01 --files hp11_m.json > "$log_dir/hp11_m.log" 2>&1
+    python3 batch_test_solutions_gurobi.py --num-solutions 3 --grid-size 0.01  --min-shared-length 1 --min-pair-dist-diff 2 --files hp11_m.json > "$log_dir/hp11_m.log" 2>&1
     
     if [ -f "$log_dir/hp6_m.log" ]; then rm -f "$log_dir/hp6_m.log"; fi
     touch "$log_dir/hp6_m.log"
-    python3 batch_test_solutions_gurobi.py --num-solutions 2 --grid-size 0.01  --min-shared-length 2 --min-pair-dist-diff 0.01 --files hp6_m.json > "$log_dir/hp6_m.log" 2>&1
+    python3 batch_test_solutions_gurobi.py --num-solutions 3 --grid-size 0.01  --min-shared-length 1 --min-pair-dist-diff 2 --files hp6_m.json > "$log_dir/hp6_m.log" 2>&1
     
     if [ -f "$log_dir/hp8_m.log" ]; then rm -f "$log_dir/hp8_m.log"; fi
     touch "$log_dir/hp8_m.log"
-    python3 batch_test_solutions_gurobi.py --num-solutions 2 --grid-size 0.01  --min-shared-length 2 --min-pair-dist-diff 0.01 --files hp8_m.json > "$log_dir/hp8_m.log" 2>&1
+    python3 batch_test_solutions_gurobi.py --num-solutions 3 --grid-size 0.01  --min-shared-length 1 --min-pair-dist-diff 2 --files hp8_m.json > "$log_dir/hp8_m.log" 2>&1
     
     if [ -f "$log_dir/multigpu.log" ]; then rm -f "$log_dir/multigpu.log"; fi
     touch "$log_dir/multigpu.log"
-    python3 batch_test_solutions_gurobi.py --num-solutions 2 --grid-size 0.01  --min-shared-length 2 --min-pair-dist-diff 0.01 --files multigpu.json > "$log_dir/multigpu.log" 2>&1
+    python3 batch_test_solutions_gurobi.py --num-solutions 3 --grid-size 0.01  --min-shared-length 1 --min-pair-dist-diff 2 --files multigpu.json > "$log_dir/multigpu.log" 2>&1
     
     if [ -f "$log_dir/xerox6_m.log" ]; then rm -f "$log_dir/xerox6_m.log"; fi
     touch "$log_dir/xerox6_m.log"
-    python3 batch_test_solutions_gurobi.py --num-solutions 2 --grid-size 0.01  --min-shared-length 2 --min-pair-dist-diff 0.01 --files xerox6_m.json > "$log_dir/xerox6_m.log" 2>&1
+    python3 batch_test_solutions_gurobi.py --num-solutions 3 --grid-size 0.01  --min-shared-length 1 --min-pair-dist-diff 2 --files xerox6_m.json > "$log_dir/xerox6_m.log" 2>&1
     
     if [ -f "$log_dir/xerox7_m.log" ]; then rm -f "$log_dir/xerox7_m.log"; fi
     touch "$log_dir/xerox7_m.log"
-    python3 batch_test_solutions_gurobi.py --num-solutions 2 --grid-size 0.01  --min-shared-length 2 --min-pair-dist-diff 0.01 --files xerox7_m.json > "$log_dir/xerox7_m.log" 2>&1
+    python3 batch_test_solutions_gurobi.py --num-solutions 3 --grid-size 0.01  --min-shared-length 1 --min-pair-dist-diff 2 --files xerox7_m.json > "$log_dir/xerox7_m.log" 2>&1
     
     if [ -f "$log_dir/xerox8_m.log" ]; then rm -f "$log_dir/xerox8_m.log"; fi
     touch "$log_dir/xerox8_m.log"
-    python3 batch_test_solutions_gurobi.py --num-solutions 2 --grid-size 0.01  --min-shared-length 2 --min-pair-dist-diff 0.01 --files xerox8_m.json > "$log_dir/xerox8_m.log" 2>&1
+    python3 batch_test_solutions_gurobi.py --num-solutions 3 --grid-size 0.01  --min-shared-length 1 --min-pair-dist-diff 2 --files xerox8_m.json > "$log_dir/xerox8_m.log" 2>&1
 fi

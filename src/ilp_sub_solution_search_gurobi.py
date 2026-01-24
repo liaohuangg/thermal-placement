@@ -232,7 +232,7 @@ def _add_exclude_dist_constraint(
             dist_curr_ij == dx_grid_abs_ij + dy_grid_abs_ij,
             name=constraint_name
         )
-        # print_constraint_formal(constr)
+        # # print_constraint_formal(constr)
         
         dx_abs_dict[(i, j)] = dx_grid_abs_ij
         dy_abs_dict[(i, j)] = dy_grid_abs_ij
@@ -278,7 +278,7 @@ def _add_exclude_dist_constraint(
                 dist_diff_ij == dist_curr_ij - dist_prev_ij,
                 name=constraint_name
             )
-            # print_constraint_formal(constr)
+            # # print_constraint_formal(constr)
             
             # 使用Big-M方法添加绝对值约束：dist_diff_abs_ij = |dist_diff_ij|
             dist_diff_abs_ij = model.addVar(
@@ -299,18 +299,18 @@ def _add_exclude_dist_constraint(
             # 如果 same_dist_pair_prev = 1，则 dist_diff_abs_ij < min_pair_dist_diff
             constraint_name = f"same_dist_pair_upper_{solution_index_suffix}_{i}_{j}_prev{prev_idx}"
             constr = model.addConstr(
-                dist_diff_abs_ij <= min_pair_dist_diff + M * (1 - same_dist_pair_prev[((i, j), prev_idx)]),
+                dist_diff_abs_ij <= min_pair_dist_diff_grid + M * (1 - same_dist_pair_prev[((i, j), prev_idx)]),
                 name=constraint_name
             )
-            # print_constraint_formal(constr)
+            # # print_constraint_formal(constr)
             
             # 如果 same_dist_pair_prev = 0，则 dist_diff_abs_ij >= min_pair_dist_diff
             constraint_name = f"same_dist_pair_lower_{solution_index_suffix}_{i}_{j}_prev{prev_idx}"
             constr = model.addConstr(
-                dist_diff_abs_ij >= min_pair_dist_diff - M * same_dist_pair_prev[((i, j), prev_idx)],
+                dist_diff_abs_ij >= min_pair_dist_diff_grid - M * same_dist_pair_prev[((i, j), prev_idx)],
                 name=constraint_name
             )
-            # print_constraint_formal(constr)
+            # # print_constraint_formal(constr)
         
         # 约束：diff_dist_pair[(i,j)] = 1 当且仅当对于所有之前解，same_dist_pair_prev = 0
         # 即：diff_dist_pair[(i,j)] = 1 表示当前解的距离与所有之前解的距离都相差 >= min_pair_dist_diff
@@ -323,7 +323,7 @@ def _add_exclude_dist_constraint(
                 same_dist_pair_prev[((i, j), prev_idx)] <= 1 - diff_dist_pair[(i, j)],
                 name=constraint_name
             )
-            print_constraint_formal(constr)
+            # print_constraint_formal(constr)
             
             # 如果至少有一个 same_dist_pair_prev = 1，则 diff_dist_pair = 0
             constraint_name = f"not_same_implies_diff_dist_pair_{solution_index_suffix}_{i}_{j}_prev{prev_idx}"
@@ -331,7 +331,7 @@ def _add_exclude_dist_constraint(
                 diff_dist_pair[(i, j)] <= 1 - same_dist_pair_prev[((i, j), prev_idx)],
                 name=constraint_name
             )
-            print_constraint_formal(constr)
+            # print_constraint_formal(constr)
         
         # 如果所有 same_dist_pair_prev = 0，则 diff_dist_pair = 1
         constraint_name = f"all_not_same_implies_diff_dist_pair_{solution_index_suffix}_{i}_{j}"
@@ -339,7 +339,7 @@ def _add_exclude_dist_constraint(
             diff_dist_pair[(i, j)] >= 1 - gp.quicksum([same_dist_pair_prev[((i, j), prev_idx)] for prev_idx in range(len(prev_pair_distances_list))]),
             name=constraint_name
         )
-        print_constraint_formal(constr)
+        # print_constraint_formal(constr)
     
     # 顶层约束：至少有一对chiplet的距离与之前所有解都不同
     # 即：至少存在一对chiplet，使得当前解的距离与所有之前解的距离都相差 >= min_pair_dist_diff
@@ -599,47 +599,62 @@ def search_multiple_solutions(
             min_pair_dist_diff=min_pair_dist_diff
         )
         
-        # 获取当前解的实际坐标（左下角坐标，不受旋转影响）
+        # 计算每对chiplet之间的曼哈顿距离 存入 all_prev_pair_distances
+        # 计算并保存当前解的chiplet对之间的距离（使用grid坐标中心点的曼哈顿距离）
+        # 注意：使用中心点坐标计算距离，而不是左下角坐标
+        pair_distances = {}
+        grid_size_val = ctx.grid_size if ctx.grid_size is not None else 1.0
+        
+        # 获取grid坐标值（左下角）
+        # 方法1：直接从 result.layout 获取（它已经是网格坐标）
         x_grid_var = {}
         y_grid_var = {}
-        w_var = {}
-        h_var = {}
         cx_grid_var = {}
         cy_grid_var = {}
-        all_vars_dict = {v.VarName: v for v in model.getVars()}
+        for k, node in enumerate(nodes):
+            node_name = node.name if hasattr(node, 'name') else f"Chiplet_{k}"
+            if node_name in result.layout:
+                x_grid_var[k], y_grid_var[k] = result.layout[node_name]
+                cx_grid_var[k], cy_grid_var[k] = result.cx_grid_var[node_name], result.cy_grid_var[node_name]
+            else:
+                # 方法2：如果 layout 中没有，尝试从模型变量获取
+                x_var = ctx.model.getVarByName(f"x_grid_var_{k}")
+                y_var = ctx.model.getVarByName(f"y_grid_var_{k}")
+                cx2_var = ctx.model.getVarByName(f"cx_grid_var_{k}")
+                cy2_var = ctx.model.getVarByName(f"cy_grid_var_{k}")
+                if x_var is None or y_var is None or cx2_var is None or cy2_var is None:
+                    print(f"[WARNING] 无法找到变量 x_grid_var/y_grid_var/cx_grid_var/cy_grid_var，跳过该chiplet的距离计算: k={k}")
+                    x_grid_var[k], y_grid_var[k] = 0.0, 0.0
+                    cx_grid_var[k], cy_grid_var[k] = 0.0, 0.0
+                else:
+                    x_grid_var[k], y_grid_var[k] = float(x_var.X), float(y_var.X)
+                    cx_grid_var[k], cy_grid_var[k] = float(cx2_var.X), float(cy2_var.X)
         
-        for k in range(n):
-            var_name_x = f"x_grid_var_{k}"
-            var_name_y = f"y_grid_var_{k}"
-            var_name_w = f"w_var_{k}"
-            var_name_h = f"h_var_{k}"
-            var_name_cx = f"cx_grid_var_{k}"
-            var_name_cy = f"cy_grid_var_{k}"
-            x_grid_temp = all_vars_dict.get(var_name_x)
-            y_grid_temp = all_vars_dict.get(var_name_y)
-            w_temp = all_vars_dict.get(var_name_w)
-            h_temp = all_vars_dict.get(var_name_h)
-            cx_temp = all_vars_dict.get(var_name_cx)
-            cy_temp = all_vars_dict.get(var_name_cy)
-            if x_grid_temp is None or y_grid_temp is None:
-                print(f"[WARNING] 无法找到变量 {var_name_x} 或 {var_name_y}，跳过排除约束")
-                # 列出所有变量名以便调试
-                all_var_names = list(all_vars_dict.keys())[:20]
-                print(f"[DEBUG] 前20个变量名: {all_var_names}")
-                return  # 如果没有grid变量，说明不是网格化模型
-            x_grid_var[k] = x_grid_temp
-            y_grid_var[k] = y_grid_temp
-            if w_temp is None or h_temp is None:
-                print(f"[WARNING] 无法找到变量 {var_name_w} 或 {var_name_h}，跳过排除约束")
-                return  # 如果没有w_var或h_var，说明不是网格化模型
-            w_var[k] = w_temp
-            h_var[k] = h_temp
-            if cx_temp is None or cy_temp is None:
-                print(f"[WARNING] 无法找到变量 {var_name_cx} 或 {var_name_cy}，跳过排除约束")
-                return  # 如果没有cx_grid_var或cy_grid_var，说明不是网格化模型
-            cx_grid_var[k] = cx_temp
-            cy_grid_var[k] = cy_temp
-            
+        # 计算每对chiplet之间的曼哈顿距离（使用grid坐标中心点）
+        for i_idx in range(len(nodes)):
+            for j_idx in range(i_idx + 1, len(nodes)):
+                if i_idx not in cx_grid_var or j_idx not in cx_grid_var:
+                    continue
+                if i_idx not in cy_grid_var or j_idx not in cy_grid_var:
+                    continue
+
+                # 注意：cx_grid_var/cy_grid_var 是“2×中心坐标”的数值（整数域）
+                # 因此 dx/dy 以及最终距离也是“放大2倍”的中心点曼哈顿距离
+                dx = abs(float(cx_grid_var[i_idx]) - float(cx_grid_var[j_idx]))
+                dy = abs(float(cy_grid_var[i_idx]) - float(cy_grid_var[j_idx]))
+                pair_distances[(i_idx, j_idx)] = dx + dy
+                
+        # 如果本轮没有成功得到可用的距离信息，直接停止后续搜索
+        if not pair_distances:
+            print(f"[WARNING] 本轮未计算出任何chiplet对距离，停止搜索")
+            break
+
+        # 如果本轮解与历史解重复（距离字典完全相同），认为“没找到新解”，停止后续搜索
+        if any(prev == pair_distances for prev in all_prev_pair_distances):
+            print(f"[INFO] 本轮解与历史解距离信息重复，停止搜索")
+            break
+
+        all_prev_pair_distances.append(pair_distances)
         # 输出当前解的基本信息
         print(f"\n=== 解 {i+1} ===")
         print(f"目标函数值: {result.objective_value:.4f}")
