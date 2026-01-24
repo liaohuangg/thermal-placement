@@ -218,6 +218,7 @@ def run_batch_tests(
     grid_size: float = DEFAULT_GRID_SIZE,
     fixed_chiplet_idx: int = DEFAULT_FIXED_CHIPLET_IDX,
     min_pair_dist_diff: float = DEFAULT_MIN_PAIR_DIST_DIFF,
+    time_limit: int = 600,  # 求解时间限制（秒），默认10分钟
     test_input_dir: Optional[Path] = None,
     output_base_dir: Optional[Path] = None,
     json_files: Optional[List[str]] = None,
@@ -306,6 +307,7 @@ def run_batch_tests(
     print(f"  - grid_size: {grid_size}")
     print(f"  - fixed_chiplet_idx: {fixed_chiplet_idx}")
     print(f"  - min_pair_dist_diff: {min_pair_dist_diff}")
+    print(f"  - time_limit: {time_limit} 秒 ({time_limit/60:.1f} 分钟)")
     
     print(f"{'='*80}\n")
     
@@ -358,6 +360,7 @@ def run_batch_tests(
         logger.info(f"  - grid_size: {grid_size}")
         logger.info(f"  - fixed_chiplet_idx: {fixed_chiplet_idx}")
         logger.info(f"  - min_pair_dist_diff: {min_pair_dist_diff}")
+        logger.info(f"  - time_limit: {time_limit} 秒 ({time_limit/60:.1f} 分钟)")
         logger.info(f"{'='*80}")
         
         try:
@@ -420,6 +423,7 @@ def run_batch_tests(
             logger.info(f"  - grid_size: {grid_size} (类型: {type(grid_size).__name__})")
             logger.info(f"  - fixed_chiplet_idx: {fixed_chiplet_idx} (类型: {type(fixed_chiplet_idx).__name__})")
             logger.info(f"  - min_pair_dist_diff: {min_pair_dist_diff} (类型: {type(min_pair_dist_diff).__name__})")
+            logger.info(f"  - time_limit: {time_limit} (类型: {type(time_limit).__name__})")
             logger.info(f"  - input_json_path: {str(json_file.absolute())}")
             logger.info(f"  - output_dir: {str(lp_dir_relative)}")
             logger.info(f"  - image_output_dir: {str(fig_dir_relative)}")
@@ -433,6 +437,7 @@ def run_batch_tests(
                 grid_size=grid_size,
                 fixed_chiplet_idx=fixed_chiplet_idx,
                 min_pair_dist_diff=min_pair_dist_diff,
+                time_limit=time_limit,
                 output_dir=str(lp_dir_relative),  # .lp文件保存到lp目录（相对路径）
                 image_output_dir=str(fig_dir_relative)  # 图片保存到fig目录（相对路径）
             )
@@ -580,6 +585,13 @@ def main():
     )
     
     parser.add_argument(
+        '--time-limit',
+        type=int,
+        default=600,
+        help='求解时间限制（秒），默认: 600 (10分钟)'
+    )
+    
+    parser.add_argument(
         '--test-input-dir',
         type=str,
         default=None,
@@ -618,6 +630,7 @@ def main():
     print(f"  - grid_size: {args.grid_size} (类型: {type(args.grid_size).__name__})")
     print(f"  - fixed_chiplet_idx: {args.fixed_chiplet_idx} (类型: {type(args.fixed_chiplet_idx).__name__})")
     print(f"  - min_pair_dist_diff: {args.min_pair_dist_diff} (类型: {type(args.min_pair_dist_diff).__name__})")
+    print(f"  - time_limit: {args.time_limit} (类型: {type(args.time_limit).__name__})")
     print(f"  - files: {args.files}")
     print(f"  - test_input_dir: {args.test_input_dir}")
     print(f"  - output_dir: {args.output_dir}")
@@ -641,6 +654,7 @@ def main():
         grid_size=args.grid_size,
         fixed_chiplet_idx=args.fixed_chiplet_idx,
         min_pair_dist_diff=args.min_pair_dist_diff,
+        time_limit=args.time_limit,
         test_input_dir=test_input_dir,
         output_base_dir=output_dir,
         json_files=args.files,

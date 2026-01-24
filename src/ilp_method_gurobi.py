@@ -99,7 +99,7 @@ class ILPModelContext:
 
 def solve_placement_ilp_from_model(
     ctx: ILPModelContext,
-    time_limit: int = 300,
+    time_limit: int = 600,  # 默认10分钟
     verbose: bool = True,
 ) -> ILPPlacementResult:
     """
@@ -206,74 +206,13 @@ def solve_placement_ilp_from_model(
         )
 
 
-def add_absolute_value_constraint_big_m(
-    model: gp.Model,
-    abs_var: gp.Var,
-    orig_var: gp.Var,
-    M: float,
-    constraint_prefix: str,
-) -> None:
-    """
-    使用Big-M方法添加绝对值约束：abs_var = |orig_var|
-    
-    实现方法（参考Big-M方法）：
-    1. 创建二进制变量 is_positive，表示 orig_var >= 0
-    2. 使用4个约束强制 abs_var = |orig_var|
-       - 当 orig_var >= 0 时 (is_positive=1): abs_var = orig_var
-       - 当 orig_var < 0 时 (is_positive=0): abs_var = -orig_var
-    3. 使用2个约束强制 is_positive 的正确性
-    """
-    # 创建二进制变量：is_positive = 1 当且仅当 orig_var >= 0
-    is_positive = model.addVar(
-        name=f"{constraint_prefix}_is_positive",
-        vtype=GRB.BINARY
-    )
-    
-    # 约束1: 当 orig_var >= 0 时 (is_positive=1)，约束简化为: abs_var >= orig_var
-    model.addConstr(
-        abs_var >= orig_var - M * (1 - is_positive),
-        name=f"{constraint_prefix}_abs_ge_orig"
-    )
-    
-    # 约束2: 当 orig_var >= 0 时 (is_positive=1)，约束简化为: abs_var <= orig_var
-    model.addConstr(
-        abs_var <= orig_var + M * (1 - is_positive),
-        name=f"{constraint_prefix}_abs_le_orig"
-    )
-    
-    # 约束3: 当 orig_var < 0 时 (is_positive=0)，约束简化为: abs_var >= -orig_var
-    model.addConstr(
-        abs_var >= -orig_var - M * is_positive,
-        name=f"{constraint_prefix}_abs_ge_neg_orig"
-    )
-    
-    # 约束4: 当 orig_var < 0 时 (is_positive=0)，约束简化为: abs_var <= -orig_var
-    model.addConstr(
-        abs_var <= -orig_var + M * is_positive,
-        name=f"{constraint_prefix}_abs_le_neg_orig"
-    )
-    
-    # 约束5: 强制 is_positive = 1 当 orig_var >= 0
-    model.addConstr(
-        orig_var >= -M * (1 - is_positive),
-        name=f"{constraint_prefix}_force_positive"
-    )
-    
-    # 约束6: 强制 is_positive = 0 当 orig_var < 0
-    epsilon = 0.001
-    model.addConstr(
-        orig_var <= M * is_positive - epsilon,
-        name=f"{constraint_prefix}_force_negative"
-    )
-
-
 def build_placement_ilp_model_grid(
     nodes: List[ChipletNode],
     edges: List[Tuple[str, str, int]],  # (src, dst, connection_type): 1=silicon_bridge, 0=standard
     grid_size: float,
     W: Optional[float] = None,
     H: Optional[float] = None,
-    time_limit: int = 300,
+    time_limit: int = 600,  # 默认10分钟
     verbose: bool = True,
     min_shared_length: float = 0.0,
     minimize_bbox_area: bool = True,
@@ -362,14 +301,14 @@ def build_placement_ilp_model_grid(
         estimated_side = math.ceil(math.sqrt(total_area * 2))
         print(f"estimated_side: {estimated_side}")
         if W is None:
-            W = estimated_side * 3
+            W = estimated_side
         if H is None:
-            H = estimated_side * 3
+            H = estimated_side
         print(f"Estimated W: {W}, H: {H}")
     
     if verbose:
         print(f"网格化布局: grid_size={grid_size}, W={W}, grid_h={H}")
-        print(f"问题规模: {n} 个模块, {len(all_connected_pairs)} 对有连接的模块对")
+        print(f"问题规模: {n} 个模块, {len(silicon_bridge_pairs)} 对硅桥模块对，{len(standard_pairs)} 对标准模块对")
     
     # 1.4 计算共享边长(硅桥互联硬约束)网格数
     min_shared_length_grid = int(math.ceil(min_shared_length / grid_size))
@@ -378,7 +317,7 @@ def build_placement_ilp_model_grid(
     model = gp.Model("ChipletPlacementGrid")
     
     # 大M常数
-    M = max(W, H) * 3 # 确保 M 足够覆盖任何两个组件之间的距离
+    M = max(W, H) * 2 # 确保 M 足够覆盖任何两个组件之间的距离
 
     # ============ 步骤3: 定义变量 ============
     # 3.1 二进制变量：旋转变量
@@ -417,8 +356,8 @@ def build_placement_ilp_model_grid(
     cx = {}
     cy = {}
     for k in range(n):
-        cx[k] = model.addVar(name=f"cx_{k}", lb=0, ub=W, vtype=GRB.INTEGER)
-        cy[k] = model.addVar(name=f"cy_{k}", lb=0, ub=H, vtype=GRB.INTEGER)
+        cx[k] = model.addVar(name=f"cx_grid_var_{k}", lb=0, ub=W, vtype=GRB.INTEGER)
+        cy[k] = model.addVar(name=f"cy_grid_var_{k}", lb=0, ub=H, vtype=GRB.INTEGER)
     
     # 3.5 二进制变量：控制相邻方式
     z1 = {}
@@ -455,9 +394,9 @@ def build_placement_ilp_model_grid(
         model.addConstr(y_grid_var[k] <= H - h_var[k], name=f"y_grid_var_ub_{k}")
     
     # 4.2 中心坐标定义
-    # for k in range(n):
-    #     model.addConstr(cx[k] == x_grid_var[k] + w_var[k] / 2.0, name=f"cx_def_{k}")
-    #     model.addConstr(cy[k] == y_grid_var[k] + h_var[k] / 2.0, name=f"cy_def_{k}")
+    for k in range(n):
+        model.addConstr(2.0 * cx[k] == 2.0 * x_grid_var[k] + w_var[k], name=f"cx_def_{k}")
+        model.addConstr(2.0 * cy[k] == 2.0 * y_grid_var[k] + h_var[k], name=f"cy_def_{k}")
    
     # 4.3 相邻约束：根据连接类型应用不同的约束
     # 4.3.1 silicon_bridge 连接：必须紧邻（当前约束）
@@ -729,23 +668,9 @@ def build_placement_ilp_model_grid(
         model.addConstr(dx_diff == cx[i] - cx[j], name=f"dx_diff_def_{i}_{j}")
         model.addConstr(dy_diff == cy[i] - cy[j], name=f"dy_diff_def_{i}_{j}")
         
-        # 使用Big-M方法添加绝对值约束
-        M_dx = M  # Big-M常数
-        M_dy = M  # Big-M常数
-        add_absolute_value_constraint_big_m(
-            model=model,
-            abs_var=dx_abs,
-            orig_var=dx_diff,
-            M=M_dx,
-            constraint_prefix=f"dx_abs_{i}_{j}"
-        )
-        add_absolute_value_constraint_big_m(
-            model=model,
-            abs_var=dy_abs,
-            orig_var=dy_diff,
-            M=M_dy,
-            constraint_prefix=f"dy_abs_{i}_{j}"
-        )
+        # 使用Gurobi原生绝对值约束
+        model.addGenConstrAbs(dx_abs, dx_diff, name=f"dx_abs_{i}_{j}")
+        model.addGenConstrAbs(dy_abs, dy_diff, name=f"dy_abs_{i}_{j}")
         
         wirelength += dx_abs + dy_abs
     
@@ -817,7 +742,7 @@ def main():
     
     # 设置参数
     grid_size = 1.0
-    time_limit = 300
+    time_limit = 600  # 10分钟
     min_shared_length = 0.1
     fixed_chiplet_idx = None  # 不再使用固定芯粒约束
     

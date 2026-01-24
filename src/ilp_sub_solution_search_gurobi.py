@@ -8,13 +8,12 @@ import math
 import gurobipy as gp
 from gurobipy import GRB
 
-from tool import build_random_chiplet_graph, draw_chiplet_diagram, print_constraint_formal, print_pair_distances_only, print_all_variables, get_var_value
+from tool import draw_chiplet_diagram, print_constraint_formal, print_pair_distances_only
 from ilp_method_gurobi import (
     ILPModelContext,
     ILPPlacementResult,
     build_placement_ilp_model_grid,
     solve_placement_ilp_from_model,
-    add_absolute_value_constraint_big_m,
 )
 
 
@@ -67,80 +66,84 @@ def _add_exclude_dist_constraint(
         print(f"[WARNING] 模型更新失败: {e}")
         return
     
-    # 计算grid的上界（需要先计算，因为后面会用到）
-    grid_w = int(math.ceil(W / grid_size))
-    grid_h = int(math.ceil(H / grid_size))
-    
-    # 获取x_grid和y_grid变量（左下角坐标）
+    # ============ 步骤1: 获得chiplet左下角左边变量 和 chiplet宽度高度变量 ============
+    # 获取x_grid_var和y_grid_var变量（左下角坐标）
     # 使用 getVars() 遍历所有变量，通过 VarName 查找，避免 getVarByName() 的错误
-    x_grid = {}
-    y_grid = {}
+    x_grid_var = {}
+    y_grid_var = {}
+    w_var = {}
+    h_var = {}
+    cx_grid_var = {}
+    cy_grid_var = {}
     all_vars_dict = {v.VarName: v for v in model.getVars()}
     
     for k in range(n):
-        var_name_x = f"x_grid_{k}"
-        var_name_y = f"y_grid_{k}"
-        x_grid_var = all_vars_dict.get(var_name_x)
-        y_grid_var = all_vars_dict.get(var_name_y)
-        if x_grid_var is None or y_grid_var is None:
+        var_name_x = f"x_grid_var_{k}"
+        var_name_y = f"y_grid_var_{k}"
+        var_name_w = f"w_var_{k}"
+        var_name_h = f"h_var_{k}"
+        var_name_cx = f"cx_grid_var_{k}"
+        var_name_cy = f"cy_grid_var_{k}"
+        x_grid_temp = all_vars_dict.get(var_name_x)
+        y_grid_temp = all_vars_dict.get(var_name_y)
+        w_temp = all_vars_dict.get(var_name_w)
+        h_temp = all_vars_dict.get(var_name_h)
+        cx_temp = all_vars_dict.get(var_name_cx)
+        cy_temp = all_vars_dict.get(var_name_cy)
+        if x_grid_temp is None or y_grid_temp is None:
             print(f"[WARNING] 无法找到变量 {var_name_x} 或 {var_name_y}，跳过排除约束")
             # 列出所有变量名以便调试
             all_var_names = list(all_vars_dict.keys())[:20]
             print(f"[DEBUG] 前20个变量名: {all_var_names}")
             return  # 如果没有grid变量，说明不是网格化模型
-        x_grid[k] = x_grid_var
-        y_grid[k] = y_grid_var
+        x_grid_var[k] = x_grid_temp
+        y_grid_var[k] = y_grid_temp
+        if w_temp is None or h_temp is None:
+            print(f"[WARNING] 无法找到变量 {var_name_w} 或 {var_name_h}，跳过排除约束")
+            return  # 如果没有w_var或h_var，说明不是网格化模型
+        w_var[k] = w_temp
+        h_var[k] = h_temp
+        if cx_temp is None or cy_temp is None:
+            print(f"[WARNING] 无法找到变量 {var_name_cx} 或 {var_name_cy}，跳过排除约束")
+            return  # 如果没有cx_grid_var或cy_grid_var，说明不是网格化模型
+        cx_grid_var[k] = cx_temp
+        cy_grid_var[k] = cy_temp
     
-    # 获取或计算中心坐标（grid坐标）
-    # 中心坐标 = 左下角坐标 + (宽度/2, 高度/2)
-    # 在grid坐标系统中，chiplet的宽度和高度是grid_size的整数倍
-    cx_grid = {}  # 中心坐标x（grid单位）
-    cy_grid = {}  # 中心坐标y（grid单位）
+    # ============ 步骤2: 获得chiplet中心坐标变量 ============
+    # # 获取或计算中心坐标（grid坐标）
+    # # 中心坐标 = 左下角坐标 + (宽度/2, 高度/2)
+    # # 在grid坐标系统中，chiplet的宽度和高度是grid_size的整数倍
+    # cx_grid_var = {}  # 中心坐标x（grid单位）
+    # cy_grid_var = {}  # 中心坐标y（grid单位）
     
-    for k in range(n):
-        node = ctx.nodes[k]
-        # 获取chiplet的实际尺寸
-        if hasattr(node, 'dimensions') and isinstance(node.dimensions, dict):
-            width = node.dimensions.get('x', 0.0)
-            height = node.dimensions.get('y', 0.0)
-        else:
-            width = 0.0
-            height = 0.0
+    # for k in range(n):
+    #     # 计算中心坐标（grid单位）：中心 = 左下角 + (宽度/2, 高度/2)
+    #     cx_grid_var[k] = model.addVar(
+    #         name=f"cx_grid_center_{solution_index_suffix}_{k}",
+    #         lb=0,
+    #         ub=W,  # 增加上界以容纳chiplet宽度
+    #         vtype=GRB.INTEGER
+    #     )
+    #     cy_grid_var[k] = model.addVar(
+    #         name=f"cy_grid_center_{solution_index_suffix}_{k}",
+    #         lb=0,
+    #         ub=H,  # 增加上界以容纳chiplet高度
+    #         vtype=GRB.INTEGER
+    #     )
         
-        # 转换为grid坐标的尺寸（grid单位）
-        w_grid = width / grid_size
-        h_grid = height / grid_size
+    #     # 约束：2 * 中心坐标 = 2 * 左下角坐标 + (宽度, 高度) 
+    #     # 为了避免除法产生的小数，我们将整个等式两边同时乘以 2。这样所有的计算都保持在整数域内。
+    #     # 注意此时的中心坐标是扩大两倍的整数
+    #     model.addConstr(
+    #         2.0 * cx_grid_var[k] == 2.0 * x_grid_var[k] + w_var[k],
+    #         name=f"cx_grid_center_def_{solution_index_suffix}_{k}"
+    #     )
+    #     model.addConstr(
+    #         2.0 * cy_grid_var[k] == 2.0 * y_grid_var[k] + h_var[k],
+    #         name=f"cy_grid_center_def_{solution_index_suffix}_{k}"
+    #     )
         
-        # 计算中心坐标（grid单位）：中心 = 左下角 + (宽度/2, 高度/2)
-        # 创建辅助变量表示中心坐标
-        # 上界需要更大，因为中心坐标可能超出grid_w/grid_h（由于chiplet有宽度和高度）
-        cx_grid_k = model.addVar(
-            name=f"cx_grid_center_{solution_index_suffix}_{k}",
-            lb=0,
-            ub=grid_w + 10,  # 增加上界以容纳chiplet宽度
-            vtype=GRB.CONTINUOUS
-        )
-        cy_grid_k = model.addVar(
-            name=f"cy_grid_center_{solution_index_suffix}_{k}",
-            lb=0,
-            ub=grid_h + 10,  # 增加上界以容纳chiplet高度
-            vtype=GRB.CONTINUOUS
-        )
-        
-        # 约束：中心坐标 = 左下角坐标 + (宽度/2, 高度/2)
-        model.addConstr(
-            cx_grid_k == x_grid[k] + w_grid / 2.0,
-            name=f"cx_grid_center_def_{solution_index_suffix}_{k}"
-        )
-        model.addConstr(
-            cy_grid_k == y_grid[k] + h_grid / 2.0,
-            name=f"cy_grid_center_def_{solution_index_suffix}_{k}"
-        )
-        
-        cx_grid[k] = cx_grid_k
-        cy_grid[k] = cy_grid_k
-    
-    print(f"[DEBUG] 成功获取所有grid变量和中心坐标，n={n}")
+    # print(f"[DEBUG] 成功获取所有grid变量和中心坐标，n={n}")
     
     # 生成所有chiplet对（i < j，避免重复）
     chiplet_pairs = []
@@ -161,80 +164,66 @@ def _add_exclude_dist_constraint(
     # 为每对chiplet和每个之前解创建二进制变量，表示该对的距离是否与解s的距离相同
     same_dist_pair_prev = {}  # key: ((i,j), prev_idx)
     
-    # max_dist_diff使用grid单位（最大可能的grid距离）
-    max_dist_diff = grid_w + grid_h
-    epsilon = max(0.001, min_pair_dist_diff_grid * 0.01)
-    
     for i, j in chiplet_pairs:
         # 创建辅助变量表示grid坐标中心点差的绝对值
         # 上界需要更大，因为中心坐标可能超出grid_w/grid_h（由于chiplet有宽度和高度）
         dx_grid_abs_ij = model.addVar(
             name=f"dx_grid_abs_pair_{solution_index_suffix}_{i}_{j}",
             lb=0,
-            ub=grid_w + 10,  # 增加上界以容纳chiplet宽度
-            vtype=GRB.CONTINUOUS
+            ub=W,  # 增加上界以容纳chiplet宽度
+            vtype=GRB.INTEGER
         )
         dy_grid_abs_ij = model.addVar(
             name=f"dy_grid_abs_pair_{solution_index_suffix}_{i}_{j}",
             lb=0,
-            ub=grid_h + 10,  # 增加上界以容纳chiplet高度
-            vtype=GRB.CONTINUOUS
+            ub=H,  # 增加上界以容纳chiplet高度
+            vtype=GRB.INTEGER
         )
         
         # 计算grid坐标中心点的差
-        # dx_grid_ij = cx_grid[i] - cx_grid[j]  (中心点x坐标差)
-        # dy_grid_ij = cy_grid[i] - cy_grid[j]  (中心点y坐标差)
+        # dx_grid_ij = cx_grid[i] - cx_grid[j]  (中心点x坐标差, 该差值是两倍中心点的差值)
+        # dy_grid_ij = cy_grid[i] - cy_grid[j]  (中心点y坐标差, 该差值是两倍中心点的差值)
         
         # 使用Big-M方法添加绝对值约束：dx_grid_abs_ij = |cx_grid[i] - cx_grid[j]|
-        # 上界需要更大以容纳chiplet宽度
-        max_diff_x = grid_w + 10
-        max_diff_y = grid_h + 10
         dx_grid_diff = model.addVar(
             name=f"dx_grid_diff_{solution_index_suffix}_{i}_{j}",
-            lb=-max_diff_x,
-            ub=max_diff_x,
-            vtype=GRB.CONTINUOUS
+            lb=-W,
+            ub=W,
+            vtype=GRB.INTEGER
         )
         model.addConstr(
-            dx_grid_diff == cx_grid[i] - cx_grid[j],
+            dx_grid_diff == cx_grid_var[i] - cx_grid_var[j],
             name=f"dx_grid_diff_def_{solution_index_suffix}_{i}_{j}"
         )
-        M_dx = max_diff_x  # Big-M常数
-        add_absolute_value_constraint_big_m(
-            model=model,
-            abs_var=dx_grid_abs_ij,
-            orig_var=dx_grid_diff,
-            M=M_dx,
-            constraint_prefix=f"dx_grid_abs_pair_{solution_index_suffix}_{i}_{j}"
+        model.addGenConstrAbs(
+            dx_grid_abs_ij,
+            dx_grid_diff,
+            name=f"dx_grid_abs_pair_{solution_index_suffix}_{i}_{j}",
         )
         
         # 使用Big-M方法添加绝对值约束：dy_grid_abs_ij = |cy_grid[i] - cy_grid[j]|
         dy_grid_diff = model.addVar(
             name=f"dy_grid_diff_{solution_index_suffix}_{i}_{j}",
-            lb=-max_diff_y,
-            ub=max_diff_y,
-            vtype=GRB.CONTINUOUS
+            lb=-H,
+            ub=H,
+            vtype=GRB.INTEGER
         )
         model.addConstr(
-            dy_grid_diff == cy_grid[i] - cy_grid[j],
+            dy_grid_diff == cy_grid_var[i] - cy_grid_var[j],
             name=f"dy_grid_diff_def_{solution_index_suffix}_{i}_{j}"
         )
-        M_dy = max_diff_y  # Big-M常数
-        add_absolute_value_constraint_big_m(
-            model=model,
-            abs_var=dy_grid_abs_ij,
-            orig_var=dy_grid_diff,
-            M=M_dy,
-            constraint_prefix=f"dy_grid_abs_pair_{solution_index_suffix}_{i}_{j}"
+        model.addGenConstrAbs(
+            dy_grid_abs_ij,
+            dy_grid_diff,
+            name=f"dy_grid_abs_pair_{solution_index_suffix}_{i}_{j}",
         )
         
-        # 创建ILP变量表示当前距离（grid单位）
-        max_dist = grid_w + grid_h
+        # 创建ILP变量表示当前距离（grid单位）,可能是对角线距离，上界为W+H
         dist_curr_ij = model.addVar(
             name=f"dist_curr_pair_{solution_index_suffix}_{i}_{j}",
             lb=0,
-            ub=max_dist,
-            vtype=GRB.CONTINUOUS
+            ub=W+H,
+            vtype=GRB.INTEGER
         )
         
         # 约束：当前距离 = dx_grid_abs_ij + dy_grid_abs_ij
@@ -243,7 +232,7 @@ def _add_exclude_dist_constraint(
             dist_curr_ij == dx_grid_abs_ij + dy_grid_abs_ij,
             name=constraint_name
         )
-        print_constraint_formal(constr)
+        # print_constraint_formal(constr)
         
         dx_abs_dict[(i, j)] = dx_grid_abs_ij
         dy_abs_dict[(i, j)] = dy_grid_abs_ij
@@ -278,9 +267,9 @@ def _add_exclude_dist_constraint(
             # 创建辅助变量表示距离差
             dist_diff_ij = model.addVar(
                 name=f"dist_diff_pair_{solution_index_suffix}_{i}_{j}_prev{prev_idx}",
-                lb=-max_dist_diff,
-                ub=max_dist_diff,
-                vtype=GRB.CONTINUOUS
+                lb=-W-H,
+                ub=W+H,
+                vtype=GRB.INTEGER
             )
             
             # 距离差 = 当前距离 - 之前距离
@@ -289,22 +278,19 @@ def _add_exclude_dist_constraint(
                 dist_diff_ij == dist_curr_ij - dist_prev_ij,
                 name=constraint_name
             )
-            print_constraint_formal(constr)
+            # print_constraint_formal(constr)
             
             # 使用Big-M方法添加绝对值约束：dist_diff_abs_ij = |dist_diff_ij|
             dist_diff_abs_ij = model.addVar(
                 name=f"dist_diff_abs_pair_{solution_index_suffix}_{i}_{j}_prev{prev_idx}",
                 lb=0,
-                ub=max_dist_diff,
-                vtype=GRB.CONTINUOUS
+                ub=W+H,
+                vtype=GRB.INTEGER
             )
-            M_dist = max_dist_diff  # Big-M常数
-            add_absolute_value_constraint_big_m(
-                model=model,
-                abs_var=dist_diff_abs_ij,
-                orig_var=dist_diff_ij,
-                M=M_dist,
-                constraint_prefix=f"dist_diff_abs_pair_{solution_index_suffix}_{i}_{j}_prev{prev_idx}"
+            model.addGenConstrAbs(
+                dist_diff_abs_ij,
+                dist_diff_ij,
+                name=f"dist_diff_abs_pair_{solution_index_suffix}_{i}_{j}_prev{prev_idx}",
             )
             
             # 约束逻辑：same_dist_pair_prev[((i,j), prev_idx)] = 1 当且仅当 dist_diff_abs_ij < min_pair_dist_diff
@@ -313,18 +299,18 @@ def _add_exclude_dist_constraint(
             # 如果 same_dist_pair_prev = 1，则 dist_diff_abs_ij < min_pair_dist_diff
             constraint_name = f"same_dist_pair_upper_{solution_index_suffix}_{i}_{j}_prev{prev_idx}"
             constr = model.addConstr(
-                dist_diff_abs_ij <= min_pair_dist_diff - epsilon + M_dist * (1 - same_dist_pair_prev[((i, j), prev_idx)]),
+                dist_diff_abs_ij <= min_pair_dist_diff + M * (1 - same_dist_pair_prev[((i, j), prev_idx)]),
                 name=constraint_name
             )
-            print_constraint_formal(constr)
+            # print_constraint_formal(constr)
             
             # 如果 same_dist_pair_prev = 0，则 dist_diff_abs_ij >= min_pair_dist_diff
             constraint_name = f"same_dist_pair_lower_{solution_index_suffix}_{i}_{j}_prev{prev_idx}"
             constr = model.addConstr(
-                dist_diff_abs_ij >= min_pair_dist_diff - M_dist * same_dist_pair_prev[((i, j), prev_idx)],
+                dist_diff_abs_ij >= min_pair_dist_diff - M * same_dist_pair_prev[((i, j), prev_idx)],
                 name=constraint_name
             )
-            print_constraint_formal(constr)
+            # print_constraint_formal(constr)
         
         # 约束：diff_dist_pair[(i,j)] = 1 当且仅当对于所有之前解，same_dist_pair_prev = 0
         # 即：diff_dist_pair[(i,j)] = 1 表示当前解的距离与所有之前解的距离都相差 >= min_pair_dist_diff
@@ -462,6 +448,7 @@ def search_multiple_solutions(
     grid_size: Optional[float] = None,
     fixed_chiplet_idx: Optional[int] = None,
     min_pair_dist_diff: Optional[float] = None,  # chiplet对之间距离差异的最小阈值，如果为None则使用grid_size或默认值1.0；此参数控制距离排除约束：至少有一对chiplet的距离差必须 >= min_pair_dist_diff
+    time_limit: int = 600,  # 求解时间限制（秒），默认10分钟
     output_dir: Optional[str] = None,  # 输出目录，用于保存.lp文件；如果为None，则使用默认路径
     image_output_dir: Optional[str] = None,  # 图片输出目录，用于保存图片；如果为None则使用output_dir
 ) -> List[ILPPlacementResult]:
@@ -595,7 +582,7 @@ def search_multiple_solutions(
         # print(f"\nLP文件已保存: {lp_file}")
         
         # 求解
-        result = solve_placement_ilp_from_model(ctx)
+        result = solve_placement_ilp_from_model(ctx, time_limit=time_limit)
         
         # result.status 是字符串类型（如 "Optimal"），需要与字符串比较
         if result.status != "Optimal":
@@ -612,79 +599,47 @@ def search_multiple_solutions(
             min_pair_dist_diff=min_pair_dist_diff
         )
         
-        # 计算并保存当前解的chiplet对之间的距离（使用grid坐标中心点的曼哈顿距离）
-        # 注意：使用中心点坐标计算距离，而不是左下角坐标
-        pair_distances = {}
-        grid_size_val = ctx.grid_size if ctx.grid_size is not None else 1.0
-        
         # 获取当前解的实际坐标（左下角坐标，不受旋转影响）
-        x_coords = {}
-        y_coords = {}
-        for k, node in enumerate(nodes):
-            node_name = node.name if hasattr(node, 'name') else f"Chiplet_{k}"
-            if node_name in result.layout:
-                x_coords[k], y_coords[k] = result.layout[node_name]
-            else:
-                x_coords[k] = 0.0
-                y_coords[k] = 0.0
+        x_grid_var = {}
+        y_grid_var = {}
+        w_var = {}
+        h_var = {}
+        cx_grid_var = {}
+        cy_grid_var = {}
+        all_vars_dict = {v.VarName: v for v in model.getVars()}
         
-        # 获取grid坐标值（左下角）
-        # 方法1：直接从 result.layout 获取（它已经是网格坐标）
-        x_grid_coords = {}
-        y_grid_coords = {}
-        for k, node in enumerate(nodes):
-            node_name = node.name if hasattr(node, 'name') else f"Chiplet_{k}"
-            if node_name in result.layout:
-                x_grid_coords[k], y_grid_coords[k] = result.layout[node_name]
-            else:
-                # 方法2：如果 layout 中没有，尝试从模型变量获取
-                x_grid_var = ctx.model.getVarByName(f"x_grid_var_{k}")
-                y_grid_var = ctx.model.getVarByName(f"y_grid_var_{k}")
-                if x_grid_var is not None and y_grid_var is not None:
-                    x_grid_val = x_grid_var.X
-                    y_grid_val = y_grid_var.X
-                    if x_grid_val is not None and y_grid_val is not None:
-                        x_grid_coords[k] = float(x_grid_val)
-                        y_grid_coords[k] = float(y_grid_val)
-                    else:
-                        x_grid_coords[k] = 0.0
-                        y_grid_coords[k] = 0.0
-                else:
-                    x_grid_coords[k] = 0.0
-                    y_grid_coords[k] = 0.0
-        
-        # 计算每对chiplet之间的曼哈顿距离（使用grid坐标中心点）
-        for i_idx in range(len(nodes)):
-            for j_idx in range(i_idx + 1, len(nodes)):
-                if i_idx in x_grid_coords and j_idx in x_grid_coords and i_idx in y_grid_coords and j_idx in y_grid_coords:
-                    # 获取chiplet的尺寸
-                    node_i = nodes[i_idx]
-                    node_j = nodes[j_idx]
-                    width_i = node_i.dimensions.get('x', 0.0) if hasattr(node_i, 'dimensions') and isinstance(node_i.dimensions, dict) else 0.0
-                    height_i = node_i.dimensions.get('y', 0.0) if hasattr(node_i, 'dimensions') and isinstance(node_i.dimensions, dict) else 0.0
-                    width_j = node_j.dimensions.get('x', 0.0) if hasattr(node_j, 'dimensions') and isinstance(node_j.dimensions, dict) else 0.0
-                    height_j = node_j.dimensions.get('y', 0.0) if hasattr(node_j, 'dimensions') and isinstance(node_j.dimensions, dict) else 0.0
-                    
-                    # 转换为grid坐标的尺寸
-                    w_grid_i = width_i / grid_size_val
-                    h_grid_i = height_i / grid_size_val
-                    w_grid_j = width_j / grid_size_val
-                    h_grid_j = height_j / grid_size_val
-                    
-                    # 计算中心点坐标（grid单位）
-                    cx_grid_i = x_grid_coords[i_idx] + w_grid_i / 2.0
-                    cy_grid_i = y_grid_coords[i_idx] + h_grid_i / 2.0
-                    cx_grid_j = x_grid_coords[j_idx] + w_grid_j / 2.0
-                    cy_grid_j = y_grid_coords[j_idx] + h_grid_j / 2.0
-                    
-                    # 计算中心点之间的grid坐标距离（绝对值差）
-                    dx_grid = abs(cx_grid_i - cx_grid_j)
-                    dy_grid = abs(cy_grid_i - cy_grid_j)
-                    # grid坐标的曼哈顿距离
-                    grid_manhattan_dist = dx_grid + dy_grid
-                    pair_distances[(i_idx, j_idx)] = grid_manhattan_dist
-        all_prev_pair_distances.append(pair_distances)
-        
+        for k in range(n):
+            var_name_x = f"x_grid_var_{k}"
+            var_name_y = f"y_grid_var_{k}"
+            var_name_w = f"w_var_{k}"
+            var_name_h = f"h_var_{k}"
+            var_name_cx = f"cx_grid_var_{k}"
+            var_name_cy = f"cy_grid_var_{k}"
+            x_grid_temp = all_vars_dict.get(var_name_x)
+            y_grid_temp = all_vars_dict.get(var_name_y)
+            w_temp = all_vars_dict.get(var_name_w)
+            h_temp = all_vars_dict.get(var_name_h)
+            cx_temp = all_vars_dict.get(var_name_cx)
+            cy_temp = all_vars_dict.get(var_name_cy)
+            if x_grid_temp is None or y_grid_temp is None:
+                print(f"[WARNING] 无法找到变量 {var_name_x} 或 {var_name_y}，跳过排除约束")
+                # 列出所有变量名以便调试
+                all_var_names = list(all_vars_dict.keys())[:20]
+                print(f"[DEBUG] 前20个变量名: {all_var_names}")
+                return  # 如果没有grid变量，说明不是网格化模型
+            x_grid_var[k] = x_grid_temp
+            y_grid_var[k] = y_grid_temp
+            if w_temp is None or h_temp is None:
+                print(f"[WARNING] 无法找到变量 {var_name_w} 或 {var_name_h}，跳过排除约束")
+                return  # 如果没有w_var或h_var，说明不是网格化模型
+            w_var[k] = w_temp
+            h_var[k] = h_temp
+            if cx_temp is None or cy_temp is None:
+                print(f"[WARNING] 无法找到变量 {var_name_cx} 或 {var_name_cy}，跳过排除约束")
+                return  # 如果没有cx_grid_var或cy_grid_var，说明不是网格化模型
+            cx_grid_var[k] = cx_temp
+            cy_grid_var[k] = cy_temp
+            
         # 输出当前解的基本信息
         print(f"\n=== 解 {i+1} ===")
         print(f"目标函数值: {result.objective_value:.4f}")
@@ -699,8 +654,8 @@ def search_multiple_solutions(
             
             # 获取网格坐标（ILP求解的结果，已经是网格坐标）
             if node_name in result.layout:
-                x_grid, y_grid = result.layout[node_name]
-                layout_dict[node_name] = (float(x_grid), float(y_grid))
+                x_grid_var, y_grid_var = result.layout[node_name]
+                layout_dict[node_name] = (float(x_grid_var), float(y_grid_var))
             else:
                 layout_dict[node_name] = (0.0, 0.0)
             
