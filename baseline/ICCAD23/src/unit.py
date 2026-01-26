@@ -595,6 +595,30 @@ def visualize_layout_with_bridges(layout: Dict[str, Chiplet],
     plt.close()
 
 
+def save_layout_image(layout: Dict[str, Chiplet], 
+                     problem: LayoutProblem,
+                     output_file: str,
+                     show_bridges: bool = True,
+                     show_coordinates: bool = False):
+    """
+    保存布局图片（visualize_layout_with_bridges的简化接口）
+    
+    Args:
+        layout: 芯片布局字典 {chip_id: Chiplet}
+        problem: 布局问题
+        output_file: 输出图片文件路径
+        show_bridges: 是否显示硅桥（默认True）
+        show_coordinates: 是否显示坐标（默认False）
+    """
+    visualize_layout_with_bridges(
+        layout=layout,
+        problem=problem,
+        output_file=output_file,
+        show_bridges=show_bridges,
+        show_coordinates=show_coordinates
+    )
+
+
 if __name__ == "__main__":
     # 测试示例
     print("单元测试 - 实用工具函数")

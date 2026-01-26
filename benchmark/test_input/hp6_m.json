@@ -2,38 +2,38 @@
   "chiplets": [
     {
       "name": "A",
-      "width": 4.62,
-      "height": 10.36,
+      "width": 4,
+      "height": 10,
       "power": 61
     },
     {
       "name": "B",
-      "width": 7.0,
-      "height": 3.78,
+      "width": 7,
+      "height": 3,
       "power": 61
     },
     {
       "name": "C",
-      "width": 2.1,
-      "height": 9.8,
+      "width": 2,
+      "height": 9,
       "power": 52
     },
     {
       "name": "D",
-      "width": 2.1,
-      "height": 9.8,
+      "width": 2,
+      "height": 9,
       "power": 48
     },
     {
       "name": "E",
-      "width": 2.1,
-      "height": 9.8,
+      "width": 2,
+      "height": 9,
       "power": 28
     },
     {
       "name": "F",
-      "width": 5.46,
-      "height": 33.04,
+      "width": 5,
+      "height": 33,
       "power": 45
     }
   ],

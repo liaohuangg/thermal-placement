@@ -529,7 +529,8 @@ def train(
 
 if __name__ == "__main__":
     # 训练配置
-    json_file = "../../baseline/ICCAD23/test_input/5core.json"
+    json_file = "../../benchmark/test_input/syn1.json"
+    
     
     trained_model = train(
         json_path=json_file,
@@ -541,11 +542,11 @@ if __name__ == "__main__":
         max_height=100.0,
         min_overlap=0.5,
         placement_reward=1,  # 放置奖励
-        adjacency_reward=10,   # 邻接奖励
+        adjacency_reward=20,   # 邻接奖励
         compact = 10,
         min_wirelength_reward_scale =0,
-        extra_adjacency_reward=0,
-        terminal_util_reward_scale=90.0 ,
+        extra_adjacency_reward=5,
+        terminal_util_reward_scale=30 ,
         terminal_wirelength_reward_scale = 30
     )
     

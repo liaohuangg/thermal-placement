@@ -225,14 +225,15 @@ print("测试维度: 最短线长优化")
 print("="*70)
 
 print("\n加载问题...")
-problem_wl = load_problem_from_json("../test_input/10core.json")
+problem_wl = load_problem_from_json("../test_input/12core.json")
 
 print("\n建议: 12core问题非常困难，可以尝试:")
 print("1. 不使用legalize (use_legalize=False) 提高速度")
 print("2. 增加运行次数，用多样性弥补单次的困难")
 print("3. 调整参数后多次尝试\n")
 
-num_runs_wl = 100  # 先运行10次看效果
+num_runs_wl = 10
+  # 先运行10次看效果
 all_legal_tcgs_wl, all_legal_layouts_wl, run_stats_wl = run_multiple_SA_1(
     problem_wl,
     num_runs=num_runs_wl,

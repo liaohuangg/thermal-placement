@@ -73,7 +73,7 @@ print("\n\n" + "="*70)
 print("测试案例: 8芯片系统")
 print("="*70)
 
-problem_8 = load_problem_from_json("../test_input/6core.json")
+problem_8 = load_problem_from_json("../../../benchmark/test_input/hp6_m.json")
 
 tcg_8 = generate_initial_TCG(problem_8, seed=None)
 layout_8 = generate_layout_from_tcg(tcg_8, problem_8)
